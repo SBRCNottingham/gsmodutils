@@ -1,0 +1,30 @@
+Genome scale model development framework.
+Initially developed by the Nottingham SBRC for use with their genome scale models.
+
+--gsm_project---
+Main script is gsm_project; this creates new genome scale model projects given an SBML or JSON file. This creates a folder structre in location with name specified.
+
+* An initial mercruial repository is created with a first commit message.
+* Dockerfile is created for the model which can be executed to run model inside of. Install dependencies upon first usage.
+* Design directory for storing json designs of the genome scale model
+* Initial test scripts are written which can be refined with py.test following the full user guide on tool usage.
+* Creates test substrates/pathways json file for automated grows/can't grow tests
+* Asks for a project description file and creats this
+* Mercurial hooks for pre-commits that run tests and create testing reports
+
+
+---parse_scrumpy---
+Parse scrumpy is a tool that allows a user to create COBRA JSON models from scrumpy but has some requirements.
+Note that this script is heavily experimental and only really tested with Nottingham's cupriavidus model. It should parse any model correctly but setting constraints requires a json file with fixed transporter fluxes.
+The flux for the ATPase reaction is also required. As most large scrumpy models are built from  metacyc/biocyc, this is assumed
+
+
+-- Library utitlities --
+Model diff fucntionality - show the changes between different versions of a model
+
+
+
+-- Dependencies --
+python
+python-pip
+if using docker, docker is required to be installed and configured. 
