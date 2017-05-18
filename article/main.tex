@@ -1,0 +1,138 @@
+\documentclass{bioinfo}
+\copyrightyear{2017} \pubyear{2017}
+
+\access{Advance Access Publication Date: Day Month Year}
+\appnotes{Systems biology}
+
+\begin{document}
+\firstpage{1}
+
+\subtitle{Applications note}
+
+\title[test driven genome scale model development]{An integrated framework for test driven genome scale model development}
+\author[Sample \textit{et~al}.]{James P Gilbert\,$^{\text{\sfb 1,}}$, Nicole Pearcy\,$^{\text{\sfb 2}}$ and Jamie Twycross\,$^{\text{\sfb 2,}*}$}
+\address{$^{\text{\sf 1}}$Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom and \\
+$^{\text{\sf 2}}$Intelligent Modelling and Analysis group, School of Computer Science, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
+
+\corresp{$^\ast$To whom correspondence should be addressed.}
+
+\history{Received on XXXXX; revised on XXXXX; accepted on XXXXX}
+
+\editor{Associate Editor: XXXXXXX}
+
+\abstract{\textbf{Motivation:} Genome scale metabolic models (GSMM) are increasingly important for systems biology and metabolic engineering research, capable of simulating complex steady state phenotopic behaviour.
+Models of this scale can include thousands of rections and metabolites, with many crucial pathways that only become activated in specific simulation settings.
+Despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for the management of continually curated large scale models.\\
+\textbf{Results:} Using tools widely available in the software engineering community, we have developed the \textit{gsmodutils} framework.
+This system places an emphasis on test driven design of models in which a user makes small changes tracked in Distributed Version Control Systems (DVCS).
+Crucially, different substrate conditions are configurable allowing users to examine how different designs or curations impact a wide range of system behaviours, hopefully, minimising error between model verions.
+We demonstrate a test of this framework on a standard \textit{E. coli} GSMM. \\
+\textbf{Availability:} The software framework described within this paper is open source and freely available from http://github.com/<repolocation> \\
+\textbf{Contact:} \href{jamie.twycross@nottingham.ac.uk}{james.gilbert@nottingham.ac.uk}\\
+\textbf{Supplementary information:} Supplementary data are available at \textit{Bioinformatics} online.}
+
+\maketitle
+
+\section{Introduction}
+The reconstruction of genome scale metabolic models (GSMM) is an arduous process that follows a complex protocol to ensure model validity \cite{Palson}.
+Whilst autmated methods exists to construct GSMMs from reference genomes \cite{ModelSEED, ScrumPy}, .
+However, treating the creation of models as an isolated ``one-off'' event ignores the significant ammount of curation that is required for applications such as biotechnology.
+
+As a consequence, a significant amount of work has gone into the managament of genome scale models.
+The BiGG models database \cite{BiGG}, for example, exists to provide a standardised reposiotry of validated models that can be shared and reused.
+However, little focus is placed upon the colaborative design aspect of such models with few mechanisms existing to store the \textit{model delta} based tools provided in our software.
+Similiarly, the MetaNetX \cite{MetaNetX} system exists to provide a standardised namespace and toolchain for GSMM analysis.
+However, such tools often make it difficult to understand the design decisions made by the intial model authors.
+
+In this paper we present a software framework geared toward \textit{test driven} genome scale model development, a concept that is taken directly from good software development practices.
+By this we mean the notion that, as a model is curated to represent biological phenomena, much of the validation can be turned into specific test cases that can be repeated between model versions.
+Example test cases include the notion that flux must be carried through specific pathways, growth and uptake rates should match experimental evidence and different nutrient sources should be included.
+This paper details the features of the software, which is under continuous development.
+The reader is referred to the software user guide for a more detailed expoloration of software features.
+
+
+%\enlargethispage{12pt}
+
+\section{Software outline and features}
+Test driven development is driven by the idea of clearly defined test cases writen before significant changes are made to any underlying architecture.
+In the case of genome scale models, errors occur as a product of human curation to better represent newly discovered aspects of metabolism.
+For simplicity, gsmodelutils uses the \textit{py.test}, which has a simple and intuitive interface.
+By automatically integrating the COBRAPy \cite{} and Cameo \cite{} users can easily write convenient test cases following examples given in the user guide.
+A standard test case, ensuring that a given model grows on media is given in Box \ref{}.
+When a new model repository is created with the gsmodelutils tool, a number of pre-written test cases are automatically added to a file.
+However, we stress that the vast majority of indiviudal use cases for a model must be specific to a given biological problem.
+
+\begin{verbatim*}
+def test_growth(model, media, lower_bound, upper_bound):
+    model.load_media(media)
+    solution = model.solve()
+    assert soltion.f < lower_bound
+    assert soltion.f > upper_bound
+\end{verbatim*}
+
+
+
+
+\begin{itemize}
+ \item Easy command line tool to integrate new models
+ \item Unit testing with pytest
+ \item Integration with CobraPy and Cameo toolsets
+ \item Integration with DVCS system (mercurial, git in a future release)
+  \item Optiopnally Integrate framework in a Docker container to stop ``runs on my machine'' issues with models
+ \item Automated pre-commit tests upon model changes
+ \item Convenient method for setting model media conditions to switch to growth on different substrates
+ \item Ability to ``diff'' models by mapping to a common MetaNetX namespace
+ \item Storing model design differences to keep track of changes between, for example, production and wild type strains
+\end{itemize}
+
+
+
+% \begin{methods}
+% \section{Methods}
+% 
+% 
+% 
+% \begin{table}[!t]
+% \processtable{This is table caption\label{Tab:01}} {\begin{tabular}{@{}llll@{}}\toprule head1 &
+% head2 & head3 & head4\\\midrule
+% row1 & row1 & row1 & row1\\
+% row2 & row2 & row2 & row2\\
+% row3 & row3 & row3 & row3\\
+% row4 & row4 & row4 & row4\\\botrule
+% \end{tabular}}{This is a footnote}
+% \end{table}
+% 
+% \end{methods}
+% 
+% \begin{figure}[!tpb]%figure1
+% \fboxsep=0pt\colorbox{gray}{\begin{minipage}[t]{235pt} \vbox to 100pt{\vfill\hbox to
+% 235pt{\hfill\fontsize{24pt}{24pt}\selectfont FPO\hfill}\vfill}
+% \end{minipage}}
+% %\centerline{\includegraphics{fig01.eps}}
+% \caption{Caption, caption.}\label{fig:01}
+% \end{figure}
+% 
+% %\begin{figure}[!tpb]%figure2
+% %%\centerline{\includegraphics{fig02.eps}}
+% %\caption{Caption, caption.}\label{fig:02}
+% %\end{figure}
+\section{Discusion}
+When research projects end it all to is common for important large models to be published and become relics lost within the literature forgotten to all but the most dedicated of individuals.
+Furthermore, as GSMMs grow in terms of the metabolism the contain as well as the biological problems they are used to solve, problems with annotation and curation naturally accumulate as a product of human error.
+We have presented a framework with a number of features taken from the software development world specifically designed to improve colaboration and minimise such error.
+However, it is important to stress the difference between defined behaviour expected from pre-written test cases and novel predictions made by a model.
+Indeed, a core objective of this framework is to ensure that good practices are followed in model development that help scientists to better trust the results discovered by their models.
+In an ideal world, we would envision a methodology such as our becoming a pre-requist for GSMMs to pass peer review. 
+
+\section*{Acknowledgements}
+We would like to thank the Oxford Brookes Cell Systems Modelling group for helpful discussions regarding this work and Rupert Norman for assitance testing and forming the idea of this software.
+
+\section*{Funding}
+This work has been supported by the BBSRC grant XXXXX.
+
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+
+\end{document}
