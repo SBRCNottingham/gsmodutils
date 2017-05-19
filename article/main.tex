@@ -63,11 +63,11 @@ When a new model repository is created with the gsmodelutils tool, a number of p
 However, we stress that the vast majority of indiviudal use cases for a model must be specific to a given biological problem.
 
 \begin{verbatim*}
-def test_growth(model, media, lower_bound, upper_bound):
+def test_growth(model, media, l_bound, u_bound):
     model.load_media(media)
     solution = model.solve()
-    assert soltion.f < lower_bound
-    assert soltion.f > upper_bound
+    assert soltion.f < l_bound
+    assert soltion.f > u_bound
 \end{verbatim*}
 
 

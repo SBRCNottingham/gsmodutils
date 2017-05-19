@@ -8,7 +8,10 @@ setup(
     author = "James Gilbert",
     author_email = "james.gilbert@nottingham.ac.uk",
     url = "",
-    license = "GPL",
+    license = "MIT",
     packages = ["gsmodutils"],
-    scripts = ["gsmodutils/parse_scrumpy.py", "gsmodutils/gsm_project.py"]
+    scripts = ["gsmodutils/parse_scrumpy.py", "gsmodutils/gsm_project.py"],
+    entry_points={
+          'console_scripts': ['gsm_project=gsmodutils.gsm_project:main'],
+    }
 )

@@ -1,6 +1,8 @@
+#!/usr/bin/python
 from __future__ import print_function
 import cameo
 import os
+
 
 def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, media={}, objective_reactions=['Biomass'], obj_dir='max'):
     '''
