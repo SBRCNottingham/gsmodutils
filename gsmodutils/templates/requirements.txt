@@ -1,4 +1,6 @@
 cameo
 mercurial
 pytest
+mercurial
 python-hglib
+ipython

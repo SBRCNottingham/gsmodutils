@@ -20,9 +20,26 @@ The flux for the ATPase reaction is also required. As most large scrumpy models 
 
 
 -- Library utitlities --
-Model diff fucntionality - show the changes between different versions of a model
 
+Projects:
 
+    To be coded more fully.
+
+    using the gsmodutils.project.Project class one can interface with the project.
+
+    This functionality will include the following:
+
+        Creating, loading and adding designs
+        
+        Very nice feature - storing saves as part of the repository commit process
+            - This will be tricky because it means checking to see if there are uncommited changes
+            - This could be a mode that is switched on or off by the user and throws errors whenever uncommited changes exist asking the user to handle this
+
+    Load designs.
+    Run tests on different models/designs
+    tests will automatically load a project and run tests inside of it
+    This means a design can be loaded and tests compared against design a and design b
+    
 
 -- Dependencies --
 python

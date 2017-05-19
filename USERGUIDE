@@ -15,6 +15,7 @@ Creating a project can be run after the installation of gsmodutils.
 
 Check gsm_project --help for more usage options.
 
+
 -- Using/building a docker container --
 
 It is assumed that docker is set up and configured for your os.
@@ -27,12 +28,17 @@ To run an ipython shell:
     docker run -i -t my/model ipython -i load_model.py
     
 To run tests:
-    
 
+TODO:
+    * Sharing a docker container.
+    * Make shell scripts for all these commands.
+    * Volumes for the docker container of the model developer rather than building on every model change.
+    
 -- Adding new growth conditions --
 The growth conditions file "model_conditions.json" allows the user to add growth conditions which are form part of the test script.
 These conditions cannot be easily written in an automated manner, a more complete guide on this will be written.
 However, here is an example 
+    
     
 -- Writing custom test cases --
 Good, clearly written test cases are the essence of easy to understand genome scale modelling approaches.
@@ -42,7 +48,4 @@ Adding test_<test_group>.py with functions labeled def test_<test_name>():
 
     
 TODO:
-    * sharing a docker container
-    * make shell scripts for all these commands
-    * volumes for the docker container of the model developer rather than building on every model change.
     * Figure out good way of saving html py.test outputs

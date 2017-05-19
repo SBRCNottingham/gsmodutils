@@ -1,4 +1,4 @@
-FROM python2.7
+FROM python
 
 RUN mkdir /model
 COPY . /model

@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes, with_statement
 import argparse
 import os
+import gsmodutils
 from gsmodutils.validator import validate_model_file
 import json
 import shutil
@@ -15,26 +16,21 @@ default_requirements = [
 ]
 
 
-def create_docker_image(path, dockerfile_name='Dockerfile', requirements=default_requirements):
+def create_docker_file(path, dockerfile_name='Dockerfile', requirements=default_requirements):
     '''
     Create a default docker container for running a model in test container
     Users may want to modify this for their own purposes, for now this is just a simple way of running the tests and generating a report
     '''
-    dockerfile_path = path + '/' + dockerfile_name
-    
-    tpl = '''
-
-    '''
-    
-    with open(dockerfile_path, 'w+') as df:
-        df.write(tpl)
+    templates_path = os.path.join(os.path.dirname(gsmodutils.__file__), 'templates/')
+    # Create the dockerfile
+    df_path = os.path.join(templates_path, 'Dockerfile')
+    dockerfile_path = os.path.join(path, dockerfile_name)
+    shutil.copy(df_path, dockerfile_path)
     
     # Create the requirements file
-    
-    requirements_file_path = path + '/requirements.txt'
-    with open(requirements_file_path, 'w+') as rp:
-        for requirement in requirements:
-            rp.write(req + "\n")
+    reqs_path = os.path.join(templates_path, 'requirements.txt')
+    dt_path = os.path.join(path, 'requirements.txt')
+    shutil.copy(reqs_path, dt_path)
         
     return dockerfile_path
 
@@ -42,13 +38,21 @@ def create_docker_image(path, dockerfile_name='Dockerfile', requirements=default
 def create_deafault_tests(path):
     '''
     '''
-    pass
+    templates_path = os.path.join(os.path.dirname(gsmodutils.__file__), 'templates/')
+    tpl_path = os.path.join(templates_path, 'default_tests.tpy')
+    
+    tpl_new_path = os.path.join(path, 'tests/test_model.py')
+    
+    shutil.copy(tpl_new_path, tpl_new_path)
+    
+    return tpl_new_path
+    
 
-
-def create_commit_hooks(path):
+def create_hg_commit_hooks(path):
     '''
+    Just looks in the 
     '''
-    pass
+    templates_path = os.path.join(os.path.dirname(gsmodutils.__file__), 'templates/')
 
 
 def create_project(args):
@@ -93,25 +97,27 @@ def create_project(args):
         hglib.init(project_path)
         repository = hglib.open(project_path)
         # create the folder stcuture
-        os.mkdir(project_path + '/tests/')
-        os.mkdir(project_path + '/designs/')
+        os.mkdir(os.path.join(project_path, 'tests'))
+        os.mkdir(os.path.join(project_path, 'designs'))
         
         if args.model is not None:
             # copy model file to repository
             model_fp = os.path.basename(args.model)
-            shutil.copy(args.model, project_path + '/' + model_fp)
+            model_path = os.path.join(project_path, model_fp)
+            shutil.copy(args.model, model_path)
         else:
             import cobra
             # create a brand new model
             model_fp = 'model.json'
             m = cobra.Model()
             m.description = description
-            cobra.io.save_json_model(m, project_path + '/' + model_fp)
+            model_path = os.path.join(project_path, model_fp)
+            cobra.io.save_json_model(m, model_path)
         
-        repository.add(project_path + '/' + model_fp)
+        repository.add(model_path)
         
-        configuration_fp = project_path + '/.gsmod_project.json'
-        conditions_fp = project_path + '/model_conditions.json'
+        configuration_fp = os.path.join(project_path, '.gsmod_project.json')
+        conditions_fp = os.path.join(project_path, 'model_conditions.json')
 
         # Project configuration file
         configuration = dict(
@@ -119,7 +125,11 @@ def create_project(args):
             author=author,
             author_email=email,
             default_model=model_fp,
+            models=[model_fp],
             repository_type='hg',
+            conditions_file='model_conditions.json',
+            tests_dir='tests',
+            design_dir='designs'
         )
         
         
@@ -129,6 +139,7 @@ def create_project(args):
             pathways=dict(),
             carbon_sources=dict(),
             growth_conditions=dict(),
+            
         )
         
         with open(configuration_fp, 'w+') as configf:
@@ -142,14 +153,18 @@ def create_project(args):
         repository.add(conditions_fp)
         
         if args.docker:
-            docker_image_path = create_docker_image(project_path)
+            docker_image_path = create_docker_file(project_path)
             repository.add(docker_image_path)
+        
+        # Adding tests folder
+        tests = create_deafault_tests(project_path)
+        repository.add(tests)
         
         repository.commit('Initial commit for model, auto generated commit by gsm_project.py')
         
         print('Project created successfully. Refer to gsmodutils user guide for proper usage.')
     except Exception as e:
-        # Cleanup after ourselves upon failure
+        # Cleanup after ourselves upon failure - i.e. don't create a new project
         shutil.rmtree(project_path)
         raise e
     
