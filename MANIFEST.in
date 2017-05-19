@@ -1,0 +1,6 @@
+include README
+include gsmodutils/templates *
+include requirments.txt
+include MANIFEST.in
+include tests *
+include LICENSE

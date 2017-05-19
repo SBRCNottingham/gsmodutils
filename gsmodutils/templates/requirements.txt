@@ -1,0 +1,4 @@
+cameo
+mercurial
+pytest
+python-hglib

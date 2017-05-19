@@ -1,0 +1,48 @@
+gsmodutils basic userguide
+
+-- Introduction --
+This is an early draft containing the details of how to use gsmodutils. The future version will be vastly more comprehenisve than this, however, this is more of a place to leave usage notes until I get around to writing something more comprehenisve.
+
+-- Installation --
+
+    pip install -r requirements.txt
+    python setup.py install
+
+-- Creating a project --
+Creating a project can be run after the installation of gsmodutils.
+
+    gsm_project.py --model <path_to_model_sbml_or_json> --path </path/to/new/repo>
+
+Check gsm_project --help for more usage options.
+
+-- Using/building a docker container --
+
+It is assumed that docker is set up and configured for your os.
+This guide only assumes a user will want to build a docker container for their model once, not mount a volume. A more conclusive description of this will come in the future.
+
+To build:
+    docker build -t my/model .
+
+To run an ipython shell:
+    docker run -i -t my/model ipython -i load_model.py
+    
+To run tests:
+    
+
+-- Adding new growth conditions --
+The growth conditions file "model_conditions.json" allows the user to add growth conditions which are form part of the test script.
+These conditions cannot be easily written in an automated manner, a more complete guide on this will be written.
+However, here is an example 
+    
+-- Writing custom test cases --
+Good, clearly written test cases are the essence of easy to understand genome scale modelling approaches.
+
+Adding test_<test_group>.py with functions labeled def test_<test_name>():
+
+
+    
+TODO:
+    * sharing a docker container
+    * make shell scripts for all these commands
+    * volumes for the docker container of the model developer rather than building on every model change.
+    * Figure out good way of saving html py.test outputs
