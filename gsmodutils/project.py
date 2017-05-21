@@ -13,10 +13,12 @@ class Project(object):
         Designs that the model uses
     '''
     
-    def __init__(self, **kwargs):
-        pass
-    
-    
+    def __init__(self, path='', **kwargs):
+        # Load a project
+        self._project_path = path
+        self.update()
+        
+        
     def update(self):
         '''
         Updates this class
