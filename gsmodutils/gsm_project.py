@@ -8,13 +8,6 @@ import json
 import shutil
 import hglib
 
-default_requirements = [
-    'ipython',
-    'cameo',
-    'cobra',
-    #gsmodutils - need to set up pip first,
-]
-
 
 def create_docker_file(path, dockerfile_name='Dockerfile', requirements=default_requirements):
     '''
