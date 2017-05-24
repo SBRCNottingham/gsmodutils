@@ -45,3 +45,8 @@ Projects:
 python
 python-pip
 if using docker, docker is required to be installed and configured. 
+
+-- Design Problems to resolve --
+Updating things between versions of this software - what if we add new configuration options? what if structure of project changes?
+
+Test cases - default test cases should be part of the software, maybe include a __version__ check on the template test cases?

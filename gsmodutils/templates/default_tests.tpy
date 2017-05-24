@@ -1,8 +1,9 @@
 from __future__ import print_function
+import os
 from gsmodutils.project import Project
 
 # load the gsmodutils project file
-project = Project('../')
+project = Project(os.path.pardir)
 
 substrates = json.load(open(substrates_config))
 carbon_sources = substrates['carbon_sources']
@@ -32,3 +33,11 @@ for cs, infd in substrates['carbon_sources'].items():
                 grows= cname in infd["growth_conditions"], # TODO set growth conditions and negative conditions
                 media=gmedia,
                 pathways=test_pathways
+                
+
+
+def test_designs(model, design):
+    '''
+    Ensures that a given model change does not break a pre existing design - flags failure if it does
+    '''
+    pass

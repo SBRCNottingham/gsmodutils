@@ -3,11 +3,6 @@ import os
 import json
 import cameo
 
-_required_cfg_params = [
-            'description', 'author', 'author_email', 'models', 
-            'repository_type', 'conditions_file', 'tests_dir',
-            'design_dir'
-        ]
 
 class ProjectNotFound(Exception):
     pass
@@ -17,6 +12,31 @@ class ProjectConfigurationError(Exception):
     pass
 
 
+class ProjectConfig(object):
+    '''
+    Class for configuration
+    basically, takes configuration arguments and ensures that the required configuration options are included
+    '''
+    _required_cfg_params = [
+            'description', 'author', 'author_email', 'models', 
+            'repository_type', 'conditions_file', 'tests_dir',
+            'design_dir'
+        ]
+    
+    def __init__(self, **kwargs):
+        
+        loaded_cfg_params = [x.lower() for x in kwargs.keys()]
+        # Check required options are there
+        for it in self._required_cfg_params:
+            if it not in loaded_cfg_params:
+                raise ProjectConfigurationError('Project configuration option "{}" is missing'.format(it) )
+        
+        for arg, val in kwargs.items():
+            setattr(self, arg.lower(), val)
+            
+        self._config_dict = kwargs
+        
+
 class GSMProject(object):
     '''
     Project class finds a gsmodutlils.json file in a given path and creates a project which allows a user to load:
@@ -24,7 +44,7 @@ class GSMProject(object):
         Designs that the model uses
     '''
     
-    def __init__(self, path='', **kwargs):
+    def __init__(self, path='.', **kwargs):
         # Load a project
         self._project_path = os.path.abspath(path)
         self.update()
@@ -39,13 +59,7 @@ class GSMProject(object):
         '''
         Sanatizes configuration input
         '''
-        
-        # Check required options are there
-        for it in _required_cfg_params:
-            if it not in [x.lower() for x in configuration.keys()]:
-                raise ProjectConfigurationError('Project configuration option {} is missing'.format(it) )
-    
-        self.config = configuration
+        self.config = ProjectConfig(**configuration)
         
         
     def update(self):
@@ -53,22 +67,32 @@ class GSMProject(object):
         Updates this class from configuration file
         '''
         if not os.path.exists(self._project_path):
+            
             raise ProjectNotFound('Project path {} does not exist'.format(self._project_path))
         
         if not os.path.exists(self._context_file):
-            raise ProjectNotFound('Project settings file {} does not exist'.format(self._project_path))
+            raise ProjectNotFound('Project settings file .gsmod_project in {} does not exist'.format(self._project_path))
         
         with open(self._context_file) as ctxfile:
             self.configuration = self._load_config(json.load(ctxfile))
         
         self._conditions_file = os.path.join(self.configuration)
         
+        
+    @property
+    def conditions(self):
+        # self.update() # TODO: profile always updating before loading properties
+        with open(self._conditions_file) as cf:
+            cdf = json.load(cf)
+        return cdf
     
+    
+    @property
     def models(self):
         '''
         Lists all the models that can be loaded
         '''
-        pass
+        return self.config.models
     
     
     def get_model(self, mpath=None):
@@ -95,13 +119,6 @@ class GSMProject(object):
     def save_design(self, model, name, base_model=None):
         '''
         Creates a design from a diff of model_a and model_b
-        '''
-        pass
-    
-    
-    def get_conditions(self):
-        '''
-        List the available model conditions
         '''
         pass
     

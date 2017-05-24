@@ -9,12 +9,13 @@ import shutil
 import hglib
 
 
-def create_docker_file(path, dockerfile_name='Dockerfile', requirements=default_requirements):
+def create_docker_file(path, dockerfile_name='Dockerfile'):
     '''
     Create a default docker container for running a model in test container
     Users may want to modify this for their own purposes, for now this is just a simple way of running the tests and generating a report
     '''
-    templates_path = os.path.join(os.path.dirname(gsmodutils.__file__), 'templates/')
+    templates_path = os.path.join(
+                            os.path.dirname(gsmodutils.__file__), 'templates')
     # Create the dockerfile
     df_path = os.path.join(templates_path, 'Dockerfile')
     dockerfile_path = os.path.join(path, dockerfile_name)
@@ -31,10 +32,11 @@ def create_docker_file(path, dockerfile_name='Dockerfile', requirements=default_
 def create_deafault_tests(path):
     '''
     '''
-    templates_path = os.path.join(os.path.dirname(gsmodutils.__file__), 'templates/')
+    templates_path = os.path.join(os.path.dirname(
+                                    os.path.abspath(gsmodutils.__file__)), 'templates')
     tpl_path = os.path.join(templates_path, 'default_tests.tpy')
     
-    new_path = os.path.join(path, 'tests/test_model.py')
+    new_path = os.path.join(path, 'tests', 'test_model.py')
     
     shutil.copy(tpl_path, new_path)
     
@@ -45,10 +47,14 @@ def create_hg_commit_hooks(path):
     '''
     Just looks in the 
     '''
-    templates_path = os.path.join(os.path.dirname(gsmodutils.__file__), 'templates/')
+    templates_path = os.path.join(os.path.dirname(
+                                    os.path.abspath(gsmodutils.__file__)), 'templates')
 
 
 def create_project(args):
+    '''
+    Creates project config file
+    '''
     project_path = os.path.abspath(args.path)
     
      # Check that the folder doesn't already exist
