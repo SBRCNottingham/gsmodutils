@@ -46,3 +46,50 @@ def diff_models(model_a, model_b):
             print("\t", r, ":")
             print("\t\t", ra)
             print("\t\t", rb)
+            
+
+def model_diff(model_a, model_b):
+    '''
+    Diff assumes l -> r (i.e. model_a is the base model)
+    '''
+    
+    diff = dict(
+        removed_metabolites=[],
+        removed_reactions=[],
+        reactions=[],
+        metabolites=[]
+    )
+    
+    for metabolite in model_a.metabolites:
+        # Find removed metabolites
+        if metabolite
+    
+    for metabolite in model_b.metabolites:
+        # find added metabolites
+        # find if metabolite has changed at all
+        pass
+    
+    
+    for reaction in model_a.reactions:
+        # reaction has been removed
+        pass
+    
+    for reaction in model_b.reactions:
+        # reaction is new
+        # reaction has changed
+            # bounds
+            
+            # stoichiometry
+            
+            # compartment
+            
+            # gene - reaction rule
+            
+            # name
+            
+            # subsystem
+            
+            # objective coef
+            
+            # variable kind
+        pass

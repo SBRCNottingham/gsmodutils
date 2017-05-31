@@ -5,6 +5,7 @@ setup(
     name="gsmodutils",
     version = "0.0.1",
     description = "",
+    zip_safe = False,
     author = "James Gilbert",
     author_email = "james.gilbert@nottingham.ac.uk",
     url = "",

@@ -2,6 +2,8 @@ from __future__ import print_function, absolute_import
 import os
 import json
 import cameo
+import glob
+import cobra
 
 
 class ProjectNotFound(Exception):
@@ -117,25 +119,51 @@ class GSMProject(object):
         
     
     @property
-    def designs(self):
+    def designs(self, design_dir=None):
         '''
         Return dictionary of all the designs stored for the project
         '''
-        pass
+        
+        designs_s = dict()
+        if design_dir is None:
+             # All designs in the config specified design dir
+             designs_direct = glob.glob('{}/*.json'.format( os.path.join(self._project_path, self.config.design_dir) ))
+
+        for dpath in designs_direct:
+            
+            with open(dpath) as dsgn_ctx_file:
+                designs_s[dpath] = json.load(dpath)
+        
     
-    
-    def load_design(self, design, model=None, copy=False):
+    def load_design(self, design, conditions=None, model=None, copy=False):
         '''
         Returns a model with a specified design modification
         
         Design must either be a design stored in the folder path or a path to a json file
+        The json file should conform to the same standard as a json model
+        
+        required fields:
+            "metabolites":[]
+            "reactions":[]
+            "description": "", 
+            "notes": {}, 
+            "genes": [], 
+            "id":""
+        
+        optional fields:
+            "conditions": ""
+            "removed_reactions":[]
+            "removed_metabolites":[]
+        
+        Note if conditions is specified it is loaded first
+        other bounds are set afterwards
         '''
         if type(model) in [str, unicode]:
             mdl = self.load_model()
         elif copy:
             mdl = model.copy()
         else:
-            # TODO: type check model
+            # TODO: type check model is actually a constraints based model (cameo/cobra)
             mdl = model
         
         designs = self.designs
@@ -143,26 +171,104 @@ class GSMProject(object):
         if type(design) is not dict:
             # just load a path
             if os.path.exists(design):
-            # Desig
-            design = json.load()
+                # Design is a path
+                design = json.load(design)
+            
         
-        # Check design conforms to valid scheme
+        # load specified conditions
+        if conditions is not None:
+            self.load_conditions(conditions, mdl, copy=False)
         
+        # TODO: Check design conforms to valid scheme
+        # Add new or changed metabolites to model
+        for metabolite in  design['metabolites']:
+            # create new metabolite object if its not in the model already
+            if metabolite['id'] in mdl.metabolites:
+                metab = mdl.metabolites.get_by_id(metabolite['id'])
+            else:
+                metab = cobra.Metabolite()
+            
+            # Note that we don't check any of these properties, just update them
+            metab.id = metabolite['id']
+            metab.name = metabolite['name']
+            metab.charge = metabolite['charge']
+            metab.formula = metabolite['formula']
+            metab.notes = metabolite['notes']
+            metab.annotation = metabolite['annotation']
+            metab.compartment = metabolite['compartment']
+            
+            if metab.id not in mdl.metabolites:
+                mdl.add_metabolite(metab)  
+                
+        # Add new or changed reactions to model
+        for rct in design['reactions']:
+            if rct['id'] in mdl.reactions:
+                reaction = mdl.reactions.get_by_id(rct['id'])
+                reaction.clear_metabolites()
+                reaction.add_metabolites(rct['metabolites'])
+            else:
+                reaction = cobra.Reaction()
+                reaction.id = rct['id']
+                reaction.metabolites = rct['metabolites']
+            
+            reaction.name = rct['name']
+            reaction.lower_bound = rct['lower_bound']
+            reaction.upper_bound = rct['upper_bound']
+            reaction.objective_coefficient = rct['objective_coefficient']
+            reaction.gene_reaction_rule = rct['gene_reaction_rule']
+            reaction.subsystem = rct['subsystem']
+            reaction.name = rct['name']
+            reaction.variable_kind = rct['variable_kind']
 
-    def save_design(self, model, name, base_model=None):
+            if rct['id'] not in mdl.reactions:
+                mdl.add_reaction(reaction)
+            
+        # delete removed metabolites/reactions
+        if 'removed_reactions' in design:
+            for rtid in design['removed_reactions']:
+                try:
+                    reaction = mdl.reactions.get_by_id(rtid)
+                    reaction.remove_from_model()
+                except KeyError:
+                    pass
+        
+        if 'removed_metabolites' in design:
+            for metid in design['removed_metabolites']:
+                try:
+                    met = mdl.metabolites.get_by_id(metid)
+                    met.remove_from_model()
+                except KeyError:
+                    pass
+
+        return mdl
+    
+    
+    def save_design(self, model, name, conditions=None, base_model=None):
         '''
         Creates a design from a diff of model_a and model_b
+        
+        name
+        description
         '''
         # Load either default model or model path
         if type(base_model) in [None, unicode, str]:
             base_model = self.load_model(mpath=base_model)
+            self.load_conditions(conditions, base_model)
         
         if base_model is None:
             raise IOError('Base model not found')
     
+        # Find all the differences between the models
+        
     
-    
-    def load_conditions(self, condition_name, model=None, copy=False):
+    def load_conditions(self, conditions, model=None, copy=False):
         '''
         '''
-        pass
+        if model is None:
+            mdl = self.load_model()
+        elif copy:
+            mdl = model.copy()
+
+        
+        return mdl
+        
