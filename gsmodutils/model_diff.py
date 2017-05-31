@@ -48,10 +48,33 @@ def diff_models(model_a, model_b):
             print("\t\t", rb)
             
 
+def _check_obj_sim(obja, objb, fields):
+    '''
+    Dirty function for checking if set fields are the same between two objects.
+    
+    This will throw excpetions if you're using it wrong but I can't tell you what they are...
+    '''
+    # I felt dirty writing it and a feel dirty using it...
+    for field in fields:
+        attr_a = getattr(obja, field)
+        attr_b = getattr(objb, field)
+        
+        # Minimal protections against some calls
+        if type(attr_a) is not type(attr_b):
+            return False
+        
+        # attrs are of the same type
+        if attr_a != attr_b:
+            return False
+        
+    return True
+
 def model_diff(model_a, model_b):
     '''
     Diff assumes l -> r (i.e. model_a is the base model)
     '''
+    
+    metfields = ['formula', 'charge', 'compartment', 'name']
     
     diff = dict(
         removed_metabolites=[],
@@ -60,15 +83,25 @@ def model_diff(model_a, model_b):
         metabolites=[]
     )
     
-    for metabolite in model_a.metabolites:
+    for ma in model_a.metabolites:
         # Find removed metabolites
-        if metabolite
-    
-    for metabolite in model_b.metabolites:
+        try:
+            mb = model_b.metabolites.get_by_id(ma.id)
+        excpet KeyError:
+            removed_metabolites = [mb]
+            mb = None
+
+    for mb in model_b.metabolites:
         # find added metabolites
         # find if metabolite has changed at all
-        pass
-    
+        try:
+            ma = model_b.metabolites.get_by_id(ma.id)
+        excpet KeyError:
+            ma = None
+            
+        if ma is not None:
+            if not _check_obj_sim(ma, mb, metfields):
+                pass
     
     for reaction in model_a.reactions:
         # reaction has been removed
