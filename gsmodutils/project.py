@@ -61,7 +61,12 @@ class GSMProject(object):
         '''
         self.config = ProjectConfig(**configuration)
         
-        
+    
+    def _load_conditions_file(self):
+        with open(self._conditions_file) as ctxfile:
+            self.conditions = json.load(ctxfile)
+    
+    
     def update(self):
         '''
         Updates this class from configuration file
@@ -76,12 +81,15 @@ class GSMProject(object):
         with open(self._context_file) as ctxfile:
             self.configuration = self._load_config(json.load(ctxfile))
         
-        self._conditions_file = os.path.join(self.configuration)
+        self._conditions_file = os.path.join(self.configuration.conditions_file)
+        
+        self._load_conditions_file()
         
         
     @property
-    def conditions(self):
-        # self.update() # TODO: profile always updating before loading properties
+    def conditions(self, update=False):
+        if update:
+            self.update()
         with open(self._conditions_file) as cf:
             cdf = json.load(cf)
         return cdf
@@ -95,32 +103,63 @@ class GSMProject(object):
         return self.config.models
     
     
-    def get_model(self, mpath=None):
+    def load_model(self, mpath=None):
         '''
-        Get the model
+        Get a model
+        '''
+        if mpath == None:
+            mpath = self.config.models[0]
+        
+        if mpath not in self.config.models:
+            raise IOError('Model file {} not found'.format(mpath))
+        
+        return cameo.load_model(mpath)
+        
+    
+    @property
+    def designs(self):
+        '''
+        Return dictionary of all the designs stored for the project
         '''
         pass
     
     
-    def get_designs(self):
-        '''
-        Return dictionary of all the designs of the model
-        '''
-        pass
-    
-    
-    def load_design(self, design):
+    def load_design(self, design, model=None, copy=False):
         '''
         Returns a model with a specified design modification
+        
+        Design must either be a design stored in the folder path or a path to a json file
         '''
-        pass
-
+        if type(model) in [str, unicode]:
+            mdl = self.load_model()
+        elif copy:
+            mdl = model.copy()
+        else:
+            # TODO: type check model
+            mdl = model
+        
+        designs = self.designs
+        
+        if type(design) is not dict:
+            # just load a path
+            if os.path.exists(design):
+            # Desig
+            design = json.load()
+        
+        # Check design conforms to valid scheme
+        
 
     def save_design(self, model, name, base_model=None):
         '''
         Creates a design from a diff of model_a and model_b
         '''
-        pass
+        # Load either default model or model path
+        if type(base_model) in [None, unicode, str]:
+            base_model = self.load_model(mpath=base_model)
+        
+        if base_model is None:
+            raise IOError('Base model not found')
+    
     
     
     def load_conditions(self, condition_name, model=None, copy=False):
