@@ -1,10 +1,9 @@
 from __future__ import print_function, absolute_import
 import os
 import json
-import cameo
 import glob
 import cobra
-from gsmodutlils.model_diff import model_diff
+from gsmodutils.model_diff import model_diff
 
 class ProjectNotFound(Exception):
     pass
@@ -62,11 +61,6 @@ class GSMProject(object):
         Sanatizes configuration input
         '''
         self.config = ProjectConfig(**configuration)
-        
-    
-    def _load_conditions_file(self):
-        with open(self._conditions_file) as ctxfile:
-            self.conditions = json.load(ctxfile)
     
     
     def update(self):
@@ -83,13 +77,14 @@ class GSMProject(object):
         with open(self._context_file) as ctxfile:
             self.configuration = self._load_config(json.load(ctxfile))
         
-        self._conditions_file = os.path.join(self.configuration.conditions_file)
-        
-        self._load_conditions_file()
+        self._conditions_file = os.path.join(self.config.conditions_file)
         
         
     @property
     def conditions(self, update=False):
+        '''
+        Load the saved conditions file
+        '''
         if update:
             self.update()
         with open(self._conditions_file) as cf:
@@ -107,7 +102,7 @@ class GSMProject(object):
     
     def load_model(self, mpath=None):
         '''
-        Get a model
+        Get a model stored by the project
         '''
         if mpath == None:
             mpath = self.config.models[0]
@@ -115,7 +110,10 @@ class GSMProject(object):
         if mpath not in self.config.models:
             raise IOError('Model file {} not found'.format(mpath))
         
-        return cameo.load_model(mpath)
+        import cameo
+        mdl = cameo.load_model(mpath)
+        mdl._gsm_model_path = mpath
+        return mdl
     
     
     @property
@@ -281,22 +279,47 @@ class GSMProject(object):
         with open(design_save_path, 'w+') as dsp:
             json.dump(diff, dsp, indent=4)
         
-        
     
-    def load_conditions(self, conditions, model=None, copy=False):
+    def load_conditions(self, conditions_id, model=None, copy=False):
         '''
+        Load a model with a given set of pre-saved media conditions
         '''
         if model is None:
             mdl = self.load_model()
         elif copy:
             mdl = model.copy()
-
+        
+        conditions_store = self.conditions(update=True)
+        mdl.load_medium(conditions_store[conditions_id])
         
         return mdl
         
     
     def add_conditions(self, model, conditions_id):
         '''
-        add conditions
+        Add media conditions that a given model has to the project
         '''
-        pass
+        # If it can't get a solution then this will raise errors.
+        model.solve()
+        
+        # List all transport reactions in to the cell
+        def is_exchange(r):
+            return (len(r.reactants) == 0 or len(r.products) == 0) and len(r.metabolites) == 1
+
+        def is_media(r):
+            if r.lower_bound < 0 and is_exchange(r):
+                return True
+            return False
+        
+        media = {}
+        for r in model.reactions:
+            if is_media(r):
+                media[r.id] = r.lower_bound
+        
+        # save to conditions file
+        conditions_store = self.conditions(update=True)
+        conditions_store[conditions_id] = media
+        with open(self._conditions_file, 'w+') as cf:
+            json.dump(conditions_store, cf, indent=4)
+        
+        # TODO: mercurial commit

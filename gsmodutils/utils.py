@@ -1,6 +1,5 @@
-import cameo
 import cobra
-
+from cameo import Metabolite as cameoMetabolite
 
 class frozendict(dict):
     def __init__(self, iterable, **kwargs):
@@ -54,9 +53,10 @@ def convert_stoich(stoich):
     '''
     Make a stoichiometry dict identifiers rather than metabolite objects
     '''
+    
     n_stoich = {}
     for meta, val in stoich.items():
-        if type(meta) in [cameo.Metabolite, cobra.Metabolite]:
+        if type(meta) in [cameoMetabolite, cobra.Metabolite]:
             n_stoich[meta.id] = val
         else:
             n_stoich[meta] = val

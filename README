@@ -60,16 +60,17 @@ Test cases - default test cases should be part of the software, maybe include a 
     * cobra_to_scrumpy (todo, if needed)
     Create a scrumpy model from a cobrapy model
     
-    * new_gsm_project (done)
+    * gsm_new_project (done)
     Utility for creating a new project around an existing (or new) genome scale model
     
-    * add_new_design (todo)
+    * gsm_new_design (todo)
     Takes a model (and optionally, specified base model name) and creates a design based on it. Also commits it to the repository.
     
-    * diff_report (todo)
+    * gsm_diff_report (todo)
     Create a report of the difference between two gsm models, showing which reactions/metabolites that have changed and how
     
-    * 
+    * gsm_add_conditions (todo)
+    Take a models transporter settings and save them in the database with a specific name
 
 
 -- TODO --

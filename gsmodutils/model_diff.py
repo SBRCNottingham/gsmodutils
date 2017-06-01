@@ -1,5 +1,4 @@
 from __future__ import print_function
-import cameo
 import cobra
 from collections import defaultdict
 from gsmodutils.utils import frozendict, _check_obj_sim, convert_stoich, equal_stoich
