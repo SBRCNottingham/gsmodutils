@@ -1,77 +1,22 @@
 from __future__ import print_function
 import cameo
+import cobra
 from collections import defaultdict
+from gsmodutils.utils import frozendict, _check_obj_sim, convert_stoich, equal_stoich
 
-
-def diff_models(model_a, model_b):
-    '''
-    Return a model design that encaptualtes the changes between two model versions
-    
-    This only really works if model_a is a precursor of b, otherwise you'll just get a huge number of reactions that are new/removed
-    '''
-    
-    removed_reactions = []
-    added_reactions = []
-    changed_reactions = dict()
-    
-    
-    for ra in model_a.reactions:
-        
-        # Reaction removed
-        if ra.id not in model_b.reactions:
-            removed_reactions.append(ra.id)
-        else:
-            # Reaction bounds aren't the same
-            rb = model_b.reactions.get_by_id(ra.id)
-                    
-            if str(ra) != str(rb):
-                changed_reactions[ra.id] = (str(ra), str(rb))
-        
-    added_reactions = [reaction.id for reaction in model_b.reactions if reaction.id not in model_a.reactions]
-    
-    
-    if len(removed_reactions):
-        print('REACTIONS REMOVED:')
-        for r in removed_reactions:
-            print("\t", r)
-    
-    if len(added_reactions):
-        print('REACTIONS ADDED:')
-        for r in added_reactions:
-            print("\t", r)
-            
-    if len(changed_reactions):
-        print('REACTIONS CHANGED:')
-        for r, (ra, rb) in changed_reactions.items():
-            print("\t", r, ":")
-            print("\t\t", ra)
-            print("\t\t", rb)
-            
-
-def _check_obj_sim(obja, objb, fields):
-    '''
-    Dirty function for checking if set fields are the same between two objects.
-    
-    This will throw excpetions if you're using it wrong but I can't tell you what they are...
-    '''
-    # I felt dirty writing it and a feel dirty using it...
-    for field in fields:
-        attr_a = getattr(obja, field)
-        attr_b = getattr(objb, field)
-        
-        # Minimal protections against some calls
-        if type(attr_a) is not type(attr_b):
-            return False
-        
-        # attrs are of the same type
-        if attr_a != attr_b:
-            return False
-        
-    return True
 
 def model_diff(model_a, model_b):
     '''
+    Returns a dictionary that contains all of the changed reactions between model a and model b
+    
+    This includes any reactions or metabolites removed, or any reactions or metabolites added/changed
+    
+    This does not say HOW a model has changed if reactions or metabolites are changed they are just included with their new values
+    
     Diff assumes l -> r (i.e. model_a is the base model)
+    
+    TODO: Make a model_diff object that is json serialisable/can be converted to a dict
+    TODO: Make a command line tool that outputs a report file listing all of the ways in which two models are different
     '''
     
     metfields = ['formula', 'charge', 'compartment', 'name']
@@ -87,42 +32,64 @@ def model_diff(model_a, model_b):
         # Find removed metabolites
         try:
             mb = model_b.metabolites.get_by_id(ma.id)
-        excpet KeyError:
-            removed_metabolites = [mb]
-            mb = None
+        except KeyError:
+            diff['removed_metabolites'].append(mb.id)
 
     for mb in model_b.metabolites:
         # find added metabolites
         # find if metabolite has changed at all
         try:
-            ma = model_b.metabolites.get_by_id(ma.id)
-        excpet KeyError:
+            ma = model_a.metabolites.get_by_id(mb.id)
+        except KeyError:
             ma = None
             
         if ma is not None:
             if not _check_obj_sim(ma, mb, metfields):
-                pass
+                diff['metabolites'].append(
+                    dict(
+                       id=mb.id,
+                       notes=mb.notes,
+                       compartment=mb.compartment,
+                       formula=mb.formula,
+                       name=mb.name,
+                       charge=mb.charge,
+                       annotation=mb.annotation,
+                    )
+                )
     
-    for reaction in model_a.reactions:
+    reacfields = [
+        'lower_bound', 'upper_bound', 
+        'gene_reaction_rule', 'subsystem', 'name', 
+        'variable_kind' 
+    ]
+    for ra in model_a.reactions:
         # reaction has been removed
-        pass
+        try:
+            rb = model_b.reactions.get_by_id(ra.id)
+        except KeyError:
+            diff['removed_reactions'].append(ra)
     
-    for reaction in model_b.reactions:
+    for rb in model_b.reactions:
         # reaction is new
+        try:
+            ra = model_a.reactions.get_by_id(rb.id)
+        except KeyError:
+            ra = None
         # reaction has changed
-            # bounds
+        if ra is not None:
             
-            # stoichiometry
-            
-            # compartment
-            
-            # gene - reaction rule
-            
-            # name
-            
-            # subsystem
-            
-            # objective coef
-            
-            # variable kind
-        pass
+            if not _check_obj_sim(ra, rb, reacfields) or not equal_stoich(ra, rb):
+                
+                diff['reactions'].append(
+                    dict(
+                        id=rb.id,
+                        lower_bound=rb.lower_bound,
+                        upper_bound=rb.upper_bound,
+                        gene_reaction_rule=rb.gene_reaction_rule,
+                        subsystem=rb.subsystem,
+                        name=rb.name,
+                        variable_kind=rb.variable_kind,
+                        metabolites=dict(convert_stoich(rb.metabolites))
+                    )
+                )
+    return diff

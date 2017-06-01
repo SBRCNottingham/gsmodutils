@@ -50,3 +50,16 @@ if using docker, docker is required to be installed and configured.
 Updating things between versions of this software - what if we add new configuration options? what if structure of project changes?
 
 Test cases - default test cases should be part of the software, maybe include a __version__ check on the template test cases?
+
+
+-- TODO --
+* Unit tests for module
+    - model diff (done)
+    - project creation
+    - saving designs
+    - config changes
+    - Docker files work (This one is hard to make general)
+    
+* User guide
+* Scripts for starting docker etc
+* Default project tests (and easy way of writing tests with helper decorators for loading the project)
