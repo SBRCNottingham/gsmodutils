@@ -4,7 +4,7 @@ import json
 import cameo
 import glob
 import cobra
-
+from gsmodutlils.model_diff import model_diff
 
 class ProjectNotFound(Exception):
     pass
@@ -116,10 +116,15 @@ class GSMProject(object):
             raise IOError('Model file {} not found'.format(mpath))
         
         return cameo.load_model(mpath)
-        
+    
     
     @property
-    def designs(self, design_dir=None):
+    def design_path(self):
+        return os.path.join(self._project_path, self.config.design_dir)
+    
+    
+    @property
+    def designs(self):
         '''
         Return dictionary of all the designs stored for the project
         '''
@@ -127,13 +132,18 @@ class GSMProject(object):
         designs_s = dict()
         if design_dir is None:
              # All designs in the config specified design dir
-             designs_direct = glob.glob('{}/*.json'.format( os.path.join(self._project_path, self.config.design_dir) ))
-
+             designs_direct = glob.glob(
+                 os.path.join(self._project_path, self.config.design_dir, '*.json') )
+             
         for dpath in designs_direct:
-            
             with open(dpath) as dsgn_ctx_file:
+                # TODO: validate design schema
+                # if designs don't conform to schema, ignore them
+                # maybe add option for throwing errors?
                 designs_s[dpath] = json.load(dpath)
         
+        return designs_s
+    
     
     def load_design(self, design, conditions=None, model=None, copy=False):
         '''
@@ -243,7 +253,7 @@ class GSMProject(object):
         return mdl
     
     
-    def save_design(self, model, name, conditions=None, base_model=None):
+    def save_design(self, model, id, name, description='', conditions=None, base_model=None):
         '''
         Creates a design from a diff of model_a and model_b
         
@@ -259,6 +269,18 @@ class GSMProject(object):
             raise IOError('Base model not found')
     
         # Find all the differences between the models
+        diff = model_diff(base_model, mdl)
+        
+        diff['description'] = description
+        diff['id'] = id,
+        diff['name'] = name
+        diff['conditions'] = conditions
+        diff['base_model'] = base_model.id
+        
+        design_save_path = os.path.join(design_path, '{}.json'.format(id))
+        with open(design_save_path, 'w+') as dsp:
+            json.dump(diff, dsp, indent=4)
+        
         
     
     def load_conditions(self, conditions, model=None, copy=False):
@@ -272,3 +294,9 @@ class GSMProject(object):
         
         return mdl
         
+    
+    def add_conditions(self, model, conditions_id):
+        '''
+        add conditions
+        '''
+        pass
