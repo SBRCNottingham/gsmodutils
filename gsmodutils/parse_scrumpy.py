@@ -1,7 +1,9 @@
 #!/usr/bin/python
 from __future__ import print_function
-import cameo
 import os
+import argparse
+import json
+import cobra
 
 
 def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, media={}, objective_reactions=['Biomass'], obj_dir='max'):
@@ -18,15 +20,15 @@ def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, med
     
     
     reactions, metabolites = parse_file(os.path.abspath(filepath).split('/')[-1], rel_path=rel_path)
-    model = cameo.Model()
+    model = cobra.Model()
     for mid in metabolites:
-        m = cameo.Metabolite(id=mid)
+        m = cobra.Metabolite(id=mid)
         model.add_metabolite(m)
     
     added_reactions = []
     for reaction in reactions:
         if reaction['id'] not in added_reactions:
-            r = cameo.Reaction(reaction['id'])
+            r = cobra.Reaction(reaction['id'])
             model.add_reaction(r)
             r.lower_bound=reaction['bounds'][0]
             r.upper_bound=reaction['bounds'][1]
@@ -245,10 +247,8 @@ def parse_file(filepath, fp_stack=[], rel_path=''):
                 
     return reactions, metabolites
 
-if __name__ == "__main__":
-    import argparse
-    import json
-    import cobra
+
+def main():
     # Parser argument
     parser = argparse.ArgumentParser(description='parse a scrumpy file and output a json cobra compatable model')
    
@@ -285,4 +285,6 @@ if __name__ == "__main__":
 
     cobra.io.save_json_model(model, args.output)
     
-    
+
+if __name__ == "__main__":
+    main()

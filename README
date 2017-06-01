@@ -52,14 +52,45 @@ Updating things between versions of this software - what if we add new configura
 Test cases - default test cases should be part of the software, maybe include a __version__ check on the template test cases?
 
 
+-- Command line utilities ---
+    * scrumpy_to_cobra (done)
+    Takes a scrumpy (structural!) model and converts it to a cobra compatable model (so you don't need scrumpy installed).
+    BIG TODO - have this work with minimisation of reaction fluxes objective function in cobrapy/cameo based models
+
+    * cobra_to_scrumpy (todo, if needed)
+    Create a scrumpy model from a cobrapy model
+    
+    * new_gsm_project (done)
+    Utility for creating a new project around an existing (or new) genome scale model
+    
+    * add_new_design (todo)
+    Takes a model (and optionally, specified base model name) and creates a design based on it. Also commits it to the repository.
+    
+    * diff_report (todo)
+    Create a report of the difference between two gsm models, showing which reactions/metabolites that have changed and how
+    
+    * 
+
+
 -- TODO --
+
+* condition handling - load a model and a specific set of conditions
+* multiple models - make sure this works
+
+* Default project tests - way of calling standard set of test functions
+    - (e.g. model grows, all designs work)
+* Easy way of writing tests with helper decorators for loading the project)
+
+
 * Unit tests for module
     - model diff (done)
     - project creation
     - saving designs
     - config changes
     - Docker files work (This one is hard to make general)
-    
+
+* Mercurial commit hooks when models in the project change
 * User guide
 * Scripts for starting docker etc
-* Default project tests (and easy way of writing tests with helper decorators for loading the project)
+
+

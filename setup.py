@@ -11,9 +11,12 @@ setup(
     url = "",
     license = "MIT",
     packages = ["gsmodutils"],
-    scripts = ["gsmodutils/parse_scrumpy.py", "gsmodutils/gsm_project.py"],
+    scripts = [],
     entry_points={
-          'console_scripts': ['gsm_project=gsmodutils.gsm_project:main'],
+        'console_scripts': [
+            'new_gsm_project=gsmodutils.gsm_project:main',
+            'scrumpy_to_cobra=gsmodutils.parse_scrumpy:main'
+        ],
     },
     include_package_data=True
 )

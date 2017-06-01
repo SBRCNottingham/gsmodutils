@@ -173,7 +173,7 @@ def main():
     '''
     Handles command line arguments
     '''
-    parser = argparse.ArgumentParser(description='Create a mercurial repository for a genome scale metabolic model and handle design and management through test driven behaviour')
+    parser = argparse.ArgumentParser(description='Create a mercurial repository for a genome scale metabolic model and handle design and management through test driven design')
     
     parser.add_argument('--model', default=None, action="store",
                         help='Path to the cobra/sbml model (json or sbml) if left blank one will be created')
