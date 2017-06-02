@@ -1,10 +1,9 @@
-#!/usr/bin/python
 from __future__ import print_function
 import os
 import argparse
 import json
 import cobra
-
+import cameo
 
 def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, media={}, objective_reactions=['Biomass'], obj_dir='max'):
     '''
@@ -20,15 +19,16 @@ def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, med
     
     
     reactions, metabolites = parse_file(os.path.abspath(filepath).split('/')[-1], rel_path=rel_path)
-    model = cobra.Model()
+    model = cameo.Model()
     for mid in metabolites:
-        m = cobra.Metabolite(id=mid)
+        m = cameo.Metabolite(id=mid)
         model.add_metabolite(m)
+    
     
     added_reactions = []
     for reaction in reactions:
         if reaction['id'] not in added_reactions:
-            r = cobra.Reaction(reaction['id'])
+            r = cameo.Reaction(reaction['id'])
             model.add_reaction(r)
             r.lower_bound=reaction['bounds'][0]
             r.upper_bound=reaction['bounds'][1]
