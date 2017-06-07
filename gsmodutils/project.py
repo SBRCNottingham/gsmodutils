@@ -1,42 +1,15 @@
-from __future__ import print_function, absolute_import
+from __future__ import print_function, absolute_import, division
 import os
 import json
 import glob
 import cobra
+import hglib
+import shutil
+
 from gsmodutils.model_diff import model_diff
+from gsmodutils.exceptions import ProjectConfigurationError, ProjectNotFound
+from gsmodutils.project_config import ProjectConfig, _default_project_file, _default_model_conditionsfp
 
-class ProjectNotFound(Exception):
-    pass
-
-
-class ProjectConfigurationError(Exception):
-    pass
-
-
-class ProjectConfig(object):
-    '''
-    Class for configuration
-    basically, takes configuration arguments and ensures that the required configuration options are included
-    '''
-    _required_cfg_params = [
-            'description', 'author', 'author_email', 'models', 
-            'repository_type', 'conditions_file', 'tests_dir',
-            'design_dir'
-        ]
-    
-    def __init__(self, **kwargs):
-        
-        loaded_cfg_params = [x.lower() for x in kwargs.keys()]
-        # Check required options are there
-        for it in self._required_cfg_params:
-            if it not in loaded_cfg_params:
-                raise ProjectConfigurationError('Project configuration option "{}" is missing'.format(it) )
-        
-        for arg, val in kwargs.items():
-            setattr(self, arg.lower(), val)
-            
-        self._config_dict = kwargs
-        
 
 class GSMProject(object):
     '''
@@ -53,7 +26,7 @@ class GSMProject(object):
     
     @property
     def _context_file(self):
-        return os.path.join(self._project_path, '.gsmod_project.json')
+        return os.path.join(self._project_path, _default_project_file)
     
     
     def _load_config(self, configuration):
@@ -72,7 +45,7 @@ class GSMProject(object):
             raise ProjectNotFound('Project path {} does not exist'.format(self._project_path))
         
         if not os.path.exists(self._context_file):
-            raise ProjectNotFound('Project settings file .gsmod_project in {} does not exist'.format(self._project_path))
+            raise ProjectNotFound('Project settings file {} in {} does not exist'.format(_default_project_file, self._project_path))
         
         with open(self._context_file) as ctxfile:
             self.configuration = self._load_config(json.load(ctxfile))
@@ -278,6 +251,8 @@ class GSMProject(object):
         design_save_path = os.path.join(design_path, '{}.json'.format(id))
         with open(design_save_path, 'w+') as dsp:
             json.dump(diff, dsp, indent=4)
+        
+        # TODO: adding to mercurial repository
         
     
     def load_conditions(self, conditions_id, model=None, copy=False):
