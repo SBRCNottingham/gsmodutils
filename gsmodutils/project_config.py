@@ -23,7 +23,7 @@ class ProjectConfig(object):
     _required_cfg_params = [
             'description', 'author', 'author_email', 'models', 
             'repository_type', 'conditions_file', 'tests_dir',
-            'design_dir'
+            'design_dir', 'default_model',
         ]
     
     def __init__(self, **kwargs):
@@ -112,6 +112,8 @@ class ProjectConfig(object):
         This function tries to clean up after itself when errors occur
         
         Add models assumes the absolute path to models
+        
+        If you add multiple models, the default model is the first path specified
         '''
         
         project_path = os.path.abspath(project_path)

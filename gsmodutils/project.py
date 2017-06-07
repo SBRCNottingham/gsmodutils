@@ -21,6 +21,7 @@ class GSMProject(object):
     def __init__(self, path='.', **kwargs):
         # Load a project
         self._project_path = os.path.abspath(path)
+        self._loaded_model = None
         self.update()
     
     
@@ -50,7 +51,7 @@ class GSMProject(object):
         with open(self._context_file) as ctxfile:
             self.configuration = self._load_config(json.load(ctxfile))
         
-        self._conditions_file = os.path.join(self.config.conditions_file)
+        self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
         
         
     @property
@@ -64,29 +65,58 @@ class GSMProject(object):
             cdf = json.load(cf)
         return cdf
     
-    
+
+    def iter_models(self):
+        '''
+        Generator for models
+        '''
+        for mdl_path in self.config.models:
+            yield self.load_model(mpath=mdl_path)
+
+
     @property
     def models(self):
         '''
         Lists all the models that can be loaded
         '''
-        return self.config.models
+        return list(self.iter_models())
     
     
     def load_model(self, mpath=None):
         '''
         Get a model stored by the project
+        mpath refers to the relative path of the model
         '''
-        if mpath == None:
-            mpath = self.config.models[0]
+        if mpath is None:
+            mpath = self.config.default_model
         
         if mpath not in self.config.models:
-            raise IOError('Model file {} not found'.format(mpath))
+            raise IOError('Model file {} not found in project, maybe you need to add it'.format(mpath))
         
         import cameo
-        mdl = cameo.load_model(mpath)
+        
+        load_path = os.path.join(self._project_path, mpath)
+        mdl = cameo.load_model(load_path)
         mdl._gsm_model_path = mpath
         return mdl
+    
+    
+    @property
+    def model(self):
+        '''
+        Returns default model for project
+        '''
+        if self._loaded_model is None:
+            self._loaded_model = self.load_model()
+            
+        return self._loaded_model
+    
+    
+    def add_model(self, model_path):
+        '''
+        Add a model given a path to it (copy it to model directory unless its in the project path already.
+        '''
+        pass
     
     
     @property
@@ -97,26 +127,51 @@ class GSMProject(object):
     @property
     def designs(self):
         '''
-        Return dictionary of all the designs stored for the project
+        Return list of all the designs stored for the project
         '''
         
         designs_s = dict()
-        if design_dir is None:
-             # All designs in the config specified design dir
-             designs_direct = glob.glob(
-                 os.path.join(self._project_path, self.config.design_dir, '*.json') )
+        
+        # All designs in the config specified design dir
+        designs_direct = glob.glob(
+            os.path.join(self._project_path, self.config.design_dir, '*.json') )
              
         for dpath in designs_direct:
             with open(dpath) as dsgn_ctx_file:
                 # TODO: validate design schema
                 # if designs don't conform to schema, ignore them
                 # maybe add option for throwing errors?
-                designs_s[dpath] = json.load(dpath)
+                d_id = os.path.basename(dpath).split(".json")[0]
+                designs_s[d_id] = json.load(dsgn_ctx_file)
         
         return designs_s
     
     
-    def load_design(self, design, conditions=None, model=None, copy=False):
+    @property
+    def list_designs(self):
+        designs_direct = glob.glob(
+            os.path.join(self._project_path, self.config.design_dir, '*.json') )
+        
+        return [os.path.basename(dpath).split(".json")[0] for dpath in designs_direct]
+        
+    
+    
+    def _construct_design(self, design_id):
+        '''
+        Loads an existing design
+        '''
+        if design_id not in self.list_designs:
+            raise KeyError('Design {} not found'.format(design_id) )
+        
+        des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design_id) )
+    
+        with open(des_path) as dsn_ctx:
+            design_dict = json.load(dsn_ctx)
+        
+        return design_dict
+    
+    
+    def load_design(self, design, model=None, copy=False):
         '''
         Returns a model with a specified design modification
         
@@ -139,26 +194,32 @@ class GSMProject(object):
         Note if conditions is specified it is loaded first
         other bounds are set afterwards
         '''
-        if type(model) in [str, unicode]:
-            mdl = self.load_model()
+        if type(model) in [type(None), str, unicode]:
+            mdl = self.load_model(mpath=model)
+            # TODO: type check model is actually a constraints based model (cameo/cobra)
         elif copy:
             mdl = model.copy()
         else:
             # TODO: type check model is actually a constraints based model (cameo/cobra)
             mdl = model
-        
-        designs = self.designs
+
         
         if type(design) is not dict:
+            
+            if design in self.list_designs:
+                design = self._construct_design(design)
             # just load a path
-            if os.path.exists(design):
+            elif os.path.exists(design):
                 # Design is a path
-                design = json.load(design)
+                with open(design) as dfctx:
+                    design = json.load(dfctx)
+            else:
+                raise IOError('design not found')
             
         
         # load specified conditions
-        if conditions is not None:
-            self.load_conditions(conditions, mdl, copy=False)
+        if 'conditions' in design and design['conditions'] is not None:
+            self.load_conditions(design['conditions'], mdl, copy=False)
         
         # TODO: Check design conforms to valid scheme
         # Add new or changed metabolites to model
@@ -224,23 +285,27 @@ class GSMProject(object):
         return mdl
     
     
-    def save_design(self, model, id, name, description='', conditions=None, base_model=None):
+    def save_design(self, model, id, name, description='', conditions=None, base_model=None, overwrite=False):
         '''
         Creates a design from a diff of model_a and model_b
         
         name
         description
         '''
+        # Test, infesible designs should not be added
+        solution = model.solve()
+        
         # Load either default model or model path
-        if type(base_model) in [None, unicode, str]:
+        if type(base_model) in [type(None), unicode, str]:
             base_model = self.load_model(mpath=base_model)
-            self.load_conditions(conditions, base_model)
+            if conditions is not None:
+                self.load_conditions(conditions, base_model)
         
         if base_model is None:
             raise IOError('Base model not found')
-    
+        
         # Find all the differences between the models
-        diff = model_diff(base_model, mdl)
+        diff = model_diff(base_model, model)
         
         diff['description'] = description
         diff['id'] = id,
@@ -248,7 +313,7 @@ class GSMProject(object):
         diff['conditions'] = conditions
         diff['base_model'] = base_model.id
         
-        design_save_path = os.path.join(design_path, '{}.json'.format(id))
+        design_save_path = os.path.join(self.design_path, '{}.json'.format(id))
         with open(design_save_path, 'w+') as dsp:
             json.dump(diff, dsp, indent=4)
         

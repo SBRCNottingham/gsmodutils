@@ -66,7 +66,7 @@ def model_diff(model_a, model_b):
         try:
             rb = model_b.reactions.get_by_id(ra.id)
         except KeyError:
-            diff['removed_reactions'].append(ra)
+            diff['removed_reactions'].append(ra.id)
     
     for rb in model_b.reactions:
         # reaction is new
@@ -86,6 +86,7 @@ def model_diff(model_a, model_b):
                         upper_bound=rb.upper_bound,
                         gene_reaction_rule=rb.gene_reaction_rule,
                         subsystem=rb.subsystem,
+                        objective_coefficient=rb.objective_coefficient,
                         name=rb.name,
                         variable_kind=rb.variable_kind,
                         metabolites=dict(convert_stoich(rb.metabolites))
