@@ -54,16 +54,20 @@ class GSMProject(object):
         self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
         
         
-    @property
-    def conditions(self, update=False):
+    def get_conditions(self, update=False):
         '''
         Load the saved conditions file
         '''
         if update:
             self.update()
+            
         with open(self._conditions_file) as cf:
             cdf = json.load(cf)
         return cdf
+    
+    @property
+    def conditions(self):
+        return self.get_conditions()
     
 
     def iter_models(self):
@@ -251,7 +255,7 @@ class GSMProject(object):
             else:
                 reaction = cobra.Reaction()
                 reaction.id = rct['id']
-                reaction.metabolites = rct['metabolites']
+            
             
             reaction.name = rct['name']
             reaction.lower_bound = rct['lower_bound']
@@ -264,6 +268,8 @@ class GSMProject(object):
 
             if rct['id'] not in mdl.reactions:
                 mdl.add_reaction(reaction)
+                reaction = mdl.reactions.get_by_id(reaction.id)
+                reaction.add_metabolites(rct['metabolites'])
             
         # delete removed metabolites/reactions
         if 'removed_reactions' in design:
@@ -289,11 +295,17 @@ class GSMProject(object):
         '''
         Creates a design from a diff of model_a and model_b
         
+        id should be a string with no spaces (conversion handled)
+        
+        Returns the saved design diff
+        
         name
         description
         '''
         # Test, infesible designs should not be added
-        solution = model.solve()
+        model.solve()
+        
+        id = unicode(id).replace(' ', '_')
         
         # Load either default model or model path
         if type(base_model) in [type(None), unicode, str]:
@@ -319,6 +331,8 @@ class GSMProject(object):
         
         # TODO: adding to mercurial repository
         
+        return diff
+    
     
     def load_conditions(self, conditions_id, model=None, copy=False):
         '''
@@ -328,14 +342,16 @@ class GSMProject(object):
             mdl = self.load_model()
         elif copy:
             mdl = model.copy()
+        else:
+            mdl = model
         
-        conditions_store = self.conditions(update=True)
+        conditions_store = self.get_conditions(update=True)
         mdl.load_medium(conditions_store[conditions_id])
         
         return mdl
         
     
-    def add_conditions(self, model, conditions_id):
+    def save_conditions(self, model, conditions_id):
         '''
         Add media conditions that a given model has to the project
         '''
@@ -357,7 +373,7 @@ class GSMProject(object):
                 media[r.id] = r.lower_bound
         
         # save to conditions file
-        conditions_store = self.conditions(update=True)
+        conditions_store = self.get_conditions(update=True)
         conditions_store[conditions_id] = media
         with open(self._conditions_file, 'w+') as cf:
             json.dump(conditions_store, cf, indent=4)

@@ -42,8 +42,7 @@ def model_diff(model_a, model_b):
         except KeyError:
             ma = None
             
-        if ma is not None:
-            if not _check_obj_sim(ma, mb, metfields):
+        if ma is None or not _check_obj_sim(ma, mb, metfields):
                 diff['metabolites'].append(
                     dict(
                        id=mb.id,
@@ -74,10 +73,9 @@ def model_diff(model_a, model_b):
             ra = model_a.reactions.get_by_id(rb.id)
         except KeyError:
             ra = None
-        # reaction has changed
-        if ra is not None:
             
-            if not _check_obj_sim(ra, rb, reacfields) or not equal_stoich(ra, rb):
+        # reaction has changed or is new
+        if ra is None or not _check_obj_sim(ra, rb, reacfields) or not equal_stoich(ra, rb):
                 
                 diff['reactions'].append(
                     dict(
@@ -92,4 +90,6 @@ def model_diff(model_a, model_b):
                         metabolites=dict(convert_stoich(rb.metabolites))
                     )
                 )
+            
+            
     return diff
