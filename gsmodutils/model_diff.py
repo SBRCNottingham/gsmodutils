@@ -10,7 +10,8 @@ def model_diff(model_a, model_b):
     
     This includes any reactions or metabolites removed, or any reactions or metabolites added/changed
     
-    This does not say HOW a model has changed if reactions or metabolites are changed they are just included with their new values
+    This does not say HOW a model has changed if reactions or metabolites are changed they are just included with their
+    new values
     
     Diff assumes l -> r (i.e. model_a is the base model)
     

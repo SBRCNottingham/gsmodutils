@@ -75,9 +75,6 @@ Test cases - default test cases should be part of the software, maybe include a 
 
 -- TODO --
 
-* condition handling - load a model and a specific set of conditions
-* multiple models - make sure this works
-
 * Default project tests - way of calling standard set of test functions
     - (e.g. model grows, all designs work)
 * Easy way of writing tests with helper decorators for loading the project)

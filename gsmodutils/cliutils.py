@@ -41,3 +41,17 @@ def scrumpy_to_cobra():
                                obj_dir=args.objective_direction)
 
     cobra.io.save_json_model(model, args.output)
+
+
+def gsmtester():
+    '''
+    '''
+    parser = argparse.ArgumentParser(description='Run model verification and validation checks')
+    
+    parser.add_argument('--model',
+                        required=False, action='store',
+                        help='specify a single model to run tests on. Default is all models in configuration')
+    
+    
+    
+    

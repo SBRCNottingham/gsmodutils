@@ -12,11 +12,11 @@ from gsmodutils.project_config import ProjectConfig, _default_project_file, _def
 
 
 class GSMProject(object):
-    '''
+    """
     Project class finds a gsmodutlils.json file in a given path and creates a project which allows a user to load:
         Models included within the project
         Designs that the model uses
-    '''
+    """
     
     def __init__(self, path='.', **kwargs):
         # Load a project
@@ -24,40 +24,42 @@ class GSMProject(object):
         self._loaded_model = None
         self.update()
     
-    
     @property
     def _context_file(self):
         return os.path.join(self._project_path, _default_project_file)
-    
-    
+
     def _load_config(self, configuration):
-        '''
+        """
         Sanatizes configuration input
-        '''
+        """
         self.config = ProjectConfig(**configuration)
-    
-    
+
+    @property
+    def tests_dir(self):
+        """ Tests directory """
+        return os.path.join(self._project_path, self.config.tests_dir)
+
     def update(self):
-        '''
+        """
         Updates this class from configuration file
-        '''
+        """
         if not os.path.exists(self._project_path):
             
             raise ProjectNotFound('Project path {} does not exist'.format(self._project_path))
         
         if not os.path.exists(self._context_file):
-            raise ProjectNotFound('Project settings file {} in {} does not exist'.format(_default_project_file, self._project_path))
+            raise ProjectNotFound(
+                'Project settings file {} in {} does not exist'.format(_default_project_file, self._project_path))
         
         with open(self._context_file) as ctxfile:
-            self.configuration = self._load_config(json.load(ctxfile))
-        
+            self._load_config(json.load(ctxfile))
+
         self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
-        
-        
+
     def get_conditions(self, update=False):
-        '''
+        """
         Load the saved conditions file
-        '''
+        """
         if update:
             self.update()
             
@@ -68,29 +70,26 @@ class GSMProject(object):
     @property
     def conditions(self):
         return self.get_conditions()
-    
 
     def iter_models(self):
-        '''
+        """
         Generator for models
-        '''
+        """
         for mdl_path in self.config.models:
             yield self.load_model(mpath=mdl_path)
 
-
     @property
     def models(self):
-        '''
+        """
         Lists all the models that can be loaded
-        '''
+        """
         return list(self.iter_models())
-    
-    
+
     def load_model(self, mpath=None):
-        '''
+        """
         Get a model stored by the project
         mpath refers to the relative path of the model
-        '''
+        """
         if mpath is None:
             mpath = self.config.default_model
         
@@ -103,36 +102,32 @@ class GSMProject(object):
         mdl = cameo.load_model(load_path)
         mdl._gsm_model_path = mpath
         return mdl
-    
-    
+
     @property
     def model(self):
-        '''
+        """
         Returns default model for project
-        '''
+        """
         if self._loaded_model is None:
             self._loaded_model = self.load_model()
             
         return self._loaded_model
     
-    
     def add_model(self, model_path):
-        '''
+        """
         Add a model given a path to it (copy it to model directory unless its in the project path already.
-        '''
+        """
         pass
-    
-    
+
     @property
     def design_path(self):
         return os.path.join(self._project_path, self.config.design_dir)
-    
-    
+
     @property
     def designs(self):
-        '''
+        """
         Return list of all the designs stored for the project
-        '''
+        """
         
         designs_s = dict()
         
@@ -150,20 +145,17 @@ class GSMProject(object):
         
         return designs_s
     
-    
     @property
     def list_designs(self):
         designs_direct = glob.glob(
             os.path.join(self._project_path, self.config.design_dir, '*.json') )
         
         return [os.path.basename(dpath).split(".json")[0] for dpath in designs_direct]
-        
-    
     
     def _construct_design(self, design_id):
-        '''
+        """
         Loads an existing design
-        '''
+        """
         if design_id not in self.list_designs:
             raise KeyError('Design {} not found'.format(design_id) )
         
@@ -174,9 +166,8 @@ class GSMProject(object):
         
         return design_dict
     
-    
     def load_design(self, design, model=None, copy=False):
-        '''
+        """
         Returns a model with a specified design modification
         
         Design must either be a design stored in the folder path or a path to a json file
@@ -197,7 +188,7 @@ class GSMProject(object):
         
         Note if conditions is specified it is loaded first
         other bounds are set afterwards
-        '''
+        """
         if type(model) in [type(None), str, unicode]:
             mdl = self.load_model(mpath=model)
             # TODO: type check model is actually a constraints based model (cameo/cobra)
@@ -207,7 +198,6 @@ class GSMProject(object):
             # TODO: type check model is actually a constraints based model (cameo/cobra)
             mdl = model
 
-        
         if type(design) is not dict:
             
             if design in self.list_designs:
@@ -219,15 +209,14 @@ class GSMProject(object):
                     design = json.load(dfctx)
             else:
                 raise IOError('design not found')
-            
-        
+
         # load specified conditions
         if 'conditions' in design and design['conditions'] is not None:
             self.load_conditions(design['conditions'], mdl, copy=False)
         
         # TODO: Check design conforms to valid scheme
         # Add new or changed metabolites to model
-        for metabolite in  design['metabolites']:
+        for metabolite in design['metabolites']:
             # create new metabolite object if its not in the model already
             if metabolite['id'] in mdl.metabolites:
                 metab = mdl.metabolites.get_by_id(metabolite['id'])
@@ -255,8 +244,7 @@ class GSMProject(object):
             else:
                 reaction = cobra.Reaction()
                 reaction.id = rct['id']
-            
-            
+
             reaction.name = rct['name']
             reaction.lower_bound = rct['lower_bound']
             reaction.upper_bound = rct['upper_bound']
@@ -290,9 +278,8 @@ class GSMProject(object):
 
         return mdl
     
-    
     def save_design(self, model, id, name, description='', conditions=None, base_model=None, overwrite=False):
-        '''
+        """
         Creates a design from a diff of model_a and model_b
         
         id should be a string with no spaces (conversion handled)
@@ -301,7 +288,7 @@ class GSMProject(object):
         
         name
         description
-        '''
+        """
         # Test, infesible designs should not be added
         model.solve()
         
@@ -333,11 +320,10 @@ class GSMProject(object):
         
         return diff
     
-    
     def load_conditions(self, conditions_id, model=None, copy=False):
-        '''
+        """
         Load a model with a given set of pre-saved media conditions
-        '''
+        """
         if model is None:
             mdl = self.load_model()
         elif copy:
@@ -349,12 +335,11 @@ class GSMProject(object):
         mdl.load_medium(conditions_store[conditions_id])
         
         return mdl
-        
     
     def save_conditions(self, model, conditions_id):
-        '''
+        """
         Add media conditions that a given model has to the project
-        '''
+        """
         # If it can't get a solution then this will raise errors.
         model.solve()
         
