@@ -82,18 +82,27 @@ def test_json_tests():
         # run test functions
         tester = project.project_tester()
         assert len(tester._d_tests) == 1
-        tester._run_dtests()
+        tester.run_all()
         assert len(tester.load_errors) == 0
 
 def test_py_tests():
     """
     This is a test of python test code within a python test.
+    
+    These tests are important because the exec code is nasty to debug...
     """
     
     code_str = """
-def test_model():
-    model = project.load_model()
-    model.solve()
+from gsmodutils.testutils import ModelTestSelector
+
+@ModelTestSelector(models=[], conditions=[], designs=[])
+def test_func(model, project, log):
+    log.assertion(True, "Works", "Does not work", "Test")
+    
+def test_model(model, project, log):
+    solution = model.solve()
+    log.assertion(solution.f > 0.0, "Model grows", "Model does not grow")
+    
     """
     
     with FakeProjectContext() as fp:
@@ -105,5 +114,17 @@ def test_model():
             
         
         tester = project.project_tester()
-        tester._py_tests()
-    
+        tester.run_all()
+        
+        assert len(tester.compile_errors) == 0
+        
+        for tf_name, func, ex in tester.execution_errors:
+            print(type(ex))
+        
+        
+        print(tester.log)
+        for id, logr in tester.log.items():
+            print(logr.std_out)
+            
+        assert len(tester.execution_errors) == 0
+        assert len(tester.syntax_errors) == 0

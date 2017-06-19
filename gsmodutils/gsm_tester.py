@@ -7,7 +7,7 @@ import os
 import glob
 import json
 from collections import defaultdict
-
+import time
 
 @contextlib.contextmanager
 def stdoutIO(stdout=None):
@@ -24,14 +24,63 @@ def stdoutIO(stdout=None):
 
 class LogRecord(object):
     """Class for handling different types of errors"""
-    def __init__(self):
+    def __init__(self, id='', parent=None):
+        self.id = id
+        self.parent = parent
         self.success = []
         self.error = []
+        self.std_out = "" # Reserved for messages
+        self.run_time = time.time()
+        self.children = []
     
-    def __repr__(self):
+    def assertion(self, statement, success_msg, error_msg, desc=''):
+        """
+        Called within test functions to store errors and successes
+        Results will be appended to the correct log reccords
+        """
+        if statement:
+            self.success.append((success_msg, desc))
+        else:
+            self.error.append((error_msg, desc))
         
-        return "\n".join(self.error) + "\n".join(self.success)
+    def create_child(self, new_id):
+        """
+        Used within decorator helper functions to allow multiple tests with the same function but where other parameters change
+        """
+        new_id = tuple(list(self.id) + list(new_id))
+        newlog = LogRecord(new_id, parent=self)
+        self.children.append(newlog)
+        return newlog
+        
+    @property
+    def is_success(self):
+        """
+        The test function is considered a failure if there are one or more error logs
+        """
+        if len(self.error):
+            return False
+        return True
+            
+
+class TestExecSpace(object):
+    """
+    Object for encaptulating the namespace of user defined test modules
     
+    Allows users to write functions that have access to the project modules with a small ammount of boilerplate code, ensuring that logs for errrors can be captured
+    """
+    
+    def __init__(self, **kwargs):
+        self._t_functions = []
+    
+    
+    def add_function(self, func, *args, **kwargs):
+        pass
+
+    def run_function(self, func, args, kwargs):
+        
+        func(*args, **kwargs)
+        
+
 class GSMTester(object):
     """
     Loads models and executes user specified tests for the genome scale models
@@ -170,39 +219,33 @@ class GSMTester(object):
         for (tf, entry_key), entry in self._d_tests.items():
             self._dict_test(tf, entry_key, entry)
     
-    
     def _exec_test(self, tf_name, compiled_code, test_func):
         """
         encapsulate a test function and run it storing the report
         """
-        
-        log_ns = self.test_results[tf_name][test_func]
-        # The current project can be used as a global var
-        
         # Load the module in to the namespace
         with stdoutIO() as stdout:
             global_namespace = dict(
-                project=self.project,
-                __name_='__gsmodtest_env__',
-                __result_capture__=dict()
+                __name__='__gsmodutils_test__',
             )
             
-            local_namespace = dict()
             try:
-                exec compiled_code in global_namespace, local_namespace
+                exec compiled_code in global_namespace
             except Exception as ex:
                 # the whole module has an error somewhere, no functions will run
+                self.log[tf_name].std_out = stdout.getvalue()
                 return -2, ex
             
             try:
                 # Call the function
                 # TODO: function args!?
-                global_namespace[test_func]()
+                global_namespace[test_func](self.project.load_model(), self.project, self.log[tf_name])
             except Exception as ex:
                 # the specific test case has an error
+                self.log[tf_name].std_out = stdout.getvalue()
                 return -1, ex
             
-        logoutput = stdout.getvalue()
+        self.log[tf_name].std_out = stdout.getvalue()
         
         return 0, None
         
@@ -211,13 +254,9 @@ class GSMTester(object):
         Loads and compiles each python test in the project's test path
         """
         test_files = os.path.join(self.project.tests_dir, "test_*.py")
-        
-        print(glob.glob(test_files))
         for pyfile in glob.glob(test_files):
             tf_name = os.path.basename(pyfile)
             with open(pyfile) as codestr:
-                
-                self.test_results[tf_name] = dict()
                 try:
                     compiled_code = compile(codestr.read(), '', 'exec')
                 except SyntaxError as ex:
@@ -227,17 +266,18 @@ class GSMTester(object):
                     continue
             
                 
-                for func in code.co_names:
+                for func in compiled_code.co_names:
                     # if the function is explicitly as test function
                     if func[:5] == "test_":
                         r_code, ex = self._exec_test(tf_name, compiled_code, func)
                         if r_code == -2:
                             # Compiled module has errors
-                            self.compile_errors.append(tf_name)
+                            self.compile_errors.append((tf_name, ex))
                             break
+                        
                         elif r_code == -1:
                             # This function throws an exception on execution_errors
-                            self.execution_errors.append((tf_name, func))
+                            self.execution_errors.append((tf_name, func, ex))
                             continue
     
     def run_test(self, test_id):
