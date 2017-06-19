@@ -1,6 +1,6 @@
 include README
 include gsmodutils/templates/*
-include requirments.txt
+include requirements.txt
 include MANIFEST.in
-include tests *
+include tests/*
 include LICENSE

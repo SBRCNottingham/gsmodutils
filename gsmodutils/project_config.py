@@ -62,20 +62,6 @@ class ProjectConfig(object):
             
         return dockerfile_path
 
-
-    def _create_deafault_tests(self, path):
-        '''
-        Creates a default test folder
-        '''
-        tpl_path = os.path.join(_templates_path, 'default_tests.tpy')
-        
-        new_path = os.path.join(path, 'tests', 'test_model.py')
-        
-        shutil.copy(tpl_path, new_path)
-        
-        return new_path
-
-
     def _create_empty_conditions_file(self, project_path):
         conditions_fp = os.path.join(project_path, _default_model_conditionsfp)
         
@@ -204,10 +190,6 @@ class ProjectConfig(object):
                 docker_image_path = self._create_docker_file(project_path)
                 added_files.append(docker_image_path)
                 repository.add(docker_image_path)
-            
-            # Adding tests folder
-            tests = self._create_deafault_tests(project_path)
-            repository.add(tests)
             
             repository.commit('Initial commit for model, auto generated commit by gsm_project.py')
             

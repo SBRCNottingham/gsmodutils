@@ -17,7 +17,7 @@ import hglib
 import tempfile
 
 
-class FakeProjectContext():
+class FakeProjectContext(object):
     
     def __init__(self):
         '''
@@ -82,11 +82,8 @@ def test_json_tests():
         # run test functions
         tester = project.project_tester()
         assert len(tester._d_tests) == 1
-        tester.run_all()
+        tester._run_dtests()
         assert len(tester.load_errors) == 0
-        
-        
-        
 
 def test_py_tests():
     """
@@ -100,5 +97,13 @@ def test_model():
     """
     
     with FakeProjectContext() as fp:
-        pass
+        project = GSMProject(fp.path)
+        tfp = os.path.join(project.tests_dir, 'test_x.py')
+        
+        with open(tfp, 'w+') as testf:
+            testf.write(code_str)
+            
+        
+        tester = project.project_tester()
+        tester._py_tests()
     

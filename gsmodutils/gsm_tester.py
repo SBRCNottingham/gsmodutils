@@ -212,8 +212,9 @@ class GSMTester(object):
         """
         test_files = os.path.join(self.project.tests_dir, "test_*.py")
         
-        for pyfile in test_files:
-            tf_name = os.basename(pyfile)
+        print(glob.glob(test_files))
+        for pyfile in glob.glob(test_files):
+            tf_name = os.path.basename(pyfile)
             with open(pyfile) as codestr:
                 
                 self.test_results[tf_name] = dict()
@@ -241,12 +242,15 @@ class GSMTester(object):
     
     def run_test(self, test_id):
         """Specify a single test to run"""
-    
+        pass
+        
     def run_all(self):
         """
         Find and run all tests for a project
         """
         self._run_dtests()
+        self._py_tests()
+        
         
     def test_results(self):
         """ Return a properly formatted test results entry """

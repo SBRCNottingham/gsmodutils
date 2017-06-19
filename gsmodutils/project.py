@@ -9,7 +9,7 @@ import shutil
 from gsmodutils.model_diff import model_diff
 from gsmodutils.exceptions import ProjectConfigurationError, ProjectNotFound
 from gsmodutils.project_config import ProjectConfig, _default_project_file, _default_model_conditionsfp
-
+from gsmodutils.gsm_tester import GSMTester
 
 class GSMProject(object):
     """
@@ -19,7 +19,7 @@ class GSMProject(object):
     """
     
     def __init__(self, path='.', **kwargs):
-        # Load a project
+        """Load a project"""
         self._project_path = os.path.abspath(path)
         self._loaded_model = None
         self.update()
@@ -38,6 +38,10 @@ class GSMProject(object):
     def tests_dir(self):
         """ Tests directory """
         return os.path.join(self._project_path, self.config.tests_dir)
+
+    def project_tester(self):
+        """Creates a tester for this project instance"""
+        return GSMTester(self)
 
     def update(self):
         """
