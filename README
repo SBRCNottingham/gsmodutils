@@ -75,18 +75,22 @@ Test cases - default test cases should be part of the software, maybe include a 
 
 -- TODO --
 
-* Default project tests - way of calling standard set of test functions
-    - (e.g. model grows, all designs work)
-* Easy way of writing tests with helper decorators for loading the project)
+* Model diff reports - human readable
+* Test reports - human readable
+* Command line utilities as interface to all of project
+
+* logging
 
 
 * Unit tests for module
     - model diff (done)
-    - project creation
-    - saving designs
+    - project creation (done)
+    - saving designs (done)
     - config changes
     - Docker files work (This one is hard to make general)
-
+* Full test coverage
+    
+    
 * Mercurial commit hooks when models in the project change
 * User guide
 * Scripts for starting docker etc

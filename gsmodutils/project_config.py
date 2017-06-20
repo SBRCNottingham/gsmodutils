@@ -14,12 +14,12 @@ _templates_path = os.path.join(
 
 
 class ProjectConfig(object):
-    '''
+    """
     Class for configuration
     Takes configuration arguments and ensures that the required configuration options are included
     
     Validates configuration and then creates the project directory etc
-    '''
+    """
     _required_cfg_params = [
             'description', 'author', 'author_email', 'models', 
             'repository_type', 'conditions_file', 'tests_dir',
@@ -39,17 +39,17 @@ class ProjectConfig(object):
 
     
     def _to_save_dict(self):
-        '''
+        """
         Could possibly just use self.__dict__ but this is the set of configuration options
-        '''
+        """
         return dict( [ (it, getattr(self, it)) for it in self._required_cfg_params ] )
     
     
     def _create_docker_file(self, path, dockerfile_name='Dockerfile'):
-        '''
+        """
         Create a default docker container for running a model in test container
         Users may want to modify this for their own purposes, for now this is just a simple way of running the tests and generating a report
-        '''
+        """
         # Create the dockerfile
         df_path = os.path.join(_templates_path, 'Dockerfile')
         dockerfile_path = os.path.join(path, dockerfile_name)
@@ -93,14 +93,14 @@ class ProjectConfig(object):
     
 
     def create_project(self, project_path, addmodels=[], validate=True, docker=True):
-        '''
+        """
         Checks if project config is valid and creates a project if it is
         This function tries to clean up after itself when errors occur
         
         Add models assumes the absolute path to models
         
         If you add multiple models, the default model is the first path specified
-        '''
+        """
         
         project_path = os.path.abspath(project_path)
         created = False
