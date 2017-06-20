@@ -1,0 +1,10 @@
+*.pyc
+article/main.pdf
+.cache/
+.coverage
+.eggs/
+.idea/
+build/
+dist/
+gsmodutils.egg-info/
+htmlcov/
