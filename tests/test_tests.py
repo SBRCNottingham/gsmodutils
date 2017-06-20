@@ -7,7 +7,7 @@ import pytest
 from gsmodutils.project import GSMProject
 import json
 from tutils import FakeProjectContext
-
+import os
 
 def test_json_tests():
     """"""

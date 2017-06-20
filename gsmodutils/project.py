@@ -9,7 +9,7 @@ import shutil
 from gsmodutils.model_diff import model_diff
 from gsmodutils.exceptions import ProjectConfigurationError, ProjectNotFound
 from gsmodutils.project_config import ProjectConfig, _default_project_file, _default_model_conditionsfp
-from gsmodutils.gsm_tester import GSMTester
+from gsmodutils.tester import GSMTester
 
 class GSMProject(object):
     """
