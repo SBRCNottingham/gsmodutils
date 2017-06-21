@@ -95,4 +95,15 @@ Test cases - default test cases should be part of the software, maybe include a 
 * User guide
 * Scripts for starting docker etc
 
+-- Future features --
+Comparing diffed models to metanetx common database of reactions
+    - Map two models from different sources to the database
+    - Show reactions maintained between different models and differences between each other
+    - Show reactions not contained in the database
+    - Show where reactions partially, but not fully, match the database
+    
+Better design for executable tests
+    - pull out descriptions from python files
+    - figure out a way to list all tests 
+
 

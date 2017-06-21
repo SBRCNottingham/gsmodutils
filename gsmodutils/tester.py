@@ -60,26 +60,47 @@ class LogRecord(object):
         if len(self.error):
             return False
         return True
+    
+    def to_dict(self):
+        """
+        converts log into dictionary form for portability
+        """
+        def unpack_child_logs(lr, stk=[]):
+            """ 
+            Entries with child logs to unpack
+            stk stops cycles (if ids aren't unique this would probably break)
+            """
+            dt = dict()
+            for child in lr.children:
+                # stop cyclic behaviour
+                child_logs = []
+                if child.id not in stk:
+                    child_logs = unpack_child_logs(child, stk+[child.id])
+                
+                # Unpack the children
+                dt[child.id] = dict(
+                    children= child_logs
+                    id=child.id,
+                    children=unpack_child_logs(lr),
+                    error=[],
+                    success=[],
+                    parent=lr.id,
+                    success=child.is_success,
+                )
+                
+            return dt
             
-
-class TestExecSpace(object):
-    """
-    Object for encaptulating the namespace of user defined test modules
-    
-    Allows users to write functions that have access to the project modules with a small ammount of boilerplate code, ensuring that logs for errrors can be captured
-    """
-    
-    def __init__(self, **kwargs):
-        self._t_functions = []
-    
-    
-    def add_function(self, func, *args, **kwargs):
-        pass
-
-    def run_function(self, func, args, kwargs):
         
-        func(*args, **kwargs)
-        
+        result = dict(
+            id=lr.id,
+            children=unpack_child_logs(lr),
+            error=[],
+            success=[],
+            parent=self.parent.id,
+            success=self.is_success
+        )
+        return result
+    
 
 class GSMTester(object):
     """
@@ -95,6 +116,8 @@ class GSMTester(object):
         self.project = project
         self.log = defaultdict(LogRecord)
         self.load_errors = []
+        self.invalid_tests = []
+        
         self.syntax_errors = dict()
         self.compile_errors = []
         self.execution_errors = []
@@ -111,14 +134,15 @@ class GSMTester(object):
             _required_fields = [
                 'conditions', 'models', 'designs', 'reaction_fluxes', 'required_reactions', 'description'
             ]
-        
+            missing_fields = [] 
             for rf in _required_fields:
                 if rf not in entry:
-                    return False
-            return True 
+                    
+                    missing_fields.append(rf)
+
+            return missing_fields
         
-        load_errors = []
-        invalid_tests = []
+        
         
         for tf in glob.glob(os.path.join(self.project.tests_dir, "test_*.json")):
             id_key = os.path.basename(tf).split(".json")[0]
@@ -127,13 +151,14 @@ class GSMTester(object):
                     entries = json.load(test_file)
                     
                     for entry_key, entry in entries.items():
-                        if req_fields(entry):
+                        missing_fields = req_fields(entry)
+                        if not len(missing_fields):
                             self._d_tests[id_key, entry_key] = entry
                         else:
-                            self.invalid_tests.append((id_key, entry_key))
+                            self.invalid_tests.append((id_key, entry_key, missing_fields))
                 except ValueError, AttributeError:
                     # Test json is invalid format
-                    self.load_errors.append((id_key, e))
+                    self.load_errors.append((os.path.basename(tf), e))
 
     def _entry_test(self, test_id, mdl, entry):
         """
@@ -148,19 +173,20 @@ class GSMTester(object):
                 try:
                     reac = mdl.reactions.get_by_id(rid)
                     
-                    if reac.flux == 0:
-                        # Required reaction not active at steady state
-                        msg = 'required reaction {} not active'.format(rid)
-                        self.log[test_id].error.append(msg)
-                    else:
-                        # success log
-                        msg = 'required reaction {} present at steady state'.format(rid)
-                        self.log[test_id].success.append(msg)
-                    
+                    self.log[test_id].assertion(
+                        reac.flux == 0,
+                        success_msg='required reaction {} not active'.format(rid),
+                        error_msg='required reaction {} present at steady state'.format(rid)
+                        desc='.required_reaction'
+                    )
+
                 except KeyError:
-                    #TODO: log reaction not found in errors
-                    err = "required reaction {} not found in model".format(rid)
-                    self.log[test_id].error.append(err)
+                    self.log[test_id].assertion(
+                        False,
+                        success_msg='',
+                        error_msg="required reaction {} not found in model".format(rid),
+                        desc='.required_reaction .reaction_not_found'
+                    )
                     continue
                 
             # tests for specific reaction flux ranges
@@ -212,6 +238,7 @@ class GSMTester(object):
                         self.project.load_design(design)
                     
                     test_id = ( tf, entry_key, (model_name, conditions_id, design) )
+                    self.log[test_id].id = test_id
                     self._entry_test(test_id, mdl, entry)
     
     def _run_dtests(self):
@@ -238,7 +265,7 @@ class GSMTester(object):
             
             try:
                 # Call the function
-                # TODO: function args!?
+                # Uses standardised prototypes
                 global_namespace[test_func](self.project.load_model(), self.project, self.log[tf_name])
             except Exception as ex:
                 # the specific test case has an error
@@ -280,6 +307,13 @@ class GSMTester(object):
                             self.execution_errors.append((tf_name, func, ex))
                             continue
     
+    def show_tests(self):
+        """
+        Lists all available test functions
+        Note - at the current time this does not list all executable tests parameters as this is only found at runtime 
+        """
+        pass
+    
     def run_test(self, test_id):
         """Specify a single test to run"""
         pass
@@ -297,4 +331,27 @@ class GSMTester(object):
         pass
         
     
+    def report(self):
+        """
+        Save the current set of logs to a json file
+        
+        Run the desired test first, or this will empty.
+        """
+        result = dict(
+            collected_tests=[], # all collected test entries with format indicated
+            completed_tests=dict(
+                [k, it.to_dict(), for k, it in self.log.items()]
+            )
+        )
+
+        
             
+        
+        self.load_errors # list of tuples, json file and exception
+        self.invalid_tests # Json tests that aren't in the correct format (fields missing)
+        
+        self.syntax_errors # dict
+        self.compile_errors # List of python files
+        self.execution_errors # List of functions found in python files
+        
+        
