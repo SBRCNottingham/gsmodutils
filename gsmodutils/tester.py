@@ -79,13 +79,12 @@ class LogRecord(object):
                 
                 # Unpack the children
                 dt[child.id] = dict(
-                    children= child_logs
+                    children= child_logs,
                     id=child.id,
-                    children=unpack_child_logs(lr),
                     error=[],
                     success=[],
                     parent=lr.id,
-                    success=child.is_success,
+                    is_success=child.is_success,
                 )
                 
             return dt
@@ -97,7 +96,7 @@ class LogRecord(object):
             error=[],
             success=[],
             parent=self.parent.id,
-            success=self.is_success
+            is_success=self.is_success
         )
         return result
     
@@ -176,7 +175,7 @@ class GSMTester(object):
                     self.log[test_id].assertion(
                         reac.flux == 0,
                         success_msg='required reaction {} not active'.format(rid),
-                        error_msg='required reaction {} present at steady state'.format(rid)
+                        error_msg='required reaction {} present at steady state'.format(rid),
                         desc='.required_reaction'
                     )
 
@@ -329,29 +328,5 @@ class GSMTester(object):
     def test_results(self):
         """ Return a properly formatted test results entry """
         pass
-        
-    
-    def report(self):
-        """
-        Save the current set of logs to a json file
-        
-        Run the desired test first, or this will empty.
-        """
-        result = dict(
-            collected_tests=[], # all collected test entries with format indicated
-            completed_tests=dict(
-                [k, it.to_dict(), for k, it in self.log.items()]
-            )
-        )
 
-        
-            
-        
-        self.load_errors # list of tuples, json file and exception
-        self.invalid_tests # Json tests that aren't in the correct format (fields missing)
-        
-        self.syntax_errors # dict
-        self.compile_errors # List of python files
-        self.execution_errors # List of functions found in python files
-        
         

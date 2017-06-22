@@ -9,6 +9,8 @@ import json
 
 _default_project_file = '.gsmod_project.json'
 _default_model_conditionsfp = 'model_conditions.json'
+_default_designsfp = 'designs'
+_default_testsfp = 'tests'
 _templates_path = os.path.join(
     os.path.dirname( os.path.abspath(gsmodutils.__file__)), 'templates')
 
@@ -18,13 +20,16 @@ class ProjectConfig(object):
     Class for configuration
     Takes configuration arguments and ensures that the required configuration options are included
     
-    Validates configuration and then creates the project directory etc
+    Validates configuration and then creates the project directory.
+    
+    Args:
+        description (str)
+        author (str)
+        author_email (str)
     """
     _required_cfg_params = [
-            'description', 'author', 'author_email', 'models', 
-            'repository_type', 'conditions_file', 'tests_dir',
-            'design_dir', 'default_model',
-        ]
+        'description', 'author', 'author_email', 
+    ]
     
     def __init__(self, **kwargs):
         # Just loads the configuration
@@ -34,8 +39,14 @@ class ProjectConfig(object):
             if it not in loaded_cfg_params:
                 raise ProjectConfigurationError('Project configuration option "{}" is missing'.format(it) )
         
+        # always sets param defaults first
+        self.tests_dir = _default_testsfp
+        self.design_dir = _default_designsfp
+        self.conditions_file = _default_model_conditionsfp
+        self.repository_type = 'hg'
+        self.default_model=None
+        
         for arg, val in kwargs.items():
-            setattr(self, arg.lower(), val)
 
     
     def _to_save_dict(self):
@@ -49,6 +60,8 @@ class ProjectConfig(object):
         """
         Create a default docker container for running a model in test container
         Users may want to modify this for their own purposes, for now this is just a simple way of running the tests and generating a report
+        
+        args:
         """
         # Create the dockerfile
         df_path = os.path.join(_templates_path, 'Dockerfile')
@@ -84,6 +97,11 @@ class ProjectConfig(object):
     
     
     def _save_config(self, project_path):
+        """
+        
+        args:
+            project_path (str) path to save the configuration
+        """
         configuration_fp = os.path.join(project_path, _default_project_file)
 
         with open(configuration_fp, 'w+') as configf:
@@ -100,6 +118,12 @@ class ProjectConfig(object):
         Add models assumes the absolute path to models
         
         If you add multiple models, the default model is the first path specified
+        
+        args:
+            project_path (str) valid path to create project in
+            addmodels (list, optional) paths to models that are added to the project
+            validate (bool, optional) validate models to be added to the project
+            docker (bool, optional) create a docker file for this project (can be done at a later time)
         """
         
         project_path = os.path.abspath(project_path)
