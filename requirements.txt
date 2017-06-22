@@ -1,4 +1,5 @@
-cameo
-mercurial
-pytest
+cameo>=0.10.3
+mercurial>=4.2.1
+pytest>=3.0.7
 python-hglib
+click>=6.7
