@@ -121,9 +121,8 @@ class GSMTester(object):
         self.compile_errors = []
         self.execution_errors = []
         
-        self._d_tests = dict()
-        
-        self._load_json_tests()
+        self._d_tests = defaultdict(dict)
+        self._tests_collected = False
     
     def _load_json_tests(self):
         """
@@ -140,9 +139,7 @@ class GSMTester(object):
                     missing_fields.append(rf)
 
             return missing_fields
-        
-        
-        
+
         for tf in glob.glob(os.path.join(self.project.tests_dir, "test_*.json")):
             id_key = os.path.basename(tf).split(".json")[0]
             with open(tf) as test_file:
@@ -152,10 +149,10 @@ class GSMTester(object):
                     for entry_key, entry in entries.items():
                         missing_fields = req_fields(entry)
                         if not len(missing_fields):
-                            self._d_tests[id_key, entry_key] = entry
+                            self._d_tests[id_key][entry_key] = entry
                         else:
                             self.invalid_tests.append((id_key, entry_key, missing_fields))
-                except ValueError, AttributeError:
+                except (ValueError, AttributeError) as e:
                     # Test json is invalid format
                     self.load_errors.append((os.path.basename(tf), e))
 
@@ -240,16 +237,19 @@ class GSMTester(object):
                     self.log[test_id].id = test_id
                     self._entry_test(test_id, mdl, entry)
     
-    def _run_dtests(self):
+    def _run_d_tests(self):
         """Run entry tests"""
-        for (tf, entry_key), entry in self._d_tests.items():
-            self._dict_test(tf, entry_key, entry)
+        for tf in self._d_tests:
+            for entry_key, entry in self._d_tests[tf].items():
+                self._dict_test(tf, entry_key, entry)
     
     def _exec_test(self, tf_name, compiled_code, test_func):
         """
         encapsulate a test function and run it storing the report
         """
         # Load the module in to the namespace
+        
+        self.log[(tf_name, test_func)].id = (tf_name, test_func)
         with stdoutIO() as stdout:
             global_namespace = dict(
                 __name__='__gsmodutils_test__',
@@ -259,26 +259,28 @@ class GSMTester(object):
                 exec compiled_code in global_namespace
             except Exception as ex:
                 # the whole module has an error somewhere, no functions will run
-                self.log[tf_name].std_out = stdout.getvalue()
+                self.log[(tf_name, test_func)].std_out = stdout.getvalue()
                 return -2, ex
             
             try:
                 # Call the function
                 # Uses standardised prototypes
-                global_namespace[test_func](self.project.load_model(), self.project, self.log[tf_name])
+                global_namespace[test_func](self.project.load_model(), self.project, self.log[(tf_name, test_func)])
             except Exception as ex:
                 # the specific test case has an error
                 self.log[tf_name].std_out = stdout.getvalue()
                 return -1, ex
             
-        self.log[tf_name].std_out = stdout.getvalue()
+        self.log[(tf_name, test_func)].std_out = stdout.getvalue()
         
         return 0, None
         
-    def _py_tests(self):
+    def _load_py_tests(self):
         """
         Loads and compiles each python test in the project's test path
         """
+        self._py_tests = defaultdict(dict)
+        self._compiled_py = dict()
         test_files = os.path.join(self.project.tests_dir, "test_*.py")
         for pyfile in glob.glob(test_files):
             tf_name = os.path.basename(pyfile)
@@ -290,39 +292,55 @@ class GSMTester(object):
                     # ex.lineno, ex.msg, ex.filename, ex.text, ex.offset
                     self.syntax_errors[pyfile] = ex
                     continue
-            
+
+                self._compiled_py[tf_name] = compiled_code
                 
                 for func in compiled_code.co_names:
                     # if the function is explicitly as test function
                     if func[:5] == "test_":
-                        r_code, ex = self._exec_test(tf_name, compiled_code, func)
-                        if r_code == -2:
-                            # Compiled module has errors
-                            self.compile_errors.append((tf_name, ex))
-                            break
-                        
-                        elif r_code == -1:
-                            # This function throws an exception on execution_errors
-                            self.execution_errors.append((tf_name, func, ex))
-                            continue
+                        self._py_tests[tf_name][func]
     
-    def show_tests(self):
+    def _run_py_tests(self):
+        """ Runs compiled python tests """
+        for tf_name, compiled_code in self._compiled_py.items():
+            
+            for func in self._py_tests[tf_name]:
+                r_code, ex = self._exec_test(tf_name, compiled_code, func)
+                if r_code == -2:
+                    # Compiled module has errors
+                    self.compile_errors.append((tf_name, ex))
+                    break
+                
+                elif r_code == -1:
+                    # This function throws an exception, not the whole module
+                    self.execution_errors.append((tf_name, func, ex))
+                    continue
+
+    @property
+    def tests(self):
+        return self._d_tests
+        
+    def collect_tests(self):
         """
-        Lists all available test functions
-        Note - at the current time this does not list all executable tests parameters as this is only found at runtime 
+        Collects all tests but does not run them
         """
-        pass
+        self._load_json_tests()
+        self._load_py_tests()
+        self._tests_collected = True
     
     def run_test(self, test_id):
         """Specify a single test to run"""
         pass
         
-    def run_all(self):
+    def run_all(self, recollect=False):
         """
         Find and run all tests for a project
         """
-        self._run_dtests()
-        self._py_tests()
+        if recollect or not self._tests_collected:
+            self.collect_tests()
+        
+        self._run_d_tests()
+        self._run_py_tests()
         
         
     def test_results(self):

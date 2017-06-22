@@ -1,12 +1,11 @@
 """
-This module contains the main command line interface for project creation
+This module contains the main command line interface for project creation, testing and handling
 """
 from __future__ import absolute_import, division, generators, print_function, nested_scopes, with_statement
 import os
 import json
 import click
 
-from gsmodutils.project_config import ProjectConfig
 from gsmodutils.exceptions import ProjectNotFound, ProjectConfigurationError
 
 
@@ -17,10 +16,11 @@ def cli():
 
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
-@click.option('--test', default=None, help='run specific test cases')
-def test(project_path, test):
+@click.option('--test_file', default=None, help='run specific test cases')
+@click.option('--display_only/--run_tests', default=False)
+def test(project_path, test_file, display_only):
     """Run tests for a project"""
-    
+    click.echo('Collecting tests...')
     from gsmodutils.project import GSMProject
     try:
         project = GSMProject(project_path)
@@ -31,15 +31,39 @@ def test(project_path, test):
         exit()
         
     tester = project.project_tester()
-    # If user specific test, load just this test (if it exists)
+    # Collect list of tests
+    tester.collect_tests()
     
-    # 
+    # Display errors
+    for tf, e in tester.load_errors:
+        click.echo(
+            click.style('Error loading test {} \n {}'.format(tf, e), fg='red')
+        )
     
+    for tf, entry_key, missing_fields in tester.invalid_tests:
+        click.echo(
+            click.style('--Error with formating of test {} in {} --'.format(tf, entry_key), fg='yellow')
+        )
+        
+        click.echo('Missing fields:')
+        for field in missing_fields:
+            click.echo('\t{}'.format(field))
+    
+    # display tests with indentations for test files/cases
+    if display_only:
+        exit()
+    
+    # Run tests
+    # TODO Progress bar as tests are run
+
+    tester.run_all()
+
 @click.command()
 @click.option('--project_path', type=click.Path(writable=True), help='new gsmodutils project path')
 @click.option('--model_path', type=str, default=None, help='path to a given model')
 def create_project(project_path, model_path):
     """Create a new gsmodutils project"""
+    from gsmodutils.project_config import ProjectConfig
     click.echo('Project creation {}'.format(project_path))
 
     click.echo('Using mode {}'.format(project_path))
@@ -89,7 +113,6 @@ def model_diff(model_a=None, model_b=None, revision=None):
     """
     Create a diff report of two models
     """
-    
     click.echo('')
 
 @click.command()
