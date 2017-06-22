@@ -1,57 +1,112 @@
-import argparse
+"""
+This module contains the main command line interface for project creation
+"""
+from __future__ import absolute_import, division, generators, print_function, nested_scopes, with_statement
 import os
 import json
+import click
 
-def scrumpy_to_cobra():
-    import cobra
-    from gsmodutils.scrumpy import load_scrumpy_model
-    
-    # Parser argument
-    parser = argparse.ArgumentParser(description='parse a scrumpy file and output a json cobra compatable model')
-   
-    parser.add_argument('--model', required=True, action="store",
-                        help='Path to the main scrumpy model')
-    
-    parser.add_argument('--output', default='omodel.json', action="store",
-                        help='output location for json file')
-    
-    parser.add_argument('--media', default='default_media.json', action='store')
-    
-    parser.add_argument('--atpase_reaction', default="ATPase", action="store")
-    parser.add_argument('--atpase_flux', default=3.0, type=float)
-    
-    parser.add_argument('--objective_reaction', default='Biomass')
-    parser.add_argument('--objective_direction', default='max', action="store")
-    
-    args = parser.parse_args()
-    
-    if os.path.exists(args.media):
-        media = json.load(open(args.media))
-    else:
-        media = dict()
-    
-    if len(media) == 0:
-        print("No media transport reactions found, model will not grow")
-   
-    model = load_scrumpy_model(args.model,
-                               atpase_reaction=args.atpase_reaction,
-                               atpase_flux=args.atpase_flux,
-                               media=media, 
-                               objective_reactions=[args.objective_reaction],
-                               obj_dir=args.objective_direction)
-
-    cobra.io.save_json_model(model, args.output)
+from gsmodutils.project_config import ProjectConfig
+from gsmodutils.exceptions import ProjectNotFound, ProjectConfigurationError
 
 
-def gsmtester():
-    '''
-    '''
-    parser = argparse.ArgumentParser(description='Run model verification and validation checks')
+@click.group()
+def cli():
+    """Command line tools for management of gsmodutils projects"""
+    pass
+
+@click.command()
+@click.option('--project_path', default='.', help='gsmodutils project path')
+@click.option('--test', default=None, help='run specific test cases')
+def test(project_path, test):
+    """Run tests for a project"""
     
-    parser.add_argument('--model',
-                        required=False, action='store',
-                        help='specify a single model to run tests on. Default is all models in configuration')
+    from gsmodutils.project import GSMProject
+    try:
+        project = GSMProject(project_path)
+    except ProjectNotFound: 
+        click.echo(
+            click.style('Error: gsmodutils project not found in this path', fg='red')
+        )
+        exit()
+        
+    tester = project.project_tester()
+    # If user specific test, load just this test (if it exists)
     
+    # 
     
+@click.command()
+@click.option('--project_path', type=click.Path(writable=True), help='new gsmodutils project path')
+@click.option('--model_path', type=str, default=None, help='path to a given model')
+def create_project(project_path, model_path):
+    """Create a new gsmodutils project"""
+    click.echo('Project creation {}'.format(project_path))
+
+    click.echo('Using mode {}'.format(project_path))
+
+    add_models = []
+
+    description = click.prompt('Please enter a project description', type=unicode)
+    author = click.prompt('Author name', type=unicode)
+    author_email = click.prompt('Author email', type=str)
+
+    configuration = dict(
+            description=description,
+            author=author,
+            author_email=author_email
+    )
     
+    # TODO: find out how to add multple path
+    add_models = [model_path]
+    if model_path is None:
+        # Create a new model
+        click.confirm('No model specified, create new model?', abort=True)
+        click.echo(
+            click.style('Empty model file model.json will be created', fg='green')
+        )
+        add_models = []
     
+    # Actually create the project
+    try:
+        click.echo('creating project in {}'.format(os.path.abspath(project_path)))
+        cfg = ProjectConfig(**configuration)
+        cfg.create_project(project_path, addmodels=add_models)
+
+        click.echo(
+            click.style('Project created succesfully', fg='green')
+        )
+    except Exception as ex:
+        click.echo(
+            click.style('Project creation error', fg='red')
+        )
+        click.echo(
+            click.style('{}'.format(ex), fg='red')
+        )
+        
+        
+@click.command()
+def model_diff(model_a=None, model_b=None, revision=None):
+    """
+    Create a diff report of two models
+    """
+    
+    click.echo('')
+
+@click.command()
+def add_model():
+    pass
+
+@click.command()
+def add_design():
+    pass
+
+@click.command()
+def add_conditions():
+    pass
+
+@click.command()
+def add_test_case():
+    pass
+
+cli.add_command(test)
+cli.add_command(create_project)

@@ -31,6 +31,11 @@ class ProjectConfig(object):
         'description', 'author', 'author_email', 
     ]
     
+    _cfg_params = [
+       'description', 'author', 'author_email', 'tests_dir', 'design_dir',
+       'conditions_file', 'repository_type',  'default_model', 'models',
+    ]
+    
     def __init__(self, **kwargs):
         # Just loads the configuration
         loaded_cfg_params = [x.lower() for x in kwargs.keys()]
@@ -45,15 +50,16 @@ class ProjectConfig(object):
         self.conditions_file = _default_model_conditionsfp
         self.repository_type = 'hg'
         self.default_model=None
+        self.models = []
         
         for arg, val in kwargs.items():
-
+            setattr(self, arg.lower(), val)
     
     def _to_save_dict(self):
         """
         Could possibly just use self.__dict__ but this is the set of configuration options
         """
-        return dict( [ (it, getattr(self, it)) for it in self._required_cfg_params ] )
+        return dict( [ (it, getattr(self, it)) for it in self._cfg_params ] )
     
     
     def _create_docker_file(self, path, dockerfile_name='Dockerfile'):

@@ -165,15 +165,7 @@ def test_bad_config():
     Tests that all config options should be included in a project configuration
     '''
     with pytest.raises(ProjectConfigurationError):
-        configuration = dict(
-
-                default_model=None,
-                models=[],
-                repository_type='hg',
-                tests_dir='tests',
-                design_dir='designs'
-        )
-        
+        configuration = dict()
         cfg = ProjectConfig(**configuration)
     
 

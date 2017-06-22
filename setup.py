@@ -14,7 +14,8 @@ setup(
     entry_points={
         'console_scripts': [
             'gsm_new_project=gsmodutils.gsm_project:main',
-            'scrumpy_to_cobra=gsmodutils.cliutils:scrumpy_to_cobra'
+            'scrumpy_to_cobra=gsmodutils.scrumpy:scrumpy_to_cobra',
+            'gsmodutils=gsmodutils.cliutils:cli',
         ],
     },
     setup_requires=['pytest-runner'],
