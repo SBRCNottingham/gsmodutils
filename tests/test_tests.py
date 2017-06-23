@@ -33,6 +33,7 @@ def test_json_tests():
         json.dump(jtest, open(tpath, "w+"))
         # run test functions
         tester = project.project_tester()
+        tester.collect_tests()
         assert len(tester._d_tests) == 1
         tester.run_all()
         assert len(tester.load_errors) == 0

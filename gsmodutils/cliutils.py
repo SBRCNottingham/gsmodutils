@@ -42,21 +42,38 @@ def test(project_path, test_file, display_only):
     
     for tf, entry_key, missing_fields in tester.invalid_tests:
         click.echo(
-            click.style('--Error with formating of test {} in {} --'.format(tf, entry_key), fg='yellow')
+            click.style('---Error with formating of test {} in {} ---'.format(tf, entry_key), fg='yellow')
         )
         
         click.echo('Missing fields:')
         for field in missing_fields:
             click.echo('\t{}'.format(field))
     
-    # display tests with indentations for test files/cases
-    if display_only:
-        exit()
+   
+    if not display_only:
+        # TODO Progress bar as tests are run
+        click.echo(
+            click.style('---- TEST RESULTS ----', fg='green')
+        )
+        for log in list(tester.iter_tests()):
+            click.echo(log.id)
+    else:
+        click.echo(
+            click.style('---- TESTS FOUND ----', fg='green')
+        )
+        # display tests with indentations for test files/cases
+        json_tests, py_tests = tester.tests
+        for id_key in json_tests:
+            click.echo('Test file - {}'.format(id_key))
+            for entry_key in tester.tests[id_key]:
+                click.echo('\t{}'.format(entry_key))
     
-    # Run tests
-    # TODO Progress bar as tests are run
+        for id_key in py:
+            click.echo('Test file - {}'.format(id_key))
+            for entry_key in tester.tests[id_key]:
+                click.echo('\t{}'.format(entry_key))
 
-    tester.run_all()
+    
 
 @click.command()
 @click.option('--project_path', type=click.Path(writable=True), help='new gsmodutils project path')
@@ -129,6 +146,17 @@ def add_conditions():
 
 @click.command()
 def add_test_case():
+    pass
+
+@click.command()
+@click.option('--project_path', default='.', help='gsmodutils project path')
+@click.option('--model_id', default=None, help='Base model id')
+@click.option('--conditions', default=None, help='conditions to apply')
+@click.option('--design', default=None, help='design to apply')
+@click.option('--filepath', default=None, help='output filename')
+@click.option('--format', default=None, help='output to smbl, json, matlab format')
+def export(project_path, model_id, design, conditions, filepath, file_format):
+    """ Export a given model with a specific design and conditions applied """
     pass
 
 cli.add_command(test)
