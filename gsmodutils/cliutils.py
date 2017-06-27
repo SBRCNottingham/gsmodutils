@@ -46,7 +46,7 @@ def _output_child_logs(log, show_success=False, indent=4, baseindent=4):
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--test_file', default=None, help='run specific test cases')
 @click.option('--display_only/--run_tests', default=False, help='Just show found tests, does not run')
-@click.option('--verbose/--no_verbose', default=False)
+@click.option('--verbose/--no_verbose', default=False, help='Dispalty succesfully run test assertions')
 def test(project_path, test_file, display_only, verbose):
     """Run tests for a project"""
     #TODO: individual test files
@@ -213,5 +213,15 @@ def export(project_path, model_id, design, conditions, filepath, file_format):
     """ Export a given model with a specific design and conditions applied """
     pass
 
+@click.command()
+def info():
+    """ 
+    Display all the information about a gsmodutils project (list models, paths, designs etc.
+    """
+    pass
+    
+
 cli.add_command(test)
 cli.add_command(create_project)
+
+
