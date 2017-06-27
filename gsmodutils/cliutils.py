@@ -14,13 +14,45 @@ def cli():
     """Command line tools for management of gsmodutils projects"""
     pass
 
+
+def _output_child_logs(log, show_success=False, indent=4, baseindent=4):
+    """
+    Outputs logs with indentations and counts the total number of tests and errors
+    """
+
+    idt = " "*indent
+    for cid, clog in log.children.items():
+        style='red'
+        if clog.is_success:
+            style='green'
+        
+        click.echo(
+                click.style(idt + str(clog.id), fg=style)
+        )
+        for msg, desc in clog.error:
+            click.echo(
+                click.style(idt + "Asserion error: " + msg, fg='red')
+            )
+            
+        if show_success:
+            for msg, desc in clog.success:
+                click.echo(
+                    click.style(idt + "Asserion success: " + msg, fg='green')
+                )
+            
+        _output_child_logs(clog, show_success=show_success, indent=indent+baseindent)
+
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--test_file', default=None, help='run specific test cases')
-@click.option('--display_only/--run_tests', default=False)
-def test(project_path, test_file, display_only):
+@click.option('--display_only/--run_tests', default=False, help='Just show found tests, does not run')
+@click.option('--verbose/--no_verbose', default=False)
+def test(project_path, test_file, display_only, verbose):
     """Run tests for a project"""
+    #TODO: individual test files
+    #TODO: save log outputs to a json file
     click.echo('Collecting tests...')
+        
     from gsmodutils.project import GSMProject
     try:
         project = GSMProject(project_path)
@@ -49,28 +81,50 @@ def test(project_path, test_file, display_only):
         for field in missing_fields:
             click.echo('\t{}'.format(field))
     
-   
+    barstr = "-"*20
     if not display_only:
         # TODO Progress bar as tests are run
         click.echo(
-            click.style('---- TEST RESULTS ----', fg='green')
+            click.style(barstr + ' gsmodutils test results ' + barstr, fg='yellow')
         )
-        for log in list(tester.iter_tests()):
-            click.echo(log.id)
+        
+        if verbose:
+            click.echo("verbose mode, showing succeses and failures")
+            click.echo()
+            
+        tester.run_all()
+        for tf, log in tester.log.items():
+
+            click.echo("Test file {}:".format(tf))
+        
+            click.echo("Counted {} test assertions with {} failures".format(*log.log_count))
+            # Output base test file
+            if not log.is_success:
+                click.echo(click.style('Test file has errors', fg='red'))
+            else:
+                click.echo(click.style('Test file completed all tests without error', fg='green'))
+            
+            # Count total tests, count total assertions
+            _output_child_logs(log, show_success=verbose)
+            click.echo()
+           
+        # output success/fail count and percentages
+        # Save report to json log file
+            
     else:
         click.echo(
-            click.style('---- TESTS FOUND ----', fg='green')
+            click.style(barstr + ' TESTS FOUND ' + barstr, fg='green')
         )
         # display tests with indentations for test files/cases
         json_tests, py_tests = tester.tests
         for id_key in json_tests:
-            click.echo('Test file - {}'.format(id_key))
-            for entry_key in tester.tests[id_key]:
+            click.echo('JSON test file - {}'.format(id_key))
+            for entry_key in json_tests[id_key]:
                 click.echo('\t{}'.format(entry_key))
     
-        for id_key in py:
-            click.echo('Test file - {}'.format(id_key))
-            for entry_key in tester.tests[id_key]:
+        for id_key in py_tests:
+            click.echo('Executable test file - {}'.format(id_key))
+            for entry_key in py_tests[id_key]:
                 click.echo('\t{}'.format(entry_key))
 
     

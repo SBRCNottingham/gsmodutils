@@ -54,6 +54,8 @@ class ModelTestSelector(object):
             log = args[2]
             
             for mn in self.models:
+                if mn is None:
+                    mn = project.default_model
                 ext_model = False
                 
                 for cid in self.conditions:

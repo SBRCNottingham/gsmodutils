@@ -33,7 +33,7 @@ class LogRecord(object):
         self.error = []
         self.std_out = "" # Reserved for messages
         self.run_time = time.time()
-        self.children = []
+        self.children = {}
     
     def assertion(self, statement, success_msg, error_msg, desc=''):
         """
@@ -44,14 +44,17 @@ class LogRecord(object):
             self.success.append((success_msg, desc))
         else:
             self.error.append((error_msg, desc))
-        
+    
+    def add_error(self, msg, desc):
+        """For errors loading tests, e.g. success cases can't be reached because the model doesn't load or can't get a feasable solution"""
+        self.error.append((msg, desc))
+    
     def create_child(self, new_id):
         """
         Used within decorator helper functions to allow multiple tests with the same function but where other parameters change
         """
-        new_id = tuple(list(self.id) + list(new_id))
         newlog = LogRecord(new_id, parent=self)
-        self.children.append(newlog)
+        self.children[new_id] = newlog
         return newlog
         
     @property
@@ -59,18 +62,32 @@ class LogRecord(object):
         """
         The test function is considered a failure if there are one or more error logs
         """
-        if len(self.error):
+        if len([x for x in self.children.values() if not x.is_success ] + self.error):
             return False
         return True
-    
+
+    @property
+    def log_count(self):
+        """ count total errors for self and children """
+        total = len(self.success) + len(self.error)
+        error = len(self.error)
+        
+        for child in self.children.values():
+            ct, ce = child.log_count
+            error += ce
+            total += ct
+            
+        return total, error
+
     def to_dict(self, stk=[]):
         """
         converts log into dictionary form for portability
+        stk stops cyclic behaviour
         """
-        children = []
+        children = {}
         for child in self.children:
             if child.id not in stk:
-                children.append(child.to_dict(stk=stk + [self.id]))
+                children[child.id] = child.to_dict(stk=stk + [self.id])
                 
         result = dict(
             id=self.id,
@@ -123,22 +140,25 @@ class GSMTester(object):
             return missing_fields
 
         for tf in glob.glob(os.path.join(self.project.tests_dir, "test_*.json")):
-            id_key = os.path.basename(tf).split(".json")[0]
+            id_key = os.path.basename(tf)
             with open(tf) as test_file:
                 try:
                     entries = json.load(test_file)
-                    
+                
+                    self.log[id_key].id = id_key
                     for entry_key, entry in entries.items():
                         missing_fields = req_fields(entry)
                         if not len(missing_fields):
                             self._d_tests[id_key][entry_key] = entry
+                            self.log[id_key].create_child(entry_key)
                         else:
+                            self.log[id_key].add_error(entry_key, missing_fields)
                             self.invalid_tests.append((id_key, entry_key, missing_fields))
                 except (ValueError, AttributeError) as e:
                     # Test json is invalid format
-                    self.load_errors.append((os.path.basename(tf), e))
+                    self.load_errors.append((id_key, e))
 
-    def _entry_test(self, test_id, mdl, entry):
+    def _entry_test(self, log, mdl, entry):
         """
         broken up code for testing individual entries
         """
@@ -151,7 +171,7 @@ class GSMTester(object):
                 try:
                     reac = mdl.reactions.get_by_id(rid)
                     
-                    self.log[test_id].assertion(
+                    log.assertion(
                         reac.flux == 0,
                         success_msg='required reaction {} not active'.format(rid),
                         error_msg='required reaction {} present at steady state'.format(rid),
@@ -159,7 +179,7 @@ class GSMTester(object):
                     )
 
                 except KeyError:
-                    self.log[test_id].assertion(
+                    log.assertion(
                         False,
                         success_msg='',
                         error_msg="required reaction {} not found in model".format(rid),
@@ -173,24 +193,28 @@ class GSMTester(object):
                     reac = mdl.reactions.get_by_id(rid)
                     if reac.flux < lb or reac.flux > ub:
                         err='reaction {} outside of flux bounds {}, {}'.format(rid, lb, ub)
-                        self.log[test_id].error.append(err)
+                        log.error.append((err, '.reaction_flux'))
                     else:
                         msg='reaction {} inside flux bounds {}, {}'.format(rid, lb, ub)
-                        self.log[test_id].success.append(msg)
+                        log.success.append((msg, '.reaction_flux'))
                 except KeyError:
                     # Error log of reaction not found
-                    err = "required reaction {} not found in model".format(rid)
-                    self.log[test_id].error.append(err)
+                    log.assertion(
+                        False,
+                        success_msg='',
+                        error_msg="required reaction {} not found in model".format(rid),
+                        desc='.reaction_flux .reaction_not_found'
+                    )
                     continue
                 
-        except cameo.exceptions.Infeasible:
+        except cameo.exceptions.Infeasible as ex:
             # This is a full test failure (i.e. the model does not work)
             # not a conditional assertion
-            self.failed_tests.append(test_id)
+            log.add_error("No solution found with model configuration", '.no_solution')
         
-        return self.log[test_id]
+        return log
 
-    def _dict_test(self, tf, entry_key, entry):
+    def _dict_test(self, id_key, entry_key, entry):
         """
         execute a standard test in the dictionary format
         """
@@ -204,6 +228,7 @@ class GSMTester(object):
         if not len(entry['models']):
             entry['models'] = self.project.config.models
         
+        top_log = self.log[id_key].children[entry_key]
         # load models
         for model_name in entry['models']:
             # load conditions
@@ -215,17 +240,26 @@ class GSMTester(object):
                 
                 for design in entry['designs']:
                     if design is not None:
-                        self.project.load_design(design)
+                        self.project.load_design(design, model=mdl)
                     
-                    test_id = ( tf, entry_key, (model_name, conditions_id, design) )
-                    self.log[test_id].id = test_id
-                    return self._entry_test(test_id, mdl, entry)
+                    if design is None and conditions_id is None:
+                        test_id = (model_name)
+                    elif design is None:
+                        test_id = (model_name, conditions_id)
+                    elif conditions_id is None:
+                        test_id = (model_name, design)
+                    else:
+                        test_id = (model_name, conditions_id, design)
+                    
+                    log = top_log.create_child(test_id)
+                    
+                    return self._entry_test(log, mdl, entry)
     
     def _run_d_tests(self):
         """Run entry tests"""
-        for tf in self._d_tests:
-            for entry_key, entry in self._d_tests[tf].items():
-                yield self._dict_test(tf, entry_key, entry)
+        for id_key in self._d_tests:
+            for entry_key, entry in self._d_tests[id_key].items():
+                yield self._dict_test(id_key, entry_key, entry)
 
     def _load_py_tests(self):
         """
@@ -294,6 +328,9 @@ class GSMTester(object):
                 
     @property
     def tests(self):
+        """Tuple of dict tests and executable tests"""
+        if not self._tests_collected:
+            self.collect_tests()
         return (self._d_tests, self._py_tests)
         
     def collect_tests(self):
@@ -308,8 +345,12 @@ class GSMTester(object):
         """Go through each test and run"""
         if recollect or not self._tests_collected:
             self.collect_tests()
+        
+        for test in  self._run_d_tests():
+            yield test
             
-        return chain(self._run_py_tests(), self._run_d_tests())
+        for test in self._run_py_tests():
+            yield test
 
     def run_all(self, recollect=False):
         """
@@ -317,8 +358,3 @@ class GSMTester(object):
         """
         return list(self.iter_tests(recollect))
     
-    def test_results(self):
-        """ Return a properly formatted test results entry """
-        pass
-
-        

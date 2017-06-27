@@ -59,20 +59,28 @@ Test cases - default test cases should be part of the software, maybe include a 
 
     * cobra_to_scrumpy (todo, if needed)
     Create a scrumpy model from a cobrapy model
-    
-    * gsm_new_project (done)
-    Utility for creating a new project around an existing (or new) genome scale model
-    
-    * gsm_new_design (todo)
-    Takes a model (and optionally, specified base model name) and creates a design based on it. Also commits it to the repository.
-    
-    * gsm_diff_report (todo)
-    Create a report of the difference between two gsm models, showing which reactions/metabolites that have changed and how
-    
-    * gsm_add_conditions (todo)
-    Take a models transporter settings and save them in the database with a specific name
 
-
+    *gsmodutils create_project (complete)
+    creates a new project
+    
+    * gsmodutils test (partially complete)
+    Run executable and json tests
+    
+    * gsmodutils export (todo)
+    Export a model with a given design/conditions in a specified format (json, scrumpy, sbml-cobra or matlab)
+    
+    * gsmodutils import_model (todo)
+    add a model file to a project
+    
+    * gsmodutils import_design (todo)
+    Take a model file and create a design from the diff between it and a specified base model
+    
+    * gsmodutils import_conditions (todo)
+    Specify json conditions file or a model with tranporters set (other changes will be ignored) and add it to the set of conditions stored for the project
+    
+    * gsmodutils create_image
+    Create a docker image of the project in its current state. This image can be run on any system with docker installed making the model and tests portable
+    
 -- TODO --
 
 * Model diff reports - human readable
