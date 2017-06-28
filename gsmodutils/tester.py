@@ -26,14 +26,15 @@ def stdoutIO(stdout=None):
 class LogRecord(object):
     """Class for handling different types of errors"""
     
-    def __init__(self, id='', parent=None):
+    def __init__(self, id='', parent=None, param_child=False):
         self.id = id
         self.parent = parent
         self.success = []
         self.error = []
-        self.std_out = "" # Reserved for messages
+        self.std_out = None # Reserved for messages
         self.run_time = time.time()
         self.children = {}
+        self.param_child = param_child # tells us if this is a parameter varaiation of parent (i.e. as low a level as the logs should get)
     
     def assertion(self, statement, success_msg, error_msg, desc=''):
         """
@@ -49,11 +50,14 @@ class LogRecord(object):
         """For errors loading tests, e.g. success cases can't be reached because the model doesn't load or can't get a feasable solution"""
         self.error.append((msg, desc))
     
-    def create_child(self, new_id):
+    def create_child(self, new_id, param_child=False):
         """
         Used within decorator helper functions to allow multiple tests with the same function but where other parameters change
         """
-        newlog = LogRecord(new_id, parent=self)
+        if self.param_child:
+            raise TypeError('Parameter varations should not have child logs')
+        
+        newlog = LogRecord(new_id, parent=self, param_child=param_child)
         self.children[new_id] = newlog
         return newlog
         
@@ -117,8 +121,6 @@ class GSMTester(object):
         self.invalid_tests = []
         
         self.syntax_errors = dict()
-        self.compile_errors = []
-        self.execution_errors = []
         
         self._d_tests = defaultdict(dict)
         self._tests_collected = False
@@ -286,13 +288,12 @@ class GSMTester(object):
                     if func[:5] == "test_":
                         self._py_tests[tf_name].append(func)
                         
-    def _exec_test(self, tf_name, compiled_code, test_func):
+    def _exec_test(self, log, tf_name, compiled_code, test_func):
         """
         encapsulate a test function and run it storing the report
         """
         # Load the module in to the namespace
-        tid =  (tf_name, test_func)
-        self.log[tid].id = tid
+        # Capture the standard out rather than dumping it to terminal
         with stdoutIO() as stdout:
             global_namespace = dict(
                 __name__='__gsmodutils_test__',
@@ -302,30 +303,45 @@ class GSMTester(object):
                 exec compiled_code in global_namespace
             except Exception as ex:
                 # the whole module has an error somewhere, no functions will run
-                self.log[tid].std_out = stdout.getvalue()
-                self.compile_errors.append((tf_name, ex))
-                return elf.log[tid]
-            
+                log.add_error("Error with code file {} error - {}".format(tf_name, str(ex)), ".compile_error")
+
             try:
                 # Call the function
                 # Uses standardised prototypes
-                global_namespace[test_func](self.project.load_model(), self.project, self.log[tid])
+                global_namespace[test_func](self.project.load_model(), self.project, log)
             except Exception as ex:
-                # the specific test case has an error
-                self.log[tid].std_out = stdout.getvalue()
-                self.execution_errors.append((tf_name, test_func, ex))
-                return self.log[tid]
-            
-        self.log[tid].std_out = stdout.getvalue()
+                # the specific test case has an erro
+                log.add_error("Error executing function {} in file {} error - {}".format(test_func, tf_name, str(ex)), ".execution_error")
         
-        return self.log[tid]
+        fout = stdout.getvalue()
+        if fout.strip() != '':
+            log.std_out = fout
+        
+        return log
     
     def _run_py_tests(self):
         """ Runs compiled python tests """
         for tf_name, compiled_code in self._compiled_py.items():
+            self.log[tf_name].id = tf_name
             for func in self._py_tests[tf_name]:
-                yield self._exec_test(tf_name, compiled_code, func)
-                
+                log = self.log[tf_name].create_child(func)
+                yield self._exec_test(log, tf_name, compiled_code, func)
+    
+    def _default_tests(self):
+        """Tests that users don't need to write - load models, load designs, load conditions"""
+        for model in self.project.models:
+            # Check model functions without design
+            pass
+            
+        for conditions in self.project.conditions:
+            # Which models do conditions apply to?
+            pass
+            
+        for design in self.project.designs:
+            # Load design
+            # which models to designs apply to?
+            pass
+    
     @property
     def tests(self):
         """Tuple of dict tests and executable tests"""

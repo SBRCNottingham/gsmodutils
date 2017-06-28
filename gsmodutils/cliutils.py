@@ -15,7 +15,7 @@ def cli():
     pass
 
 
-def _output_child_logs(log, show_success=False, indent=4, baseindent=4):
+def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
     """
     Outputs logs with indentations and counts the total number of tests and errors
     """
@@ -27,20 +27,26 @@ def _output_child_logs(log, show_success=False, indent=4, baseindent=4):
             style='green'
         
         click.echo(
-                click.style(idt + str(clog.id), fg=style)
+                click.style(idt + "--" + str(clog.id), fg=style)
         )
         for msg, desc in clog.error:
             click.echo(
                 click.style(idt + "Asserion error: " + msg, fg='red')
             )
             
-        if show_success:
+        if verbose:
             for msg, desc in clog.success:
                 click.echo(
                     click.style(idt + "Asserion success: " + msg, fg='green')
                 )
             
-        _output_child_logs(clog, show_success=show_success, indent=indent+baseindent)
+        _output_child_logs(clog, verbose=verbose, indent=indent+baseindent)
+
+        
+        if verbose and log.std_out is not None:
+            click.echo("-------- Captured standard output ----------")
+            click.echo(log.std_out)
+            click.echo("-------- End standard output ----------")
 
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
@@ -70,6 +76,11 @@ def test(project_path, test_file, display_only, verbose):
     for tf, e in tester.load_errors:
         click.echo(
             click.style('Error loading test {} \n {}'.format(tf, e), fg='red')
+        )
+    
+    for tf, e in tester.syntax_errors.items():
+        click.echo(
+            click.style('Error - {} has syntax errors {}'.format(tf, e), fg='red')
         )
     
     for tf, entry_key, missing_fields in tester.invalid_tests:
@@ -105,9 +116,15 @@ def test(project_path, test_file, display_only, verbose):
                 click.echo(click.style('Test file completed all tests without error', fg='green'))
             
             # Count total tests, count total assertions
-            _output_child_logs(log, show_success=verbose)
-            click.echo()
-           
+            _output_child_logs(log, verbose=verbose)
+            
+            if log.std_out is not None:
+                click.echo("-------- Captured standard output ----------")
+                click.echo(log.std_out)
+                click.echo("-------- End standard output ----------")
+        
+        for error in tester.compile_errors + tester.execution_errors:
+            click.echo(error)
         # output success/fail count and percentages
         # Save report to json log file
             

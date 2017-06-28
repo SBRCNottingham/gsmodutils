@@ -55,41 +55,50 @@ class ModelTestSelector(object):
             
             for mn in self.models:
                 if mn is None:
-                    mn = project.default_model
+                    mn = project.config.default_model
                 ext_model = False
                 
                 for cid in self.conditions:
                     
                     for did in self.designs:
+                        # correctly setting the log id so user can easily read
+                        tid = mn
+                        if cid is not None and did is not None:
+                            tid = (mn, cid, did)
+                        elif cid is not None:
+                            tid = (mn, cid)
+                        elif did is not None:
+                            tid = (mn, did)
                         
-                        nlog = log.create_child((mn, cid, did))
+                        nlog = log.create_child(tid, param_child=True)
                         
                         try:
                             mdl = project.load_model(mn)
-                        except IOError:
+                        except IOError as e:
                             ext_model=True
-                            nlog.errors.append("model {} not found".format(mn))
+                            nlog.add_error("model {} not found".format(mn), str(e))
                             break
                         
                         if cid is not None:
                             try:
                                 project.load_conditions(cid, model=mdl)
-                            except IOError:
-                                nlog.errors.append("conditions {} not found".format(mn))
+                            except IOError as e:
+                                nlog.add_error("conditions {} not found".format(mn), str(e))
                                 break
                             
                         if did is not None:
                             try:
                                 project.load_design(did, model=mdl)
-                            except IOError:
-                                 nlog.errors.append("conditions {} not found".format(mn))
+                            except IOError as e:
+                                 nlog.add_error("design {} not found".format(mn), str(e))
                                  break
                         
                         nargs=tuple([mdl, project, nlog] + list(args[3:]))
                         func(*nargs, **kwargs)
                         
+                        
                     if ext_model:
                         break
-                    
+                  
         return wrapper
     
