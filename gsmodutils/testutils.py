@@ -6,6 +6,7 @@ This code assumes that the namespace that python based tests are in is correctly
 """
 from __future__ import print_function, absolute_import, division
 from gsmodutils.exceptions import ProjectNamespaceError
+import time
 
 class ModelTestSelector(object):
     
@@ -101,4 +102,96 @@ class ModelTestSelector(object):
                         break
                   
         return wrapper
+
+
+class LogRecord(object):
+    """
+    Class for handling logging of errors in tester
+    follows a hierarchical pattern as log records allow child records
+
+    """
+    def __init__(self, id='', parent=None, param_child=False):
+        self.id = id
+        self.parent = parent
+        self.success = []
+        self.error = []
+        self.std_out = None # Reserved for messages
+        self.run_time = time.time()
+        self.children = {}
+        self.param_child = param_child # tells us if this is a parameter varaiation of parent (i.e. as low a level as the logs should get)
+    
+    def assertion(self, statement, success_msg, error_msg, desc=''):
+        """
+        Called within test functions to store errors and successes
+        Results will be appended to the correct log reccords
+        """
+        desc = dict(
+            desc=desc,
+            ex_time=time.time()
+        )
+        if statement:
+            self.success.append((success_msg, desc))
+        else:
+            self.error.append((error_msg, desc))
+    
+    def add_error(self, msg, desc=''):
+        """For errors loading tests, e.g. success cases can't be reached because the model doesn't load or can't get a feasable solution"""
+        desc = dict(
+            desc=desc,
+            ex_time=time.time()
+        )
+        self.error.append((msg, desc))
+    
+    def create_child(self, new_id, param_child=False):
+        """
+        Used within decorator helper functions to allow multiple tests with the same function but where other parameters change
+        """
+        if self.param_child:
+            raise TypeError('Parameter varations should not have child logs')
+        
+        newlog = LogRecord(new_id, parent=self, param_child=param_child)
+        self.children[new_id] = newlog
+        return newlog
+        
+    @property
+    def is_success(self):
+        """
+        The test function is considered a failure if there are one or more error logs
+        """
+        if len([x for x in self.children.values() if not x.is_success ] + self.error):
+            return False
+        return True
+
+    @property
+    def log_count(self):
+        """ count total errors for self and children """
+        total = len(self.success) + len(self.error)
+        error = len(self.error)
+        
+        for child in self.children.values():
+            ct, ce = child.log_count
+            error += ce
+            total += ct
+            
+        return total, error
+
+    def to_dict(self, stk=[]):
+        """
+        converts log into dictionary form for portability
+        stk stops cyclic behaviour
+        """
+        children = {}
+        for child in self.children:
+            if child.id not in stk:
+                children[child.id] = child.to_dict(stk=stk + [self.id])
+                
+        result = dict(
+            id=self.id,
+            children=children,
+            error=self.error,
+            success=self.success,
+            parent=self.parent.id,
+            is_success=self.is_success
+        )
+        return result
     

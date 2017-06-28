@@ -7,8 +7,7 @@ import os
 import glob
 import json
 from collections import defaultdict
-import time
-from itertools import chain
+from gsmodutils.testutils import LogRecord
 
 @contextlib.contextmanager
 def stdoutIO(stdout=None):
@@ -22,93 +21,12 @@ def stdoutIO(stdout=None):
     sys.stdout = stdout
     yield stdout
     sys.stdout = old
-
-class LogRecord(object):
-    """Class for handling different types of errors"""
-    
-    def __init__(self, id='', parent=None, param_child=False):
-        self.id = id
-        self.parent = parent
-        self.success = []
-        self.error = []
-        self.std_out = None # Reserved for messages
-        self.run_time = time.time()
-        self.children = {}
-        self.param_child = param_child # tells us if this is a parameter varaiation of parent (i.e. as low a level as the logs should get)
-    
-    def assertion(self, statement, success_msg, error_msg, desc=''):
-        """
-        Called within test functions to store errors and successes
-        Results will be appended to the correct log reccords
-        """
-        if statement:
-            self.success.append((success_msg, desc))
-        else:
-            self.error.append((error_msg, desc))
-    
-    def add_error(self, msg, desc):
-        """For errors loading tests, e.g. success cases can't be reached because the model doesn't load or can't get a feasable solution"""
-        self.error.append((msg, desc))
-    
-    def create_child(self, new_id, param_child=False):
-        """
-        Used within decorator helper functions to allow multiple tests with the same function but where other parameters change
-        """
-        if self.param_child:
-            raise TypeError('Parameter varations should not have child logs')
-        
-        newlog = LogRecord(new_id, parent=self, param_child=param_child)
-        self.children[new_id] = newlog
-        return newlog
-        
-    @property
-    def is_success(self):
-        """
-        The test function is considered a failure if there are one or more error logs
-        """
-        if len([x for x in self.children.values() if not x.is_success ] + self.error):
-            return False
-        return True
-
-    @property
-    def log_count(self):
-        """ count total errors for self and children """
-        total = len(self.success) + len(self.error)
-        error = len(self.error)
-        
-        for child in self.children.values():
-            ct, ce = child.log_count
-            error += ce
-            total += ct
-            
-        return total, error
-
-    def to_dict(self, stk=[]):
-        """
-        converts log into dictionary form for portability
-        stk stops cyclic behaviour
-        """
-        children = {}
-        for child in self.children:
-            if child.id not in stk:
-                children[child.id] = child.to_dict(stk=stk + [self.id])
-                
-        result = dict(
-            id=self.id,
-            children=children,
-            error=self.error,
-            success=self.success,
-            parent=self.parent.id,
-            is_success=self.is_success
-        )
-        return result
     
 
 class GSMTester(object):
     """
     Loads models and executes user specified tests for the genome scale models
     """
-    
     def __init__(self, project, **kwargs):
         """Creates the storage locations for logs"""
         
@@ -122,6 +40,9 @@ class GSMTester(object):
         
         self.syntax_errors = dict()
         
+        self._dtask_execs = dict()
+        self._pytask_execs = dict()
+    
         self._d_tests = defaultdict(dict)
         self._tests_collected = False
     
@@ -151,15 +72,28 @@ class GSMTester(object):
                     for entry_key, entry in entries.items():
                         missing_fields = req_fields(entry)
                         if not len(missing_fields):
+                            t_args = (id_key, entry_key, entry)
                             self._d_tests[id_key][entry_key] = entry
                             self.log[id_key].create_child(entry_key)
+                            self._dtask_execs[(id_key, entry_key)] = self._t_gen(self._dict_test, *t_args)
+                            
                         else:
                             self.log[id_key].add_error(entry_key, missing_fields)
                             self.invalid_tests.append((id_key, entry_key, missing_fields))
                 except (ValueError, AttributeError) as e:
                     # Test json is invalid format
                     self.load_errors.append((id_key, e))
-
+    
+    def _t_gen(self, func, *args):
+        """ returns generator for a function """
+        yield func(*args)
+    
+    def _run_d_tests(self):
+        """Run entry tests"""
+        for id_key in self._d_tests:
+            for entry_key, entry in self._d_tests[id_key].items():
+                yield self._dict_test(id_key, entry_key, entry)
+                
     def _entry_test(self, log, mdl, entry):
         """
         broken up code for testing individual entries
@@ -256,12 +190,6 @@ class GSMTester(object):
                     log = top_log.create_child(test_id)
                     
                     return self._entry_test(log, mdl, entry)
-    
-    def _run_d_tests(self):
-        """Run entry tests"""
-        for id_key in self._d_tests:
-            for entry_key, entry in self._d_tests[id_key].items():
-                yield self._dict_test(id_key, entry_key, entry)
 
     def _load_py_tests(self):
         """
@@ -282,16 +210,24 @@ class GSMTester(object):
                     continue
 
                 self._compiled_py[tf_name] = compiled_code
+                self.log[tf_name].id = tf_name
                 
                 for func in compiled_code.co_names:
                     # if the function is explicitly as test function
                     if func[:5] == "test_":
+                        log = self.log[tf_name].create_child(func)
                         self._py_tests[tf_name].append(func)
                         
-    def _exec_test(self, log, tf_name, compiled_code, test_func):
+                        args = (log, tf_name, func)
+                        self._pytask_execs[(tf_name, func)] = self._t_gen(self._exec_test, *args)
+                        
+                        
+    def _exec_test(self, log, tf_name, test_func):
         """
         encapsulate a test function and run it storing the report
         """
+        compiled_code = self._compiled_py[tf_name] 
+        
         # Load the module in to the namespace
         # Capture the standard out rather than dumping it to terminal
         with stdoutIO() as stdout:
@@ -322,10 +258,9 @@ class GSMTester(object):
     def _run_py_tests(self):
         """ Runs compiled python tests """
         for tf_name, compiled_code in self._compiled_py.items():
-            self.log[tf_name].id = tf_name
             for func in self._py_tests[tf_name]:
-                log = self.log[tf_name].create_child(func)
-                yield self._exec_test(log, tf_name, compiled_code, func)
+                log = self.log[tf_name].children[func]
+                yield self._exec_test(log, tf_name, func)
     
     def _default_tests(self):
         """Tests that users don't need to write - load models, load designs, load conditions"""

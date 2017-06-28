@@ -17,7 +17,6 @@ class GSMProject(object):
         Models included within the project
         Designs that the model uses
     """
-    
     def __init__(self, path='.', **kwargs):
         """Load a project"""
         self._project_path = os.path.abspath(path)

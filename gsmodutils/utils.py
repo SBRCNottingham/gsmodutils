@@ -28,11 +28,11 @@ class frozendict(dict):
 
 
 def _check_obj_sim(obja, objb, fields):
-    '''
+    """
     Dirty function for checking if set fields are the same between two objects.
     
     This will throw excpetions if you're using it wrong but I can't tell you what they are...
-    '''
+    """
     # I felt dirty writing it and a feel dirty using it...
     for field in fields:
         attr_a = getattr(obja, field)
@@ -50,10 +50,9 @@ def _check_obj_sim(obja, objb, fields):
 
 
 def convert_stoich(stoich):
-    '''
+    """
     Make a stoichiometry dict identifiers rather than metabolite objects
-    '''
-    
+    """
     n_stoich = {}
     for meta, val in stoich.items():
         if type(meta) in [cameoMetabolite, cobra.Metabolite]:
@@ -65,8 +64,8 @@ def convert_stoich(stoich):
 
 
 def equal_stoich(reaction_a, reaction_b):
-    '''
+    """
     Confirms if the stoich of two reactions is equivalent
     This ignores the metabolite objects in cobra reactions and converts them to metabolite ids
-    '''
+    """
     return convert_stoich(reaction_a.metabolites) == convert_stoich(reaction_b.metabolites)

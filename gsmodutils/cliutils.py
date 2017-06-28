@@ -47,7 +47,8 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
             click.echo("-------- Captured standard output ----------")
             click.echo(log.std_out)
             click.echo("-------- End standard output ----------")
-
+        click.echo()
+        
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--test_file', default=None, help='run specific test cases')
@@ -122,12 +123,9 @@ def test(project_path, test_file, display_only, verbose):
                 click.echo("-------- Captured standard output ----------")
                 click.echo(log.std_out)
                 click.echo("-------- End standard output ----------")
-        
-        for error in tester.compile_errors + tester.execution_errors:
-            click.echo(error)
-        # output success/fail count and percentages
-        # Save report to json log file
             
+        # output success/fail count and percentages
+        # Save report to json log file       
     else:
         click.echo(
             click.style(barstr + ' TESTS FOUND ' + barstr, fg='green')
