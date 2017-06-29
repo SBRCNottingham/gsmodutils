@@ -1,6 +1,5 @@
 from __future__ import print_function, absolute_import, division
 
-
 class ProjectNotFound(Exception):
     """ Used if no project can be found in a given directory path """
     pass
@@ -8,9 +7,4 @@ class ProjectNotFound(Exception):
 
 class ProjectConfigurationError(Exception):
     """ Used if project configuration is erronious """
-    pass
-
-
-class ProjectNamespaceError(Exception):
-    """ Used if, when test function is running, the correct project namespace is not set """
     pass

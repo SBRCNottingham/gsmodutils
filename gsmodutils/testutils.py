@@ -5,7 +5,6 @@ This code assumes that the namespace that python based tests are in is correctly
 
 """
 from __future__ import print_function, absolute_import, division
-from gsmodutils.exceptions import ProjectNamespaceError
 import time
 
 class ModelTestSelector(object):
@@ -104,11 +103,11 @@ class ModelTestSelector(object):
         return wrapper
 
 
-class LogRecord(object):
+class TestRecord(object):
     """
     Class for handling logging of errors in tester
     follows a hierarchical pattern as log records allow child records
-
+    This is a bit of a weird data structure but the objective is to (in a future version) encapsulate all tests inside an instance of Test Record
     """
     def __init__(self, id='', parent=None, param_child=False):
         self.id = id
@@ -119,7 +118,7 @@ class LogRecord(object):
         self.run_time = time.time()
         self.children = {}
         self.param_child = param_child # tells us if this is a parameter varaiation of parent (i.e. as low a level as the logs should get)
-    
+        
     def assertion(self, statement, success_msg, error_msg, desc=''):
         """
         Called within test functions to store errors and successes
@@ -149,7 +148,7 @@ class LogRecord(object):
         if self.param_child:
             raise TypeError('Parameter varations should not have child logs')
         
-        newlog = LogRecord(new_id, parent=self, param_child=param_child)
+        newlog = TestRecord(new_id, parent=self, param_child=param_child)
         self.children[new_id] = newlog
         return newlog
         
@@ -181,17 +180,17 @@ class LogRecord(object):
         stk stops cyclic behaviour
         """
         children = {}
-        for child in self.children:
+        for child in self.children.values():
             if child.id not in stk:
                 children[child.id] = child.to_dict(stk=stk + [self.id])
-                
+            
         result = dict(
             id=self.id,
             children=children,
             error=self.error,
             success=self.success,
-            parent=self.parent.id,
-            is_success=self.is_success
+            is_success=self.is_success,
+            run_time=self.run_time,
         )
         return result
     

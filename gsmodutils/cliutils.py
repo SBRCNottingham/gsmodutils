@@ -53,11 +53,13 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--test_file', default=None, help='run specific test cases')
 @click.option('--display_only/--run_tests', default=False, help='Just show found tests, does not run')
+@click.option('--test_id', default=None, help='specify a given test identifier to run - pyton filename, function or json_filename entry. If just a filename is selected, all subtests are executed')
+@click.option('--skip_default/--no_skip_default', default=False, help='skip default tests')
 @click.option('--verbose/--no_verbose', default=False, help='Dispalty succesfully run test assertions')
-def test(project_path, test_file, display_only, verbose):
+@click.option('--log_path', default=None, type=click.Path(writable=True), help='path to output json test log')
+def test(project_path, test_file, test_id, display_only, skip_default, verbose, log_path):
     """Run tests for a project"""
     #TODO: individual test files
-    #TODO: save log outputs to a json file
     click.echo('Collecting tests...')
         
     from gsmodutils.project import GSMProject
@@ -93,23 +95,49 @@ def test(project_path, test_file, display_only, verbose):
         for field in missing_fields:
             click.echo('\t{}'.format(field))
     
-    barstr = "-"*20
+    if test_id is not None:
+        test_id = tuple(test_id.split(" "))
+        
+        if len(test_id) == 1:
+            test_id = test_id[0]
+        #Only run specific test id
+        if test_id not in tester.tests:
+            click.echo(
+                click.style('Test {} not found'.format(test_id), fg='red')
+            )
+            click.echo("Tests to select from: \n\t" + "\n\t".join(tester.tests))
+        else:
+            log = tester.run_by_id(test_id)
+            click.echo("results for {}".format(log.id))
+            # run test, get log
+            _output_child_logs(log)
+        
+        exit()
+    
+    barstr = "-"*30
     if not display_only:
         # TODO Progress bar as tests are run
         click.echo(
-            click.style(barstr + ' gsmodutils test results ' + barstr, fg='yellow')
+            click.style(barstr + ' gsmodutils test results ' + barstr, bg='green', bold=True)
         )
         
         if verbose:
             click.echo("verbose mode, showing succeses and failures")
             click.echo()
-            
-        tester.run_all()
+        
+        with click.progressbar(tester.iter_tests(), label='Running tests: ') as bar:
+            for x in bar:
+                pass
+        
+        ts = 0
+        te = 0
         for tf, log in tester.log.items():
 
             click.echo("Test file {}:".format(tf))
-        
-            click.echo("Counted {} test assertions with {} failures".format(*log.log_count))
+            lc = log.log_count
+            ts += lc[0]
+            te += lc[1]
+            click.echo("Counted {} test assertions with {} failures".format(*lc))
             # Output base test file
             if not log.is_success:
                 click.echo(click.style('Test file has errors', fg='red'))
@@ -120,12 +148,31 @@ def test(project_path, test_file, display_only, verbose):
             _output_child_logs(log, verbose=verbose)
             
             if log.std_out is not None:
-                click.echo("-------- Captured standard output ----------")
+                click.echo(
+                    click.style(barstr + ' Captured standard output ' + barstr, fg='black', bg='white')
+                )
                 click.echo(log.std_out)
-                click.echo("-------- End standard output ----------")
-            
-        # output success/fail count and percentages
-        # Save report to json log file       
+                click.echo(
+                    click.style(barstr + ' End standard output ' + barstr, fg='black', bg='white')
+                )         
+        click.echo(
+            'Ran {} test assertions with a total of {} errors ({}% success)'.format(ts, te, ((ts-te)/ts) * 100)
+        )
+        
+        # Save report to json log file
+        if log_path is not None:
+            try:
+                with open(log_path, 'w+') as lf:
+                    json.dump(tester.to_dict(), lf, indent=4)
+            except IOError:
+                click.echo(
+                    click.style('Error writing log file'.format(log_path), fg='red')
+                )
+            except TypeError:
+                click.echo(
+                    click.style('Error writing log file, tests appear to be in nonstandard format. Check executable python test files', fg='red')
+                )
+                
     else:
         click.echo(
             click.style(barstr + ' TESTS FOUND ' + barstr, fg='green')

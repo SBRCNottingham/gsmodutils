@@ -7,7 +7,7 @@ import os
 import glob
 import json
 from collections import defaultdict
-from gsmodutils.testutils import LogRecord
+from gsmodutils.testutils import TestRecord
 
 @contextlib.contextmanager
 def stdoutIO(stdout=None):
@@ -34,15 +34,15 @@ class GSMTester(object):
             raise TypeError('Requires valid gsmodutils project')
             
         self.project = project
-        self.log = defaultdict(LogRecord)
+        self.log = defaultdict(TestRecord)
         self.load_errors = []
         self.invalid_tests = []
         
         self.syntax_errors = dict()
         
-        self._dtask_execs = dict()
-        self._pytask_execs = dict()
-    
+        self._task_execs = dict()
+        self._child_tests = defaultdict(list) # store for top level tests
+        
         self._d_tests = defaultdict(dict)
         self._tests_collected = False
     
@@ -71,28 +71,28 @@ class GSMTester(object):
                     self.log[id_key].id = id_key
                     for entry_key, entry in entries.items():
                         missing_fields = req_fields(entry)
+                        t_args = (id_key, entry_key)
+                        self._child_tests[id_key].append(t_args)
                         if not len(missing_fields):
-                            t_args = (id_key, entry_key, entry)
                             self._d_tests[id_key][entry_key] = entry
                             self.log[id_key].create_child(entry_key)
-                            self._dtask_execs[(id_key, entry_key)] = self._t_gen(self._dict_test, *t_args)
+                            self._task_execs[t_args] = self._dict_test
                             
                         else:
                             self.log[id_key].add_error(entry_key, missing_fields)
                             self.invalid_tests.append((id_key, entry_key, missing_fields))
+                    
                 except (ValueError, AttributeError) as e:
                     # Test json is invalid format
                     self.load_errors.append((id_key, e))
-    
-    def _t_gen(self, func, *args):
-        """ returns generator for a function """
-        yield func(*args)
-    
+                
+                self._task_execs[tf] = self.iter_basetf
+                
     def _run_d_tests(self):
         """Run entry tests"""
         for id_key in self._d_tests:
-            for entry_key, entry in self._d_tests[id_key].items():
-                yield self._dict_test(id_key, entry_key, entry)
+            for entry_key in self._d_tests[id_key]:
+                yield self._dict_test(id_key, entry_key)
                 
     def _entry_test(self, log, mdl, entry):
         """
@@ -150,10 +150,11 @@ class GSMTester(object):
         
         return log
 
-    def _dict_test(self, id_key, entry_key, entry):
+    def _dict_test(self, id_key, entry_key):
         """
         execute a standard test in the dictionary format
         """
+        entry = self._d_tests[id_key][entry_key]
         
         if not len(entry['conditions']):
             entry['conditions'] = [None]
@@ -218,16 +219,16 @@ class GSMTester(object):
                         log = self.log[tf_name].create_child(func)
                         self._py_tests[tf_name].append(func)
                         
-                        args = (log, tf_name, func)
-                        self._pytask_execs[(tf_name, func)] = self._t_gen(self._exec_test, *args)
+                        args = (tf_name, func)
+                        self._task_execs[args] = self._exec_test
+                        self._child_tests[tf_name].append(args)
                         
-                        
-    def _exec_test(self, log, tf_name, test_func):
+    def _exec_test(self, tf_name, test_func):
         """
         encapsulate a test function and run it storing the report
         """
         compiled_code = self._compiled_py[tf_name] 
-        
+        log = self.log[tf_name].children[test_func]
         # Load the module in to the namespace
         # Capture the standard out rather than dumping it to terminal
         with stdoutIO() as stdout:
@@ -259,8 +260,7 @@ class GSMTester(object):
         """ Runs compiled python tests """
         for tf_name, compiled_code in self._compiled_py.items():
             for func in self._py_tests[tf_name]:
-                log = self.log[tf_name].children[func]
-                yield self._exec_test(log, tf_name, func)
+                yield self._exec_test(tf_name, func)
     
     def _default_tests(self):
         """Tests that users don't need to write - load models, load designs, load conditions"""
@@ -282,8 +282,17 @@ class GSMTester(object):
         """Tuple of dict tests and executable tests"""
         if not self._tests_collected:
             self.collect_tests()
-        return (self._d_tests, self._py_tests)
+        return [str(x) for x in self._task_execs.keys()]
         
+    def run_by_id(self, tid):
+        """ Returns result of individual test funtion """
+        func = self._task_execs[tid]
+        
+        if func == self.iter_basetf:
+            return list(func(tid))[0]
+        
+        return func(*tid).next()
+
     def collect_tests(self):
         """
         Collects all tests but does not run them
@@ -291,21 +300,32 @@ class GSMTester(object):
         self._load_json_tests()
         self._load_py_tests()
         self._tests_collected = True
+
+    def iter_basetf(self, base_file):
+        """ Given a base test file (.json or .py) """
+        yield self.log[base_file] # first element is always the top level log
+        for args in self._child_tests[base_file]:
+            yield self._task_execs[args](*args)
     
     def iter_tests(self, recollect=False):
-        """Go through each test and run"""
+        """Generate each test function"""
         if recollect or not self._tests_collected:
             self.collect_tests()
         
-        for test in  self._run_d_tests():
-            yield test
-            
-        for test in self._run_py_tests():
-            yield test
+        for tid, func in self._task_execs.items():
+            # skip base files - this just runs all the tests twice
+            if func != self.iter_basetf:
+                yield func(*tid)
+        
 
     def run_all(self, recollect=False):
-        """
-        Find and run all tests for a project
-        """
+        """Find and run all tests for a project, executes rather than returning generator"""
         return list(self.iter_tests(recollect))
     
+    def to_dict(self):
+        """ json serialisable log - call after running tests"""
+        res = dict()
+        for tf, log in self.log.items():
+            res[tf] = log.to_dict()
+        return res
+        
