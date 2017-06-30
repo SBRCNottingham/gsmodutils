@@ -43,8 +43,11 @@ class GSMTester(object):
         self._task_execs = dict()
         self._child_tests = defaultdict(list) # store for top level tests
         
-        self._d_tests = defaultdict(dict)
+        self.python_tests = defaultdict(list)
+        self.json_tests = defaultdict(dict)
         self._tests_collected = False
+        
+        self.sub_tests = defaultdict(list)
     
     def _load_json_tests(self):
         """
@@ -74,10 +77,9 @@ class GSMTester(object):
                         t_args = (id_key, entry_key)
                         self._child_tests[id_key].append(t_args)
                         if not len(missing_fields):
-                            self._d_tests[id_key][entry_key] = entry
+                            self.json_tests[id_key][entry_key] = entry
                             self.log[id_key].create_child(entry_key)
                             self._task_execs[t_args] = self._dict_test
-                            
                         else:
                             self.log[id_key].add_error(entry_key, missing_fields)
                             self.invalid_tests.append((id_key, entry_key, missing_fields))
@@ -90,8 +92,8 @@ class GSMTester(object):
                 
     def _run_d_tests(self):
         """Run entry tests"""
-        for id_key in self._d_tests:
-            for entry_key in self._d_tests[id_key]:
+        for id_key in self.json_tests:
+            for entry_key in self.json_tests[id_key]:
                 yield self._dict_test(id_key, entry_key)
                 
     def _entry_test(self, log, mdl, entry):
@@ -154,7 +156,7 @@ class GSMTester(object):
         """
         execute a standard test in the dictionary format
         """
-        entry = self._d_tests[id_key][entry_key]
+        entry = self.json_tests[id_key][entry_key]
         
         if not len(entry['conditions']):
             entry['conditions'] = [None]
@@ -196,7 +198,7 @@ class GSMTester(object):
         """
         Loads and compiles each python test in the project's test path
         """
-        self._py_tests = defaultdict(list)
+
         self._compiled_py = dict()
         test_files = os.path.join(self.project.tests_dir, "test_*.py")
         for pyfile in glob.glob(test_files):
@@ -217,7 +219,7 @@ class GSMTester(object):
                     # if the function is explicitly as test function
                     if func[:5] == "test_":
                         log = self.log[tf_name].create_child(func)
-                        self._py_tests[tf_name].append(func)
+                        self.python_tests[tf_name].append(func)
                         
                         args = (tf_name, func)
                         self._task_execs[args] = self._exec_test
@@ -259,7 +261,7 @@ class GSMTester(object):
     def _run_py_tests(self):
         """ Runs compiled python tests """
         for tf_name, compiled_code in self._compiled_py.items():
-            for func in self._py_tests[tf_name]:
+            for func in self.python_tests[tf_name]:
                 yield self._exec_test(tf_name, func)
     
     def _default_tests(self):
@@ -282,7 +284,13 @@ class GSMTester(object):
         """Tuple of dict tests and executable tests"""
         if not self._tests_collected:
             self.collect_tests()
-        return [str(x) for x in self._task_execs.keys()]
+            
+        kptests = []
+        for k in self.python_tests.keys():
+            for t in self.python_tests[k]:
+                kptests.append(k,t)
+                
+        return self.json_tests.items() + kptests
         
     def run_by_id(self, tid):
         """ Returns result of individual test funtion """
