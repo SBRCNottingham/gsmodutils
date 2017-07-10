@@ -95,7 +95,7 @@ class ProjectConfig(object):
 
         return conditions_fp
 
-    def _save_config(self, project_path):
+    def save_config(self, project_path, commit=False):
         """
         
         args:
@@ -105,7 +105,14 @@ class ProjectConfig(object):
 
         with open(configuration_fp, 'w+') as configf:
             json.dump(self._to_save_dict(), configf, indent=4)
-        
+
+        if commit:
+            try:
+                repository = hglib.open(project_path)
+                repository.commit('Initial commit for model, auto generated commit by gsm_project.py')
+            except hglib.error.CommandError:
+                pass
+
         return configuration_fp
 
     def create_project(self, project_path, addmodels=None, validate=True, docker=True):
@@ -204,7 +211,7 @@ class ProjectConfig(object):
 
             self.default_model = self.models[0]
 
-            configuration_fp = self._save_config(project_path)
+            configuration_fp = self.save_config(project_path)
             added_files.append(configuration_fp)
             repository.add(configuration_fp)
             

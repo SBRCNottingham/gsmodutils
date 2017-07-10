@@ -24,6 +24,10 @@ class GSMProject(object):
         self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
 
     @property
+    def project_path(self):
+        return self._project_path
+
+    @property
     def _context_file(self):
         return os.path.join(self._project_path, default_project_file)
 
@@ -116,8 +120,7 @@ class GSMProject(object):
             
         return self._loaded_model
 
-    @staticmethod
-    def add_model(self, model_path):
+    def add_model(self, model_path, validate=True):
         """
         Add a model given a path to it copy it to model directory unless its in the project path already.
         """
@@ -125,10 +128,15 @@ class GSMProject(object):
             raise IOError('No such model {}'.format(model_path))
 
         model_path = os.path.abspath(model_path)
+
+        if validate:
+            pass  # TODO validate models
+
         # check model isn't in the project already
-
+        npath = os.path.basename(model_path)
         # add model to project and save configuration
-
+        self.config.models.append(npath)
+        self.config.save_config(self.project_path)
 
     @property
     def design_path(self):

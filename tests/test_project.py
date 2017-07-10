@@ -17,7 +17,7 @@ def test_load_project():
     
     with FakeProjectContext() as ctx:
         project = GSMProject(ctx.path)
-        assert project._project_path == ctx.path
+        assert project.project_path == ctx.path
 
 
 def test_create_design():
