@@ -160,5 +160,3 @@ def test_bad_config():
     with pytest.raises(TypeError):
         configuration = dict()
         ProjectConfig(**configuration)
-    
-
