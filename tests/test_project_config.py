@@ -2,6 +2,7 @@
 Tests for GSMProject class
 
 TODO: tests for command line interface
+TODO: update use the fake project (written after these tests)
 """
 import pytest
 from gsmodutils.exceptions import ProjectConfigurationError
