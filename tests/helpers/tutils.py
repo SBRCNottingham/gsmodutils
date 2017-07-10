@@ -1,26 +1,25 @@
 import cameo
 import cobra
 import tempfile
-from gsmodutils.project import GSMProject
 from gsmodutils.project_config import ProjectConfig
-from gsmodutils.project_config import _default_model_conditionsfp, _default_project_file
+from gsmodutils.project_config import default_model_conditionsfp
 import os
 import shutil
+
 
 class FakeProjectContext(object):
     
     def __init__(self):
-        '''
+        """
         Assumes projectConfig class works correctly
-        '''
+        """
         self.path = tempfile.mkdtemp()
         self.mdl_path = tempfile.mkstemp()
 
-
     def __enter__(self):
-        '''
+        """
         Create a temporary gsmodutils project folder
-        '''
+        """
         self.model = cameo.models.bigg.iAF1260
         cobra.io.save_json_model(self.model, self.mdl_path[1])
         add_models = [self.mdl_path[1]]
@@ -31,7 +30,7 @@ class FakeProjectContext(object):
                 default_model=None,
                 models=[],
                 repository_type='hg',
-                conditions_file=_default_model_conditionsfp,
+                conditions_file=default_model_conditionsfp,
                 tests_dir='tests',
                 design_dir='designs'
         )
@@ -41,9 +40,9 @@ class FakeProjectContext(object):
         return self
     
     def __exit__(self, *args):
-        '''
+        """
         Delete directory and model
-        '''
+        """
         shutil.rmtree(self.path)
         os.remove(self.mdl_path[1])
     

@@ -1,11 +1,9 @@
 from __future__ import print_function
-import cobra
-from collections import defaultdict
-from gsmodutils.utils import frozendict, _check_obj_sim, convert_stoich, equal_stoich
+from gsmodutils.utils import FrozenDict, check_obj_sim, convert_stoich, equal_stoich
 
 
 def model_diff(model_a, model_b):
-    '''
+    """
     Returns a dictionary that contains all of the changed reactions between model a and model b
     
     This includes any reactions or metabolites removed, or any reactions or metabolites added/changed
@@ -17,7 +15,7 @@ def model_diff(model_a, model_b):
     
     TODO: Make a model_diff object that is json serialisable/can be converted to a dict
     TODO: Make a command line tool that outputs a report file listing all of the ways in which two models are different
-    '''
+    """
     
     metfields = ['formula', 'charge', 'compartment', 'name']
     
@@ -43,7 +41,7 @@ def model_diff(model_a, model_b):
         except KeyError:
             ma = None
             
-        if ma is None or not _check_obj_sim(ma, mb, metfields):
+        if ma is None or not check_obj_sim(ma, mb, metfields):
                 diff['metabolites'].append(
                     dict(
                        id=mb.id,
@@ -76,8 +74,8 @@ def model_diff(model_a, model_b):
             ra = None
             
         # reaction has changed or is new
-        if ra is None or not _check_obj_sim(ra, rb, reacfields) or not equal_stoich(ra, rb):
-                
+        if ra is None or not check_obj_sim(ra, rb, reacfields) or not equal_stoich(ra, rb):
+
                 diff['reactions'].append(
                     dict(
                         id=rb.id,

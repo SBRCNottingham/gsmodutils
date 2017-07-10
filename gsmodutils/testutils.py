@@ -1,15 +1,17 @@
 """
 Utilities for test functions
 
-This code assumes that the namespace that python based tests are in is correctly assigned, otherwise global variables won't be present and this will throw errors
+This code assumes that the namespace that python based tests are in is correctly assigned, otherwise global
+variables won't be present and this will throw errors
 
 """
 from __future__ import print_function, absolute_import, division
 import time
 
+
 class ModelTestSelector(object):
     
-    def __init__(self, models=[], conditions=[], designs=[], *args, **kwargs):
+    def __init__(self, models=None, conditions=None, designs=None):
         """
         For each parameter set run the test function with these models and save results accordingly
         
@@ -17,7 +19,8 @@ class ModelTestSelector(object):
         
         This 
         
-        Default functionality, when using the decorator, is to perfom the test on all models and under defualt conditions.
+        Default functionality, when using the decorator, is to perfom the test on all models and under default
+        conditions.
         
         Designs and conditions will never be loaded unless specified
         
@@ -31,7 +34,16 @@ class ModelTestSelector(object):
         def test_func(model, project, log):
             log.assert(True, "Works", "Does not work". "Test")
         """
-        
+
+        if models is None:
+            models = []
+
+        if conditions is None:
+            conditions = []
+
+        if designs is None:
+            designs = []
+
         self.models = models
         if not len(self.models):
             self.models = [None]
@@ -75,7 +87,7 @@ class ModelTestSelector(object):
                         try:
                             mdl = project.load_model(mn)
                         except IOError as e:
-                            ext_model=True
+                            ext_model = True
                             nlog.add_error("model {} not found".format(mn), str(e))
                             break
                         
@@ -90,13 +102,12 @@ class ModelTestSelector(object):
                             try:
                                 project.load_design(did, model=mdl)
                             except IOError as e:
-                                 nlog.add_error("design {} not found".format(mn), str(e))
-                                 break
+                                nlog.add_error("design {} not found".format(mn), str(e))
+                                break
                         
-                        nargs=tuple([mdl, project, nlog] + list(args[3:]))
+                        nargs = tuple([mdl, project, nlog] + list(args[3:]))
                         func(*nargs, **kwargs)
-                        
-                        
+
                     if ext_model:
                         break
                   
@@ -107,17 +118,19 @@ class TestRecord(object):
     """
     Class for handling logging of errors in tester
     follows a hierarchical pattern as log records allow child records
-    This is a bit of a weird data structure but the objective is to (in a future version) encapsulate all tests inside an instance of Test Record
+    This is a bit of a weird data structure but the objective is to (in a future version) encapsulate all tests inside
+    an instance of Test Record
     """
-    def __init__(self, id='', parent=None, param_child=False):
-        self.id = id
+    def __init__(self, tid='', parent=None, param_child=False):
+        self.id = tid
         self.parent = parent
         self.success = []
         self.error = []
-        self.std_out = None # Reserved for messages
+        self.std_out = None  # Reserved for messages
         self.run_time = time.time()
         self.children = {}
-        self.param_child = param_child # tells us if this is a parameter varaiation of parent (i.e. as low a level as the logs should get)
+        # tells us if this is a parameter varaiation of parent (i.e. as low a level as the logs should get)
+        self.param_child = param_child
         
     def assertion(self, statement, success_msg, error_msg, desc=''):
         """
@@ -134,7 +147,10 @@ class TestRecord(object):
             self.error.append((error_msg, desc))
     
     def add_error(self, msg, desc=''):
-        """For errors loading tests, e.g. success cases can't be reached because the model doesn't load or can't get a feasable solution"""
+        """
+        For errors loading tests, e.g. success cases can't be reached because the model doesn't load or can't get a
+        feasable solution
+        """
         desc = dict(
             desc=desc,
             ex_time=time.time()
@@ -143,10 +159,11 @@ class TestRecord(object):
     
     def create_child(self, new_id, param_child=False):
         """
-        Used within decorator helper functions to allow multiple tests with the same function but where other parameters change
+        Used within decorator helper functions to allow multiple tests with the same function but where other parameters
+        change
         """
         if self.param_child:
-            raise TypeError('Parameter varations should not have child logs')
+            raise TypeError('Parameter variations should not have child logs')
         
         newlog = TestRecord(new_id, parent=self, param_child=param_child)
         self.children[new_id] = newlog
@@ -157,7 +174,7 @@ class TestRecord(object):
         """
         The test function is considered a failure if there are one or more error logs
         """
-        if len([x for x in self.children.values() if not x.is_success ] + self.error):
+        if len([x for x in self.children.values() if not x.is_success]) + len(self.error):
             return False
         return True
 
@@ -174,11 +191,14 @@ class TestRecord(object):
             
         return total, error
 
-    def to_dict(self, stk=[]):
+    def to_dict(self, stk=None):
         """
         converts log into dictionary form for portability
         stk stops cyclic behaviour
         """
+        if stk is None:
+            stk = []
+
         children = {}
         for child in self.children.values():
             if child.id not in stk:
@@ -193,4 +213,3 @@ class TestRecord(object):
             run_time=self.run_time,
         )
         return result
-    

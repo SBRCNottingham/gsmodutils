@@ -1,9 +1,10 @@
 import cobra
 from cameo import Metabolite as cameoMetabolite
 
-class frozendict(dict):
+
+class FrozenDict(dict):
     def __init__(self, iterable, **kwargs):
-        super(frozendict, self).__init__(iterable, **kwargs)
+        super(FrozenDict, self).__init__(iterable, **kwargs)
 
     def popitem(self):
         raise AttributeError("'frozendict' object has no attribute 'popitem")
@@ -23,11 +24,11 @@ class frozendict(dict):
     def __hash__(self):
         return hash(tuple(sorted(self.items())))
 
-    def update(self, E=None, **F):
+    def update(self, e=None, **kwargs):
         raise AttributeError("'frozendict' object has no attribute 'update")
 
 
-def _check_obj_sim(obja, objb, fields):
+def check_obj_sim(obja, objb, fields):
     """
     Dirty function for checking if set fields are the same between two objects.
     
@@ -60,7 +61,7 @@ def convert_stoich(stoich):
         else:
             n_stoich[meta] = val
             
-    return frozendict(n_stoich)
+    return FrozenDict(n_stoich)
 
 
 def equal_stoich(reaction_a, reaction_b):

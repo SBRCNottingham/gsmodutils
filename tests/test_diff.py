@@ -1,6 +1,7 @@
 import cameo
 import gsmodutils.model_diff
 
+
 def test_model_ident():
     '''
     Tests that an identical model does not produce any differences

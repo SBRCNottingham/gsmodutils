@@ -1,23 +1,15 @@
-'''
+"""
 Tests for GSMProject class
 
 TODO: tests for command line interface
-'''
+"""
 
 
 from __future__ import print_function, absolute_import, division
 import pytest
-from gsmodutils.exceptions import ProjectConfigurationError
 from gsmodutils.project import GSMProject
-from gsmodutils.project_config import ProjectConfig
-
 import cameo
-import cobra
 import os
-import shutil
-import json
-import hglib
-import tempfile
 from tutils import FakeProjectContext
 
 
@@ -27,10 +19,11 @@ def test_load_project():
         project = GSMProject(ctx.path)
         assert project._project_path == ctx.path
 
+
 def test_create_design():
-    '''
+    """
     Create a design that adds and removes reactions
-    '''
+    """
     with FakeProjectContext() as ctx:
         project = GSMProject(ctx.path)
         model = project.model
@@ -92,8 +85,7 @@ def test_create_design():
         
         nmodel.reactions.get_by_id('test_reaction')
         nmodel.metabolites.get_by_id('test_c')
-        
-        
+
         # assert that the reaction is removed 
         with pytest.raises(KeyError):
             nmodel.reactions.get_by_id('UDPGD')

@@ -1,7 +1,7 @@
 import gsmodutils
 import cameo
 import sys
-import StringIO
+from io import StringIO
 import contextlib
 import os
 import glob
@@ -9,15 +9,16 @@ import json
 from collections import defaultdict
 from gsmodutils.testutils import TestRecord
 
+
 @contextlib.contextmanager
-def stdoutIO(stdout=None):
+def stdout_ctx(stdout=None):
     """
     Context to capture standard output of python executed tests during run time
     This is displayed to the user for them to see
     """
     old = sys.stdout
     if stdout is None:
-        stdout = StringIO.StringIO()
+        stdout = StringIO()
     sys.stdout = stdout
     yield stdout
     sys.stdout = old
@@ -27,7 +28,7 @@ class GSMTester(object):
     """
     Loads models and executes user specified tests for the genome scale models
     """
-    def __init__(self, project, **kwargs):
+    def __init__(self, project):
         """Creates the storage locations for logs"""
         
         if type(project) is not gsmodutils.project.GSMProject:
@@ -41,7 +42,7 @@ class GSMTester(object):
         self.syntax_errors = dict()
         
         self._task_execs = dict()
-        self._child_tests = defaultdict(list) # store for top level tests
+        self._child_tests = defaultdict(list)  # store for top level tests
         
         self.python_tests = defaultdict(list)
         self.json_tests = defaultdict(dict)
@@ -53,17 +54,17 @@ class GSMTester(object):
         """
         populate all json files from test directory, validate format and add tests to be run
         """
-        def req_fields(entry):
+        def req_fields(entryi):
             _required_fields = [
                 'conditions', 'models', 'designs', 'reaction_fluxes', 'required_reactions', 'description'
             ]
-            missing_fields = [] 
+            missing_fieldsi = []
             for rf in _required_fields:
-                if rf not in entry:
+                if rf not in entryi:
                     
-                    missing_fields.append(rf)
+                    missing_fieldsi.append(rf)
 
-            return missing_fields
+            return missing_fieldsi
 
         for tf in glob.glob(os.path.join(self.project.tests_dir, "test_*.json")):
             id_key = os.path.basename(tf)
@@ -95,13 +96,14 @@ class GSMTester(object):
         for id_key in self.json_tests:
             for entry_key in self.json_tests[id_key]:
                 yield self._dict_test(id_key, entry_key)
-                
-    def _entry_test(self, log, mdl, entry):
+
+    @staticmethod
+    def _entry_test(log, mdl, entry):
         """
         broken up code for testing individual entries
         """
         try:
-            soltuion = mdl.solve()
+            mdl.solve()
                 
             # Test entries that require non-zero fluxes
             for rid in entry['required_reactions']:
@@ -130,10 +132,10 @@ class GSMTester(object):
                 try:
                     reac = mdl.reactions.get_by_id(rid)
                     if reac.flux < lb or reac.flux > ub:
-                        err='reaction {} outside of flux bounds {}, {}'.format(rid, lb, ub)
+                        err = 'reaction {} outside of flux bounds {}, {}'.format(rid, lb, ub)
                         log.error.append((err, '.reaction_flux'))
                     else:
-                        msg='reaction {} inside flux bounds {}, {}'.format(rid, lb, ub)
+                        msg = 'reaction {} inside flux bounds {}, {}'.format(rid, lb, ub)
                         log.success.append((msg, '.reaction_flux'))
                 except KeyError:
                     # Error log of reaction not found
@@ -182,7 +184,7 @@ class GSMTester(object):
                         self.project.load_design(design, model=mdl)
                     
                     if design is None and conditions_id is None:
-                        test_id = (model_name)
+                        test_id = model_name
                     elif design is None:
                         test_id = (model_name, conditions_id)
                     elif conditions_id is None:
@@ -218,7 +220,7 @@ class GSMTester(object):
                 for func in compiled_code.co_names:
                     # if the function is explicitly as test function
                     if func[:5] == "test_":
-                        log = self.log[tf_name].create_child(func)
+                        self.log[tf_name].create_child(func)
                         self.python_tests[tf_name].append(func)
                         
                         args = (tf_name, func)
@@ -233,7 +235,7 @@ class GSMTester(object):
         log = self.log[tf_name].children[test_func]
         # Load the module in to the namespace
         # Capture the standard out rather than dumping it to terminal
-        with stdoutIO() as stdout:
+        with stdout_ctx() as stdout:
             global_namespace = dict(
                 __name__='__gsmodutils_test__',
             )
@@ -250,7 +252,8 @@ class GSMTester(object):
                 global_namespace[test_func](self.project.load_model(), self.project, log)
             except Exception as ex:
                 # the specific test case has an erro
-                log.add_error("Error executing function {} in file {} error - {}".format(test_func, tf_name, str(ex)), ".execution_error")
+                log.add_error("Error executing function {} in file {} error - {}".format(test_func, tf_name, str(ex)),
+                              ".execution_error")
         
         fout = stdout.getvalue()
         if fout.strip() != '':
@@ -288,12 +291,12 @@ class GSMTester(object):
         kptests = []
         for k in self.python_tests.keys():
             for t in self.python_tests[k]:
-                kptests.append(k,t)
+                kptests.append(k, t)
                 
         return self.json_tests.items() + kptests
         
     def run_by_id(self, tid):
-        """ Returns result of individual test funtion """
+        """ Returns result of individual test function """
         func = self._task_execs[tid]
         
         if func == self.iter_basetf:
@@ -311,7 +314,7 @@ class GSMTester(object):
 
     def iter_basetf(self, base_file):
         """ Given a base test file (.json or .py) """
-        yield self.log[base_file] # first element is always the top level log
+        yield self.log[base_file]  # first element is always the top level log
         for args in self._child_tests[base_file]:
             yield self._task_execs[args](*args)
     
@@ -324,7 +327,6 @@ class GSMTester(object):
             # skip base files - this just runs all the tests twice
             if func != self.iter_basetf:
                 yield func(*tid)
-        
 
     def run_all(self, recollect=False):
         """Find and run all tests for a project, executes rather than returning generator"""
@@ -336,4 +338,3 @@ class GSMTester(object):
         for tf, log in self.log.items():
             res[tf] = log.to_dict()
         return res
-        

@@ -5,33 +5,39 @@ import json
 import cobra
 import cameo
 
-def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, media={}, objective_reactions=['Biomass'], obj_dir='max'):
-    '''
+
+def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
+                       media=None, objective_reactions=None, obj_dir='max'):
+    """
     Specify a base scrumpy structural model file and returns a cameo model.
     This hasn't be thoroughly tested so expect there to be bugs
     
     To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media
     
     NOTE Only designed and tested for the cupriavidus model!
-    '''
-    
-    rel_path = '/'.join(os.path.abspath(filepath).split('/')[:-1] )
-    
-    
+    """
+
+    if objective_reactions is None:
+        objective_reactions = ['Biomass']
+
+    if media is None:
+        media = {}
+
+    rel_path = '/'.join(os.path.abspath(filepath).split('/')[:-1])
+
     reactions, metabolites = parse_file(os.path.abspath(filepath).split('/')[-1], rel_path=rel_path)
     model = cameo.Model()
     for mid in metabolites:
         m = cameo.Metabolite(id=mid)
         model.add_metabolite(m)
     
-    
     added_reactions = []
     for reaction in reactions:
         if reaction['id'] not in added_reactions:
             r = cameo.Reaction(reaction['id'])
             model.add_reaction(r)
-            r.lower_bound=reaction['bounds'][0]
-            r.upper_bound=reaction['bounds'][1]
+            r.lower_bound = reaction['bounds'][0]
+            r.upper_bound = reaction['bounds'][1]
             r.add_metabolites(reaction['metabolites'])
             added_reactions.append(reaction['id'])
     
@@ -55,8 +61,7 @@ def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, med
         else:
             exch.lower_bound = -1000
             exch.upper_bound = 1000
-        
-    
+
     model.load_medium(media)
     
     try:
@@ -64,7 +69,7 @@ def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, med
         atpase.lower_bound = atpase_flux
         atpase.upper_bound = atpase_flux
     except KeyError:
-        print('Error setting ATPase flux, reaction name {} not found'.format(atpase_reaction) )
+        print('Error setting ATPase flux, reaction name {} not found'.format(atpase_reaction))
     
     for oreact in objective_reactions:
         
@@ -72,7 +77,7 @@ def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, med
             objreac = model.reactions.get_by_id(oreact)
             objreac.objective_coefficient = 1.0
         except KeyError:
-             print('Error setting objective, reaction name {} not found'.format(oreact) )
+            print('Error setting objective, reaction name {} not found'.format(oreact))
     
     model.objective.direction = obj_dir
     
@@ -80,23 +85,21 @@ def load_scrumpy_model(filepath,  atpase_reaction="ATPase", atpase_flux=3.0, med
 
 
 def get_tokens(line_dt):
-    '''
+    """
     Goes through each charachter in scrumpy file attempting to find tokens
     
     BUG: if there is a numeric after a direction token this fails
     e.g. '->2 "PROTON"' fails but '-> 2 "PROTON"' works
-    '''
+    """
     tokens = []
     
     quoted = False
     tk_str = ""
-    line_dt=line_dt.replace("->", "-> ")
-    line_dt=line_dt.replace("<-", "<- ")
-    line_dt=line_dt.replace("<>", "<> ")
+    line_dt = line_dt.replace("->", "-> ")
+    line_dt = line_dt.replace("<-", "<- ")
+    line_dt = line_dt.replace("<>", "<> ")
     
     for ch in line_dt:
-        
-        
         if ch in ['"', "'"]:
             if not quoted:
                 quoted = True
@@ -125,17 +128,16 @@ def get_tokens(line_dt):
             
     return tokens
 
-
-def parse_include(fps):
-    pass
     
-    
-def parse_file(filepath, fp_stack=[], rel_path=''):
-    '''
+def parse_file(filepath, fp_stack=None, rel_path=''):
+    """
     Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions
     
     This code is not that stable. Expect bugs.
-    '''
+    """
+    if fp_stack is None:
+        fp_stack = []
+
     reactions = []
     metabolites = []
     with open(rel_path+'/'+filepath) as infile:
@@ -151,7 +153,8 @@ def parse_file(filepath, fp_stack=[], rel_path=''):
             line_dt = line.strip().split('#')[0]
             
             tokens = get_tokens(line_dt)
-            #print tokens
+            prev_token = ''
+            # print tokens
             for token in tokens:
                 if in_reaction:
                     
@@ -196,7 +199,7 @@ def parse_file(filepath, fp_stack=[], rel_path=''):
                         metabolites.append(token)
                         rs = dict(
                             id='{}_tx'.format(token),
-                            metabolites={token:1.0},
+                            metabolites={token: 1.0},
                             source=filepath,
                             bounds=[-1000.0, 1000.0]
                         )
@@ -212,8 +215,6 @@ def parse_file(filepath, fp_stack=[], rel_path=''):
                         
                     elif token == ')':
                         in_include = False
-                    
-                    
                     elif token in fp_stack:
                         raise Exception('Cyclic depedncy for file {}'.format(token))
                     else:
@@ -221,8 +222,7 @@ def parse_file(filepath, fp_stack=[], rel_path=''):
                         reactions += rset
                         metabolites += mset
                     continue
-                
-                
+
                 if token == '':
                     continue
                 
@@ -241,10 +241,8 @@ def parse_file(filepath, fp_stack=[], rel_path=''):
                         line=linecount,
                     )
 
-                
                 prev_token = token
 
-                
     return reactions, metabolites
 
 

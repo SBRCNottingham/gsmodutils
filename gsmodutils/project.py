@@ -3,13 +3,12 @@ import os
 import json
 import glob
 import cobra
-import hglib
-import shutil
 
 from gsmodutils.model_diff import model_diff
-from gsmodutils.exceptions import ProjectConfigurationError, ProjectNotFound
-from gsmodutils.project_config import ProjectConfig, _default_project_file, _default_model_conditionsfp
+from gsmodutils.exceptions import ProjectNotFound
+from gsmodutils.project_config import ProjectConfig, default_project_file
 from gsmodutils.tester import GSMTester
+
 
 class GSMProject(object):
     """
@@ -17,15 +16,16 @@ class GSMProject(object):
         Models included within the project
         Designs that the model uses
     """
-    def __init__(self, path='.', **kwargs):
+    def __init__(self, path='.'):
         """Load a project"""
         self._project_path = os.path.abspath(path)
         self._loaded_model = None
         self.update()
-    
+        self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
+
     @property
     def _context_file(self):
-        return os.path.join(self._project_path, _default_project_file)
+        return os.path.join(self._project_path, default_project_file)
 
     def _load_config(self, configuration):
         """
@@ -52,7 +52,7 @@ class GSMProject(object):
         
         if not os.path.exists(self._context_file):
             raise ProjectNotFound(
-                'Project settings file {} in {} does not exist'.format(_default_project_file, self._project_path))
+                'Project settings file {} in {} does not exist'.format(default_project_file, self._project_path))
         
         with open(self._context_file) as ctxfile:
             self._load_config(json.load(ctxfile))
@@ -115,12 +115,20 @@ class GSMProject(object):
             self._loaded_model = self.load_model()
             
         return self._loaded_model
-    
+
+    @staticmethod
     def add_model(self, model_path):
         """
-        Add a model given a path to it (copy it to model directory unless its in the project path already.
+        Add a model given a path to it copy it to model directory unless its in the project path already.
         """
-        pass
+        if not os.path.exists(model_path):
+            raise IOError('No such model {}'.format(model_path))
+
+        model_path = os.path.abspath(model_path)
+        # check model isn't in the project already
+
+        # add model to project and save configuration
+
 
     @property
     def design_path(self):
@@ -136,7 +144,7 @@ class GSMProject(object):
         
         # All designs in the config specified design dir
         designs_direct = glob.glob(
-            os.path.join(self._project_path, self.config.design_dir, '*.json') )
+            os.path.join(self._project_path, self.config.design_dir, '*.json'))
              
         for dpath in designs_direct:
             with open(dpath) as dsgn_ctx_file:
@@ -151,7 +159,7 @@ class GSMProject(object):
     @property
     def list_designs(self):
         designs_direct = glob.glob(
-            os.path.join(self._project_path, self.config.design_dir, '*.json') )
+            os.path.join(self._project_path, self.config.design_dir, '*.json'))
         
         return [os.path.basename(dpath).split(".json")[0] for dpath in designs_direct]
     
@@ -160,9 +168,9 @@ class GSMProject(object):
         Loads an existing design
         """
         if design_id not in self.list_designs:
-            raise KeyError('Design {} not found'.format(design_id) )
+            raise KeyError('Design {} not found'.format(design_id))
         
-        des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design_id) )
+        des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design_id))
     
         with open(des_path) as dsn_ctx:
             design_dict = json.load(dsn_ctx)
@@ -281,7 +289,7 @@ class GSMProject(object):
 
         return mdl
     
-    def save_design(self, model, id, name, description='', conditions=None, base_model=None, overwrite=False):
+    def save_design(self, model, mid, name, description='', conditions=None, base_model=None, overwrite=False):
         """
         Creates a design from a diff of model_a and model_b
         
@@ -295,8 +303,12 @@ class GSMProject(object):
         # Test, infesible designs should not be added
         model.solve()
         
-        id = unicode(id).replace(' ', '_')
-        
+        mid = str(mid).replace(' ', '_')
+        design_save_path = os.path.join(self.design_path, '{}.json'.format(mid))
+
+        if os.path.exists(design_save_path) and not overwrite:
+            raise IOError('File {} exists'.format(design_save_path))
+
         # Load either default model or model path
         if type(base_model) in [type(None), unicode, str]:
             base_model = self.load_model(mpath=base_model)
@@ -310,12 +322,11 @@ class GSMProject(object):
         diff = model_diff(base_model, model)
         
         diff['description'] = description
-        diff['id'] = id,
+        diff['id'] = mid,
         diff['name'] = name
         diff['conditions'] = conditions
         diff['base_model'] = base_model.id
-        
-        design_save_path = os.path.join(self.design_path, '{}.json'.format(id))
+
         with open(design_save_path, 'w+') as dsp:
             json.dump(diff, dsp, indent=4)
         
@@ -347,11 +358,11 @@ class GSMProject(object):
         model.solve()
         
         # List all transport reactions in to the cell
-        def is_exchange(r):
-            return (len(r.reactants) == 0 or len(r.products) == 0) and len(r.metabolites) == 1
+        def is_exchange(rr):
+            return (len(rr.reactants) == 0 or len(rr.products) == 0) and len(rr.metabolites) == 1
 
-        def is_media(r):
-            if r.lower_bound < 0 and is_exchange(r):
+        def is_media(rr):
+            if rr.lower_bound < 0 and is_exchange(rr):
                 return True
             return False
         

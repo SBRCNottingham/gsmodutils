@@ -3,14 +3,14 @@ Test cases for the GSMTests class and associated files
 """
 
 from __future__ import print_function, absolute_import, division
-import pytest
 from gsmodutils.project import GSMProject
 import json
 from tutils import FakeProjectContext
 import os
 
+
 def test_json_tests():
-    """"""
+    """ Test the execution of json tests"""
     with FakeProjectContext() as fp:
         # Create a fake json file with tests in it
         jtest = dict(
@@ -34,9 +34,10 @@ def test_json_tests():
         # run test functions
         tester = project.project_tester()
         tester.collect_tests()
-        assert len(tester._d_tests) == 1
+        assert len(tester.json_tests) == 1
         tester.run_all()
         assert len(tester.load_errors) == 0
+
 
 def test_py_tests():
     """
@@ -64,7 +65,6 @@ def test_model(model, project, log):
         
         with open(tfp, 'w+') as testf:
             testf.write(code_str)
-            
         
         tester = project.project_tester()
         tester.run_all()

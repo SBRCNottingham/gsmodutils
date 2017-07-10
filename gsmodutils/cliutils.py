@@ -6,7 +6,7 @@ import os
 import json
 import click
 
-from gsmodutils.exceptions import ProjectNotFound, ProjectConfigurationError
+from gsmodutils.exceptions import ProjectNotFound
 
 
 @click.group()
@@ -19,7 +19,6 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
     """
     Outputs logs with indentations and counts the total number of tests and errors
     """
-
     idt = " "*indent
     for cid, clog in log.children.items():
         style='red'
@@ -42,7 +41,6 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
             
         _output_child_logs(clog, verbose=verbose, indent=indent+baseindent)
 
-        
         if verbose and log.std_out is not None:
             click.echo("-------- Captured standard output ----------")
             click.echo(log.std_out)
@@ -53,25 +51,26 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--test_file', default=None, help='run specific test cases')
 @click.option('--display_only/--run_tests', default=False, help='Just show found tests, does not run')
-@click.option('--test_id', default=None, help='specify a given test identifier to run - pyton filename, function or json_filename entry. If just a filename is selected, all subtests are executed')
+@click.option('--test_id', default=None, help='specify a given test identifier to run - pyton filename, function or' +
+                                              'json_filename entry')
 @click.option('--skip_default/--no_skip_default', default=False, help='skip default tests')
 @click.option('--verbose/--no_verbose', default=False, help='Dispalty succesfully run test assertions')
 @click.option('--log_path', default=None, type=click.Path(writable=True), help='path to output json test log')
 def test(project_path, test_file, test_id, display_only, skip_default, verbose, log_path):
     """Run tests for a project"""
-    #TODO: individual test files
+    # TODO: individual test files
     click.echo('Collecting tests...')
         
     from gsmodutils.project import GSMProject
     try:
         project = GSMProject(project_path)
+        tester = project.project_tester()
     except ProjectNotFound: 
         click.echo(
             click.style('Error: gsmodutils project not found in this path', fg='red')
         )
         exit()
-        
-    tester = project.project_tester()
+
     # Collect list of tests
     tester.collect_tests()
     
@@ -100,7 +99,7 @@ def test(project_path, test_file, test_id, display_only, skip_default, verbose, 
         
         if len(test_id) == 1:
             test_id = test_id[0]
-        #Only run specific test id
+        # Only run specific test id
         if test_id not in tester.tests:
             click.echo(
                 click.style('Test {} not found'.format(test_id), fg='red')
@@ -114,7 +113,7 @@ def test(project_path, test_file, test_id, display_only, skip_default, verbose, 
         
         exit()
     
-    barstr = "-"*30
+    barstr = "-"*15
     if not display_only:
         # TODO Progress bar as tests are run
         click.echo(
@@ -170,7 +169,8 @@ def test(project_path, test_file, test_id, display_only, skip_default, verbose, 
                 )
             except TypeError:
                 click.echo(
-                    click.style('Error writing log file, tests appear to be in nonstandard format. Check executable python test files', fg='red')
+                    click.style('Error writing log file, tests appear to be in nonstandard' +
+                                'format. Check executable python test files', fg='red')
                 )
                 
     else:
@@ -189,7 +189,6 @@ def test(project_path, test_file, test_id, display_only, skip_default, verbose, 
             for entry_key in py_tests[id_key]:
                 click.echo('\t{}'.format(entry_key))
 
-    
 
 @click.command()
 @click.option('--project_path', type=click.Path(writable=True), help='new gsmodutils project path')
@@ -248,21 +247,26 @@ def model_diff(model_a=None, model_b=None, revision=None):
     """
     click.echo('')
 
+
 @click.command()
 def add_model():
     pass
+
 
 @click.command()
 def add_design():
     pass
 
+
 @click.command()
 def add_conditions():
     pass
 
+
 @click.command()
 def add_test_case():
     pass
+
 
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
