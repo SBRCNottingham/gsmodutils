@@ -17,34 +17,20 @@ _templates_path = os.path.join(
 
 
 class ProjectConfig(object):
-    """
-    Class for configuration
-    Takes configuration arguments and ensures that the required configuration options are included
-    
-    Validates configuration and then creates the project directory.
-    
-    Args:
-        description (str)
-        author (str)
-        author_email (str)
-    """
-    _required_cfg_params = [
-        'description', 'author', 'author_email', 
-    ]
     
     _cfg_params = [
-       'description', 'author', 'author_email', 'tests_dir', 'design_dir',
-       'conditions_file', 'repository_type',  'default_model', 'models',
+        'description', 'author', 'author_email', 'tests_dir', 'design_dir', 'conditions_file',
+        'repository_type', 'default_model', 'models',
     ]
     
-    def __init__(self, **kwargs):
-        # Just loads the configuration
-        loaded_cfg_params = [x.lower() for x in kwargs.keys()]
-        # Check required options are there
-        for it in self._required_cfg_params:
-            if it not in loaded_cfg_params:
-                raise ProjectConfigurationError('Project configuration option "{}" is missing'.format(it))
-        
+    def __init__(self, description, author, author_email, **kwargs):
+        """
+        Class for configuration
+        Takes configuration arguments and ensures that the required configuration options are included
+
+        Validates configuration and then creates the project directory.
+        :param kwargs: has required fields - description, author, author_email
+        """
         # always sets param defaults first
         self.tests_dir = default_testsfp
         self.design_dir = default_designsfp
@@ -52,7 +38,12 @@ class ProjectConfig(object):
         self.repository_type = 'hg'
         self.default_model = None
         self.models = []
-        
+
+        self.author = author
+        self.description = description
+        self.author_email = author_email
+
+        # used for the optional config parameters
         for arg, val in kwargs.items():
             setattr(self, arg.lower(), val)
     

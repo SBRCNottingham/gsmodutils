@@ -156,7 +156,7 @@ def test_bad_config():
     """
     Tests that all config options should be included in a project configuration
     """
-    with pytest.raises(ProjectConfigurationError):
+    with pytest.raises(TypeError):
         configuration = dict()
         ProjectConfig(**configuration)
     
