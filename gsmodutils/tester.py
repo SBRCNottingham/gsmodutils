@@ -1,5 +1,5 @@
 import gsmodutils
-import cameo
+from cameo.exceptions import Infeasible
 import sys
 from io import StringIO
 import contextlib
@@ -46,6 +46,8 @@ class GSMTester(object):
         
         self.python_tests = defaultdict(list)
         self.json_tests = defaultdict(dict)
+        self.default_tests = defaultdict(dict)
+
         self._tests_collected = False
         
         self.sub_tests = defaultdict(list)
@@ -147,7 +149,7 @@ class GSMTester(object):
                     )
                     continue
                 
-        except cameo.exceptions.Infeasible as ex:
+        except Infeasible as ex:
             # This is a full test failure (i.e. the model does not work)
             # not a conditional assertion
             log.add_error("No solution found with model configuration", '.no_solution')
@@ -266,21 +268,42 @@ class GSMTester(object):
         for tf_name, compiled_code in self._compiled_py.items():
             for func in self.python_tests[tf_name]:
                 yield self._exec_test(tf_name, func)
-    
-    def _default_tests(self):
+
+    @staticmethod
+    def _model_check(model):
+        """
+        Check a model produces a steady state flux solution
+        :return: bool
+        """
+        try:
+            solution = model.solve()
+            if solution.f != 0:
+                return True
+            return False
+        except Infeasible:
+            return False
+
+    def _load_default_tests(self):
         """Tests that users don't need to write - load models, load designs, load conditions"""
-        for model in self.project.models:
-            # Check model functions without design
-            pass
-            
+        for model in self.project.iter_models():
+            # Checking model functions without design
+            tf_name = 'model_{}'.format(model.id)
+            self.default_tests[tf_name]
+            self.log[tf_name]
+
         for conditions in self.project.conditions:
-            # Which models do conditions apply to?
+            # Load model that conditions applies to (default is all models in project)
             pass
-            
+
         for design in self.project.designs:
-            # Load design
-            # which models to designs apply to?
+            # Load model design applies to (default is all models in project)
+            # Load conditions that the design requires. Default is to apply none (model default)
             pass
+
+    def _run_default_tests(self):
+        """ Run tests for models, designs, conditions"""
+        for key, (func, args) in self.default_tests.items():
+            yield func(*args)
     
     @property
     def tests(self):
@@ -291,7 +314,7 @@ class GSMTester(object):
         kptests = []
         for k in self.python_tests.keys():
             for t in self.python_tests[k]:
-                kptests.append(k, t)
+                kptests.append((k, t))
                 
         return self.json_tests.items() + kptests
         
@@ -308,6 +331,7 @@ class GSMTester(object):
         """
         Collects all tests but does not run them
         """
+        self._load_default_tests()
         self._load_json_tests()
         self._load_py_tests()
         self._tests_collected = True
