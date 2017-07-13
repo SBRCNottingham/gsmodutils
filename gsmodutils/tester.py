@@ -375,7 +375,7 @@ class GSMTester(object):
         for tid, func in self._task_execs.items():
             # skip base files - this just runs all the tests twice
             if func != self.iter_basetf:
-                yield func(*tid)
+                yield func(*tid) # generator for the test
 
     def run_all(self, recollect=False):
         """Find and run all tests for a project, executes rather than returning generator"""
