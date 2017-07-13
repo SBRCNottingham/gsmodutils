@@ -283,17 +283,42 @@ class GSMTester(object):
         except Infeasible:
             return False
 
+    def _df_model_test(self, log, model_path, conditions=None, design=None):
+        model = self.project.load_model(model_path)
+
+        if conditions is not None:
+            self.project.load_conditions(conditions, model=model)
+
+        if design is not None:
+            self.project.load_design(design, model=model)
+
+        if self._model_check(model):
+            log.success.append(('Model grows', '.default'))
+        else:
+            log.error.append(('Model does not grow', '.default'))
+
+        return log
+
     def _load_default_tests(self):
         """Tests that users don't need to write - load models, load designs, load conditions"""
-        for model in self.project.iter_models():
+        for model_path in self.project.config.models:
             # Checking model functions without design
-            tf_name = 'model_{}'.format(model.id)
-            self.default_tests[tf_name]
-            self.log[tf_name]
+            tf_name = 'model_{}'.format(model_path)
+            log =  self.log[tf_name]
+            kwargs = dict(log=log, model_path=model_path)
+            self.default_tests[tf_name] = (self._df_model_test, kwargs)
 
         for conditions in self.project.conditions:
             # Load model that conditions applies to (default is all models in project)
-            pass
+            cmodels = self.project.config.models
+            if len(conditions['models']):
+                cmodels = conditions['models']
+
+            for model_path in cmodels:
+                tf_name = 'conditions_{}:model_{}'.format(model_path, conditions)
+                log = self.log[tf_name]
+                kwargs = dict(log=log, model_path=model_path, conditions=conditions)
+                self.default_tests[tf_name] = (self._df_model_test, kwargs)
 
         for design in self.project.designs:
             # Load model design applies to (default is all models in project)
@@ -302,8 +327,8 @@ class GSMTester(object):
 
     def _run_default_tests(self):
         """ Run tests for models, designs, conditions"""
-        for key, (func, args) in self.default_tests.items():
-            yield func(*args)
+        for key, (func, kwargs) in self.default_tests.items():
+            yield func(**kwargs)
     
     @property
     def tests(self):
