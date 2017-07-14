@@ -7,6 +7,8 @@ from gsmodutils.project import GSMProject
 import json
 from tutils import FakeProjectContext
 import os
+import pytest
+from cameo.exceptions import Infeasible
 
 
 def test_json_tests():
@@ -70,3 +72,56 @@ def test_model(model, project, log):
         tester.run_all()
         
         assert len(tester.syntax_errors) == 0
+
+
+def test_conditions():
+    with FakeProjectContext() as fp:
+        # add some growth conditions
+        conditions = dict(
+            EX_xyl__D_e=-8.0,
+            EX_ca2_e=-99999.0,
+            EX_cbl1_e=-0.01,
+            EX_cl_e=-99999.0,
+            EX_co2_e=-99999.0,
+            EX_cobalt2_e=-99999.0,
+            EX_cu2_e=-99999.0,
+            EX_fe2_e=-99999.0,
+            EX_fe3_e=-99999.0,
+            EX_h2o_e=-99999.0,
+            EX_h_e=-99999.0,
+            EX_k_e=-99999.0,
+            EX_mg2_e=-99999.0,
+            EX_mn2_e=-99999.0,
+            EX_mobd_e=-99999.0,
+            EX_na1_e=-99999.0,
+            EX_nh4_e=-99999.0,
+            EX_o2_e=-18.5,
+            EX_pi_e=-99999.0,
+            EX_so4_e=-99999.0,
+            EX_tungs_e=-99999.0,
+            EX_zn2_e=-99999.0
+        )
+        mdl = fp.project.model
+        mdl.load_medium(conditions)
+        mdl.solve()
+        fp.project.save_conditions(mdl, "xyl_src", apply_to=fp.project.config.default_model)
+
+        mdl.load_medium(dict())
+        fp.project.save_conditions(mdl, "bad", apply_to=fp.project.config.default_model, observe_growth=False)
+
+        # Shouldn't allow conditions that don't grow without being formally specified
+        with pytest.raises(Infeasible):
+            fp.project.save_conditions(mdl, "very bad", apply_to=fp.project.config.default_model)
+
+        assert(len(fp.project.get_conditions(update=True)['growth_conditions']) == 2)
+        # run the default test
+        tester = fp.project.project_tester()
+        tester.collect_tests()
+        assert(len(tester.default_tests) == 3)
+
+        tester.run_all()
+
+
+def test_design():
+    with FakeProjectContext() as fp:
+        pass

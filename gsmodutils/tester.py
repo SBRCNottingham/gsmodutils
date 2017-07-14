@@ -46,7 +46,7 @@ class GSMTester(object):
         
         self.python_tests = defaultdict(list)
         self.json_tests = defaultdict(dict)
-        self.default_tests = defaultdict(dict)
+        self.default_tests = dict()
 
         self._tests_collected = False
         
@@ -149,7 +149,7 @@ class GSMTester(object):
                     )
                     continue
                 
-        except Infeasible as ex:
+        except Infeasible:
             # This is a full test failure (i.e. the model does not work)
             # not a conditional assertion
             log.add_error("No solution found with model configuration", '.no_solution')
@@ -283,20 +283,29 @@ class GSMTester(object):
         except Infeasible:
             return False
 
-    def _df_model_test(self, log, model_path, conditions=None, design=None):
+    def _df_model_test(self, log, model_path, conditions=None):
         model = self.project.load_model(model_path)
 
         if conditions is not None:
             self.project.load_conditions(conditions, model=model)
 
-        if design is not None:
-            self.project.load_design(design, model=model)
-
-        if self._model_check(model):
+        if self._model_check(model) and conditions['observe_growth']:
             log.success.append(('Model grows', '.default'))
+        elif self._model_check(model) and not conditions['observe_growth']:
+            log.error.append(('Model grows when it should not', '.default'))
+        elif not self._model_check(model) and not conditions['observe_growth']:
+            log.success.append(('Model does not grow', '.default'))
         else:
             log.error.append(('Model does not grow', '.default'))
 
+        return log
+
+    def _df_design_test(self, log, design):
+        model = self.project.load_design(design)
+        if self._model_check(model):
+            log.success.append(('Design functions', '.default'))
+        else:
+            log.error.append(('Design failure', '.default'))
         return log
 
     def _load_default_tests(self):
@@ -304,26 +313,29 @@ class GSMTester(object):
         for model_path in self.project.config.models:
             # Checking model functions without design
             tf_name = 'model_{}'.format(model_path)
-            log =  self.log[tf_name]
+            log = self.log[tf_name]
             kwargs = dict(log=log, model_path=model_path)
             self.default_tests[tf_name] = (self._df_model_test, kwargs)
 
-        for conditions in self.project.conditions:
+        for ckey, cdf in self.project.conditions['growth_conditions'].items():
             # Load model that conditions applies to (default is all models in project)
             cmodels = self.project.config.models
-            if len(conditions['models']):
-                cmodels = conditions['models']
+            print(ckey, cdf)
+            if len(cdf['models']):
+                cmodels = cdf['models']
 
             for model_path in cmodels:
-                tf_name = 'conditions_{}:model_{}'.format(model_path, conditions)
+                tf_name = 'conditions_{}:model_{}'.format(model_path, ckey)
                 log = self.log[tf_name]
-                kwargs = dict(log=log, model_path=model_path, conditions=conditions)
+                kwargs = dict(log=log, model_path=model_path, conditions=ckey)
                 self.default_tests[tf_name] = (self._df_model_test, kwargs)
 
         for design in self.project.designs:
-            # Load model design applies to (default is all models in project)
-            # Load conditions that the design requires. Default is to apply none (model default)
-            pass
+            # Load model design with design applied
+            tf_name = 'design_{}'.format(design['id'])
+            log = self.log[tf_name]
+            kwargs = dict(log=log, design=design)
+            self.default_tests[tf_name] = (self._df_design_test, kwargs)
 
     def _run_default_tests(self):
         """ Run tests for models, designs, conditions"""
@@ -375,7 +387,7 @@ class GSMTester(object):
         for tid, func in self._task_execs.items():
             # skip base files - this just runs all the tests twice
             if func != self.iter_basetf:
-                yield func(*tid) # generator for the test
+                yield func(*tid)  # generator for the test
 
     def run_all(self, recollect=False):
         """Find and run all tests for a project, executes rather than returning generator"""

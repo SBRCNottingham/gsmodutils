@@ -3,6 +3,7 @@ import cobra
 import tempfile
 from gsmodutils.project_config import ProjectConfig
 from gsmodutils.project_config import default_model_conditionsfp
+from gsmodutils.project import GSMProject
 import os
 import shutil
 
@@ -23,6 +24,7 @@ class FakeProjectContext(object):
         self.model = cameo.models.bigg.iAF1260
         cobra.io.save_json_model(self.model, self.mdl_path[1])
         add_models = [self.mdl_path[1]]
+
         configuration = dict(
                 description='TEST PROJECT ONLY',
                 author='test',
@@ -37,17 +39,13 @@ class FakeProjectContext(object):
         
         self.cfg = ProjectConfig(**configuration)
         self.cfg.create_project(self.path, addmodels=add_models)
+
+        self.project = GSMProject(self.path)
         return self
     
     def __exit__(self, *args):
         """
         Delete directory and model
         """
-        shutil.rmtree(self.path)
         os.remove(self.mdl_path[1])
-    
-    def create_test(self):
-        pass
-    
-    def create_design(self):
-        pass
+        shutil.rmtree(self.path)

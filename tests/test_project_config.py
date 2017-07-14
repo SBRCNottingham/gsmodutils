@@ -15,15 +15,15 @@ import os
 import shutil
 import hglib
 import tempfile
+from tutils import FakeProjectContext
 
 
 def project_creator(test_path, model=True, model_path=None):
-    
     add_models = []
     nmodel = None
     if model and model_path is None:
         nmodel = cameo.models.bigg.iAF1260
-        mdl_path = os.path.join('/tmp', nmodel.id) 
+        mdl_path = os.path.join('/tmp', nmodel.id + '.json')
         # save the model
         cobra.io.save_json_model(nmodel, mdl_path)
         add_models = [mdl_path]
@@ -46,36 +46,28 @@ def test_create_project():
     Create a test project with an example e coli model
     """
     # When writing tests use a different folder for multiprocess!
-    test_path = tempfile.mkdtemp()
-    shutil.rmtree(test_path)
-    project_creator(test_path)
-    
-    # Make sure all files exist
-    assert os.path.exists(test_path)
-    assert os.path.exists(os.path.join(test_path, default_project_file))
-    assert os.path.exists(os.path.join(test_path, default_model_conditionsfp))
-    
-    # check project loads
-    GSMProject(test_path)
-    # check mercurial project exists and can load
-    assert os.path.exists(os.path.join(test_path, '.hg'))
-    hglib.open(test_path)
-    
-    shutil.rmtree(test_path)
+
+    with FakeProjectContext() as ctx:
+
+        # Make sure all files exist
+        assert os.path.exists(ctx.path)
+        assert os.path.exists(os.path.join(ctx.path, default_project_file))
+        assert os.path.exists(os.path.join(ctx.path, default_model_conditionsfp))
+
+        # check project loads
+        GSMProject(ctx.path)
+        # check mercurial project exists and can load
+        assert os.path.exists(os.path.join(ctx.path, '.hg'))
+        hglib.open(ctx.path)
 
 
 def test_existing_project():
     """
     Force project exists exception to be thrown
     """
-    test_path = tempfile.mkdtemp()
-    
-    project_creator(test_path)
-    
-    with pytest.raises(ProjectConfigurationError):
-        project_creator(test_path)
-
-    shutil.rmtree(test_path)
+    with FakeProjectContext() as ctx:
+        with pytest.raises(ProjectConfigurationError):
+            project_creator(ctx.path)
     
     
 def test_existing_dir():

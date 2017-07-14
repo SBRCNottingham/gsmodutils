@@ -9,6 +9,9 @@ from gsmodutils.exceptions import ProjectNotFound
 from gsmodutils.project_config import ProjectConfig, default_project_file
 from gsmodutils.tester import GSMTester
 
+from cameo.exceptions import Infeasible
+from lockfile import LockFile
+
 
 class GSMProject(object):
     """
@@ -45,6 +48,16 @@ class GSMProject(object):
     def project_tester(self):
         """Creates a tester for this project instance"""
         return GSMTester(self)
+
+    @property
+    def _project_context_lock(self):
+        """
+        Returns a gloab project lock to stop multiple operations on files.
+        This software is not designed to be used in multiple user environments, so this is slow. However, it provides
+        some degree of protection for the user against modifying the same files
+        """
+        lock_path = os.path.join(self._project_path, '.gsmodultils_project_lock')
+        return LockFile(lock_path)
 
     def update(self):
         """
@@ -147,7 +160,6 @@ class GSMProject(object):
         """
         Return list of all the designs stored for the project
         """
-        
         designs_s = dict()
         
         # All designs in the config specified design dir
@@ -297,22 +309,27 @@ class GSMProject(object):
 
         return mdl
     
-    def save_design(self, model, mid, name, description='', conditions=None, base_model=None, overwrite=False):
+    def save_design(self, model, did, name, description='', conditions=None, base_model=None, overwrite=False):
         """
         Creates a design from a diff of model_a and model_b
         
         id should be a string with no spaces (conversion handled)
         
         Returns the saved design diff
-        
-        name
-        description
+
+        :param model: cobrapy/cameo model
+        :param did: design identifier
+        :param name: name of the design
+        :param description: text description of what it does
+        :param conditions: conditions that should be applied for the design
+        :param base_model: Model that the design should be derived from - specified model included in project
+        :param overwrite: overwrite and existing design (only applies if the id is already in use)
         """
         # Test, infesible designs should not be added
         model.solve()
         
-        mid = str(mid).replace(' ', '_')
-        design_save_path = os.path.join(self.design_path, '{}.json'.format(mid))
+        did = str(did).replace(' ', '_')
+        design_save_path = os.path.join(self.design_path, '{}.json'.format(did))
 
         if os.path.exists(design_save_path) and not overwrite:
             raise IOError('File {} exists'.format(design_save_path))
@@ -330,7 +347,7 @@ class GSMProject(object):
         diff = model_diff(base_model, model)
         
         diff['description'] = description
-        diff['id'] = mid,
+        diff['id'] = did,
         diff['name'] = name
         diff['conditions'] = conditions
         diff['base_model'] = base_model.id
@@ -345,26 +362,61 @@ class GSMProject(object):
     def load_conditions(self, conditions_id, model=None, copy=False):
         """
         Load a model with a given set of pre-saved media conditions
+        :param conditions_id: identifier of conditions file
+        :param model: string or cobrapy/cameo model
+        :param copy:
+        :return:
         """
-        if model is None:
-            mdl = self.load_model()
+        if model is None or type(model) is str:
+            mdl = self.load_model(model)
         elif copy:
             mdl = model.copy()
         else:
             mdl = model
         
         conditions_store = self.get_conditions(update=True)
-        mdl.load_medium(conditions_store[conditions_id])
+        mdl.load_medium(conditions_store['growth_conditions'][conditions_id]['media'])
         
         return mdl
     
-    def save_conditions(self, model, conditions_id):
+    def save_conditions(self, model, conditions_id, apply_to=None, observe_growth=True):
         """
         Add media conditions that a given model has to the project
+
+        In some cases, one may wish to set conditions under which a model should not grow.
+        observe_growth allows this to be configured. If using a single model or if the condition should not grow under
+        any circumstances, observe_growth can be set to false.
+
+        If certain models should grow, specify this with a a tuple where the entries refer to the model files tracked by
+        the project. All models specified must be contained within the project.
+
+        :param model: cobrapy or cameo model
+        :param conditions_id: identifier for the conditions
+        :param apply_to: iterable of models that this set of conditions applies to
+        :param observe_growth: bool or list.
+        :return:
         """
         # If it can't get a solution then this will raise errors.
-        model.solve()
-        
+
+        if observe_growth:
+            model.solve()
+        else:
+            try:
+                model.solve()
+                raise AssertionError('Model should not grow')
+            except Infeasible:
+                pass  # This is what should happen
+
+        if apply_to is None:
+            apply_to = []
+        else:
+            if type(apply_to) is not list:
+                apply_to = [apply_to]
+
+            for mdl_path in apply_to:
+                if mdl_path not in self.config.models:
+                    raise KeyError("Model {} not in current project".format(mdl_path))
+
         # List all transport reactions in to the cell
         def is_exchange(rr):
             return (len(rr.reactants) == 0 or len(rr.products) == 0) and len(rr.metabolites) == 1
@@ -381,8 +433,53 @@ class GSMProject(object):
         
         # save to conditions file
         conditions_store = self.get_conditions(update=True)
-        conditions_store[conditions_id] = media
-        with open(self._conditions_file, 'w+') as cf:
-            json.dump(conditions_store, cf, indent=4)
+        conditions_store['growth_conditions'][conditions_id] = dict(
+            media=media,
+            models=apply_to,
+            observe_growth=observe_growth,
+        )
+        self._write_conditions(conditions_store)
+
+    def _write_conditions(self, conditions_store):
+        """
+        Writes updated conditions store
+        TODO: Validate passed dictionary
+        TODO: make this a persistent dict stored in memory?
+        :param conditions_store:
+        :return:
+        """
+        with self._project_context_lock:
+            with open(self._conditions_file, 'w+') as cf:
+                json.dump(conditions_store, cf, indent=4)
         
         # TODO: mercurial commit
+
+    def clean_project(self, auto_remove=False):
+        """
+        Check all design and condition settings to see if they contain orphans or links to non-existing models
+        If auto_remove is true applied, any orphan files are automatically deleted and entries to missing models are
+        also removed.
+        :return: tuple(list, list) of all orphan designs and conditions (ones removed if auto_remove is set to true)
+        """
+        with self._project_context_lock:
+            bad_entries = []
+            models = self.config.models
+            conditions_store = self.conditions
+            for ck, conditions in conditions_store['growth_conditions'].items():
+                # check all models
+                for mdl in conditions['models']:
+                    if mdl not in models:
+                        bad_entries.append(mdl)
+
+                        # delete the conditions file
+                        if auto_remove and len(bad_entries) == len(conditions['models'])\
+                                and len(conditions['models']) > 0:
+                            del conditions_store[ck]
+                            self._write_conditions(conditions_store)
+                        elif auto_remove and len(bad_entries):
+                            conditions['models'] = [x for x in conditions['models'] if x not in bad_entries]
+                            self._write_conditions(conditions_store)
+
+            # for designs we have to check if models and conditions have been removed
+
+        return
