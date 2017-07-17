@@ -316,6 +316,7 @@ class GSMTester(object):
             log = self.log[tf_name]
             kwargs = dict(log=log, model_path=model_path)
             self.default_tests[tf_name] = (self._df_model_test, kwargs)
+            self._task_execs[tf_name] = self._exec_default
 
         for ckey, cdf in self.project.conditions['growth_conditions'].items():
             # Load model that conditions applies to (default is all models in project)
@@ -329,6 +330,7 @@ class GSMTester(object):
                 log = self.log[tf_name]
                 kwargs = dict(log=log, model_path=model_path, conditions=ckey)
                 self.default_tests[tf_name] = (self._df_model_test, kwargs)
+                self._task_execs[tf_name] = self._exec_default
 
         for design in self.project.designs:
             # Load model design with design applied
@@ -336,6 +338,10 @@ class GSMTester(object):
             log = self.log[tf_name]
             kwargs = dict(log=log, design=design)
             self.default_tests[tf_name] = (self._df_design_test, kwargs)
+            self._task_execs[tf_name] = self._exec_default
+
+    def _exec_default(self, tid):
+        return self.default_tests[tid]
 
     def _run_default_tests(self):
         """ Run tests for models, designs, conditions"""
@@ -379,14 +385,16 @@ class GSMTester(object):
         for args in self._child_tests[base_file]:
             yield self._task_execs[args](*args)
     
-    def iter_tests(self, recollect=False):
+    def iter_tests(self, recollect=False, skip_default=False):
         """Generate each test function"""
         if recollect or not self._tests_collected:
             self.collect_tests()
         
         for tid, func in self._task_execs.items():
             # skip base files - this just runs all the tests twice
-            if func != self.iter_basetf:
+            if func == self._exec_default and not skip_default:
+                self._exec_default(tid)
+            elif func != self.iter_basetf:
                 yield func(*tid)  # generator for the test
 
     def run_all(self, recollect=False):

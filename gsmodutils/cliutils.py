@@ -21,9 +21,9 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
     """
     idt = " "*indent
     for cid, clog in log.children.items():
-        style='red'
+        style = 'red'
         if clog.is_success:
-            style='green'
+            style = 'green'
         
         click.echo(
                 click.style(idt + "--" + str(clog.id), fg=style)
@@ -47,16 +47,16 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
             click.echo("-------- End standard output ----------")
         click.echo()
         
+
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
-@click.option('--test_file', default=None, help='run specific test cases')
 @click.option('--display_only/--run_tests', default=False, help='Just show found tests, does not run')
 @click.option('--test_id', default=None, help='specify a given test identifier to run - pyton filename, function or' +
                                               'json_filename entry')
 @click.option('--skip_default/--no_skip_default', default=False, help='skip default tests')
 @click.option('--verbose/--no_verbose', default=False, help='Dispalty succesfully run test assertions')
 @click.option('--log_path', default=None, type=click.Path(writable=True), help='path to output json test log')
-def test(project_path, test_file, test_id, display_only, skip_default, verbose, log_path):
+def test(project_path, test_id, display_only, skip_default, verbose, log_path):
     """Run tests for a project"""
     # TODO: individual test files
     click.echo('Collecting tests...')
@@ -119,12 +119,13 @@ def test(project_path, test_file, test_id, display_only, skip_default, verbose, 
         click.echo(
             click.style(barstr + ' gsmodutils test results ' + barstr, bg='green', bold=True)
         )
-        
+
+        # TODO: flag for skipping default test runs
         if verbose:
             click.echo("verbose mode, showing succeses and failures")
             click.echo()
         
-        with click.progressbar(tester.iter_tests(), label='Running tests: ') as bar:
+        with click.progressbar(tester.iter_tests(skip_default=skip_default), label='Running tests: ') as bar:
             for x in bar:
                 pass
         
