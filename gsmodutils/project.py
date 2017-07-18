@@ -378,7 +378,11 @@ class GSMProject(object):
         mdl.load_medium(conditions_store['growth_conditions'][conditions_id]['media'])
         
         return mdl
-    
+
+    def growth_condition(self, conditions_id):
+        conditions_store = self.get_conditions(update=True)
+        return conditions_store['growth_conditions'][conditions_id]['observe_growth']
+
     def save_conditions(self, model, conditions_id, apply_to=None, observe_growth=True):
         """
         Add media conditions that a given model has to the project

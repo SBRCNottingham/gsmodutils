@@ -287,13 +287,16 @@ class GSMTester(object):
         model = self.project.load_model(model_path)
 
         if conditions is not None:
+            growth_expected = self.project.growth_condition(conditions)
             self.project.load_conditions(conditions, model=model)
+        else:
+            growth_expected = True
 
-        if self._model_check(model) and conditions['observe_growth']:
+        if self._model_check(model) and growth_expected:
             log.success.append(('Model grows', '.default'))
-        elif self._model_check(model) and not conditions['observe_growth']:
+        elif self._model_check(model) and not growth_expected:
             log.error.append(('Model grows when it should not', '.default'))
-        elif not self._model_check(model) and not conditions['observe_growth']:
+        elif not self._model_check(model) and not growth_expected:
             log.success.append(('Model does not grow', '.default'))
         else:
             log.error.append(('Model does not grow', '.default'))
@@ -343,7 +346,7 @@ class GSMTester(object):
             self._task_execs[tf_name] = self._exec_default
 
     def _exec_default(self, tid):
-        yield self.default_tests[tid][0](self.default_tests[tid][1])
+        return self.default_tests[tid][0](**self.default_tests[tid][1])
 
     def _run_default_tests(self):
         """ Run tests for models, designs, conditions"""
@@ -395,7 +398,7 @@ class GSMTester(object):
         for tid, func in self._task_execs.items():
             # skip base files - this just runs all the tests twice
             if func == self._exec_default and not skip_default:
-                self._exec_default(tid)
+                yield func(tid)
             elif func != self.iter_basetf:
                 yield func(*tid)  # generator for the test
 

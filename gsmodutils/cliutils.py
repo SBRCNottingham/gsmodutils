@@ -120,7 +120,6 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
             click.style(barstr + ' gsmodutils test results ' + barstr, bg='green', bold=True)
         )
 
-        # TODO: flag for skipping default test runs
         if verbose:
             click.echo("verbose mode, showing successes and failures")
             click.echo()
@@ -134,20 +133,20 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
         for tf, log in tester.log.items():
 
             if tf == 'default_tests':
-                click.echo('Default project tests:')
-                for ki, val in log.children.items():
-                    click.echo("{} {}".format(len(val.error), len(val.success)))
+                click.echo('Default project file tests (models, designs, conditions):')
+                indicator = "Project file"
             else:
                 click.echo("Test file {}:".format(tf))
+                indicator = "Test file"
             lc = log.log_count
             ts += lc[0]
             te += lc[1]
             click.echo("Counted {} test assertions with {} failures".format(*lc))
             # Output base test file
             if not log.is_success:
-                click.echo(click.style('Test file has errors', fg='red'))
+                click.echo(click.style('{} has errors'.format(indicator), fg='red'))
             else:
-                click.echo(click.style('Test file completed all tests without error', fg='green'))
+                click.echo(click.style('{} completed all tests without error'.format(indicator), fg='green'))
             
             # Count total tests, count total assertions
             _output_child_logs(log, verbose=verbose)
