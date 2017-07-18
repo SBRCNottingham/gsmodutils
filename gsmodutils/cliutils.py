@@ -113,7 +113,7 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
         
         exit()
     
-    barstr = "-"*15
+    barstr = "-"*25
     if not display_only:
         # TODO Progress bar as tests are run
         click.echo(
@@ -122,7 +122,7 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
 
         # TODO: flag for skipping default test runs
         if verbose:
-            click.echo("verbose mode, showing succeses and failures")
+            click.echo("verbose mode, showing successes and failures")
             click.echo()
         
         with click.progressbar(tester.iter_tests(skip_default=skip_default), label='Running tests: ') as bar:
@@ -133,7 +133,12 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
         te = 0
         for tf, log in tester.log.items():
 
-            click.echo("Test file {}:".format(tf))
+            if tf == 'default_tests':
+                click.echo('Default project tests:')
+                for ki, val in log.children.items():
+                    click.echo("{} {}".format(len(val.error), len(val.success)))
+            else:
+                click.echo("Test file {}:".format(tf))
             lc = log.log_count
             ts += lc[0]
             te += lc[1]

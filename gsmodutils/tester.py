@@ -310,10 +310,12 @@ class GSMTester(object):
 
     def _load_default_tests(self):
         """Tests that users don't need to write - load models, load designs, load conditions"""
+        df_log = self.log['default_tests']
+
         for model_path in self.project.config.models:
             # Checking model functions without design
             tf_name = 'model_{}'.format(model_path)
-            log = self.log[tf_name]
+            log = df_log.create_child(tf_name)
             kwargs = dict(log=log, model_path=model_path)
             self.default_tests[tf_name] = (self._df_model_test, kwargs)
             self._task_execs[tf_name] = self._exec_default
@@ -327,7 +329,7 @@ class GSMTester(object):
 
             for model_path in cmodels:
                 tf_name = 'conditions_{}:model_{}'.format(model_path, ckey)
-                log = self.log[tf_name]
+                log = df_log.create_child(tf_name)
                 kwargs = dict(log=log, model_path=model_path, conditions=ckey)
                 self.default_tests[tf_name] = (self._df_model_test, kwargs)
                 self._task_execs[tf_name] = self._exec_default
@@ -335,13 +337,13 @@ class GSMTester(object):
         for design in self.project.designs:
             # Load model design with design applied
             tf_name = 'design_{}'.format(design['id'])
-            log = self.log[tf_name]
+            log = df_log.create_child(tf_name)
             kwargs = dict(log=log, design=design)
             self.default_tests[tf_name] = (self._df_design_test, kwargs)
             self._task_execs[tf_name] = self._exec_default
 
     def _exec_default(self, tid):
-        return self.default_tests[tid]
+        yield self.default_tests[tid][0](self.default_tests[tid][1])
 
     def _run_default_tests(self):
         """ Run tests for models, designs, conditions"""
