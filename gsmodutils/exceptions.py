@@ -9,3 +9,8 @@ class ProjectNotFound(Exception):
 class ProjectConfigurationError(Exception):
     """ Used if project configuration is erroneous """
     pass
+
+
+class DesignError(Exception):
+    """ Design error occurs when their is an issue with a given design file """
+    pass

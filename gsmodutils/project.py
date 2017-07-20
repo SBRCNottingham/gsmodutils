@@ -5,7 +5,7 @@ import glob
 import cobra
 
 from gsmodutils.model_diff import model_diff
-from gsmodutils.exceptions import ProjectNotFound
+from gsmodutils.exceptions import ProjectNotFound, DesignError
 from gsmodutils.project_config import ProjectConfig, default_project_file
 from gsmodutils.tester import GSMTester
 
@@ -197,7 +197,7 @@ class GSMProject(object):
         
         return design_dict
     
-    def load_design(self, design, model=None, copy=False):
+    def load_design(self, design, model=None, copy=False, parent_stack=None):
         """
         Returns a model with a specified design modification
         
@@ -213,6 +213,7 @@ class GSMProject(object):
             "id":""
         
         optional fields:
+            "parent": str - parent design to be applied first
             "conditions": ""
             "removed_reactions":[]
             "removed_metabolites":[]
@@ -220,17 +221,11 @@ class GSMProject(object):
         Note if conditions is specified it is loaded first
         other bounds are set afterwards
         """
-        if type(model) in [type(None), str, unicode]:
-            mdl = self.load_model(mpath=model)
-            # TODO: type check model is actually a constraints based model (cameo/cobra)
-        elif copy:
-            mdl = model.copy()
-        else:
-            # TODO: type check model is actually a constraints based model (cameo/cobra)
-            mdl = model
+
+        if parent_stack is None:
+            parent_stack = []
 
         if type(design) is not dict:
-            
             if design in self.list_designs:
                 design = self._construct_design(design)
             # just load a path
@@ -240,6 +235,21 @@ class GSMProject(object):
                     design = json.load(dfctx)
             else:
                 raise IOError('design not found')
+
+        if 'parent' in design and design['parent'] not in [None, '']:
+            if design['parent'] in parent_stack:
+                raise DesignError('Cyclic behaviour detected in parental design. Consider running a project clean.')
+
+            parent_stack += [design['parent']]
+            mdl = self.load_design(design['parent'], model=model, copy=copy, parent_stack=parent_stack)
+        elif type(model) in [type(None), str, unicode]:
+            mdl = self.load_model(mpath=model)
+            # TODO: type check model is actually a constraints based model (cameo/cobra)
+        elif copy:
+            mdl = model.copy()
+        else:
+            # TODO: type check model is actually a constraints based model (cameo/cobra)
+            mdl = model
 
         # load specified conditions
         if 'conditions' in design and design['conditions'] is not None:
