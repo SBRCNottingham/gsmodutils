@@ -233,10 +233,15 @@ class GSMProject(object):
                 # Design is a path
                 with open(design) as dfctx:
                     design = json.load(dfctx)
+            elif len(parent_stack):
+                raise DesignError('Parent design {} does not exist.'.format(parent_stack[-1]))
             else:
-                raise IOError('design not found')
+                raise IOError('Design {} not found.'.format(design))
 
         if 'parent' in design and design['parent'] not in [None, '']:
+            if type(design['parent']) is not str:
+                raise DesignError('Parent design must be a string identifier.')
+
             if design['parent'] in parent_stack:
                 raise DesignError('Cyclic behaviour detected in parental design. Consider running a project clean.')
 
