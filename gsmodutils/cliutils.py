@@ -5,8 +5,19 @@ from __future__ import absolute_import, division, generators, print_function, ne
 import os
 import json
 import click
-
 from gsmodutils.exceptions import ProjectNotFound
+
+
+def load_project(project_path):
+    from gsmodutils.project import GSMProject
+    project = None
+    try:
+        project = GSMProject(project_path)
+    except ProjectNotFound:
+        click.echo('Error project not found in path'.format(project_path))
+        exit()
+
+    return project
 
 
 @click.group()
@@ -58,22 +69,12 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
 @click.option('--log_path', default=None, type=click.Path(writable=True), help='path to output json test log')
 def test(project_path, test_id, display_only, skip_default, verbose, log_path):
     """Run tests for a project"""
-    # TODO: individual test files
-    click.echo('Collecting tests...')
-        
-    from gsmodutils.project import GSMProject
-    try:
-        project = GSMProject(project_path)
-        tester = project.project_tester()
-    except ProjectNotFound: 
-        click.echo(
-            click.style('Error: gsmodutils project not found in this path', fg='red')
-        )
-        exit()
-
+    project = load_project(project_path)
+    tester = project.project_tester()
     # Collect list of tests
+    click.echo('Collecting tests...')
     tester.collect_tests()
-    
+
     # Display errors
     for tf, e in tester.load_errors:
         click.echo(
@@ -123,11 +124,11 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
         if verbose:
             click.echo("verbose mode, showing successes and failures")
             click.echo()
-        
-        with click.progressbar(tester.iter_tests(skip_default=skip_default), label='Running tests: ') as bar:
-            for x in bar:
-                pass
-        
+
+        print('Running tests: ', end='')
+        for _ in tester.iter_tests(skip_default=skip_default):
+            print('.', end='')
+        click.echo()
         ts = 0
         te = 0
         for tf, log in tester.log.items():
@@ -205,8 +206,6 @@ def create_project(project_path, model_path):
 
     click.echo('Using mode {}'.format(project_path))
 
-    add_models = []
-
     description = click.prompt('Please enter a project description', type=unicode)
     author = click.prompt('Author name', type=unicode)
     author_email = click.prompt('Author email', type=str)
@@ -217,7 +216,7 @@ def create_project(project_path, model_path):
             author_email=author_email
     )
     
-    # TODO: find out how to add multple path
+    # TODO: find out how to add multiple paths with click
     add_models = [model_path]
     if model_path is None:
         # Create a new model
@@ -245,54 +244,84 @@ def create_project(project_path, model_path):
         )
         
         
-@click.command()
-def model_diff(model_a=None, model_b=None, revision=None):
-    """
-    Create a diff report of two models
-    """
-    click.echo('')
+# @click.command()
+# def model_diff(model_a=None, model_b=None):
+    # """ Create a diff report of two models """
+    # click.echo('')
 
 
 @click.command()
-def add_model():
-    pass
+@click.argument('path', help='path to model')
+@click.option('--project_path', default='.', help='gsmodutils project path')
+@click.option('--diff', default=True, help='Make sure model is unique to this project')
+@click.option('--validate/--no-validate', default=True, help='Chose to validate the model before it is added.')
+def add_model(path, project_path, diff, validate):
+    """Add a model to a specified gsm project"""
+    load_project(project_path)
+    # Check the diff between other models
+    if diff:
+        pass
+
+    project = None
+    try:
+        project.add_model(path, validate=validate)
+    except KeyError:
+        click.echo(click.style('Model of the same naem already included in project', fg='red'))
+        exit()
+
+    click.echo('Model successfully added to project')
 
 
 @click.command()
-def add_design():
-    pass
+@click.argument('path', help='path to model')
+@click.argument('ident', help='design identifier (save path)')
+@click.argument('--name', default=None, help='Formal design name (longer than identifier)')
+@click.option('--description', default=None, help='Description of what the design does')
+@click.option('--project_path', default='.', help='gsmodutils project path')
+@click.option('--parent', default=None, help='A parent design that was applied first to avoid replication.')
+@click.option('--base_model', default=None, help='Model that design is based on')
+def add_design(path, ident, name, description, project_path, parent, base_model):
+    """Specify a path to a model and """
+    import cameo
+    model = cameo.load_model(path)
+    project = load_project(project_path)
+    project.save_design(model, ident, name=name, description=description, parent=parent)
+
+    click.echo('Design successfully added to project')
 
 
 @click.command()
-def add_conditions():
-    pass
+@click.argument('path', help='path to model')
+@click.argument('ident', help='unique conditions identifier used for reloading')
+@click.option('--project_path', default='.', help='gsmodutils project path')
+@click.option('--apply_to', default=None, help='Description of what the design does')
+@click.option('--growth/--no_growth', default=True, help='Should these conditions allow growth or not')
+def add_conditions(path, ident, project_path, apply_to, growth):
+    """ Add a given set of media condtions from a model """
+    import cameo
+    model = cameo.load_model(path)
+    project = load_project(project_path)
+    project.save_conditions(model, ident, apply_to=apply_to, observe_growth=growth)
 
 
 @click.command()
-def add_test_case():
-    pass
-
-
-@click.command()
+@click.option('--filepath', default=None, help='output filename')
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--model_id', default=None, help='Base model id')
 @click.option('--conditions', default=None, help='conditions to apply')
 @click.option('--design', default=None, help='design to apply')
-@click.option('--filepath', default=None, help='output filename')
 @click.option('--format', default=None, help='output to smbl, json, matlab format')
-def export(project_path, model_id, design, conditions, filepath, file_format):
+def export(filepath, project_path, model_id, design, conditions, file_format):
     """ Export a given model with a specific design and conditions applied """
     pass
 
+
 @click.command()
 def info():
-    """ 
-    Display all the information about a gsmodutils project (list models, paths, designs etc.
-    """
+    """ Display all the information about a gsmodutils project (list models, paths, designs etc. """
     pass
     
 
 cli.add_command(test)
+cli.add_command(add_model)
 cli.add_command(create_project)
-
-

@@ -13,8 +13,6 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
     This hasn't be thoroughly tested so expect there to be bugs
     
     To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media
-    
-    NOTE Only designed and tested for the cupriavidus model!
     """
 
     if objective_reactions is None:
@@ -216,7 +214,7 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
                     elif token == ')':
                         in_include = False
                     elif token in fp_stack:
-                        raise Exception('Cyclic depedncy for file {}'.format(token))
+                        raise Exception('Cyclic dependency for file {}'.format(token))
                     else:
                         rset, mset = parse_file(token, fp_stack + [filepath], rel_path)
                         reactions += rset

@@ -147,6 +147,9 @@ class GSMProject(object):
 
         # check model isn't in the project already
         npath = os.path.basename(model_path)
+        if npath in self.config.models:
+            raise KeyError('Model of the same name already included in project')
+
         # add model to project and save configuration
         self.config.models.append(npath)
         self.config.save_config(self.project_path)
@@ -324,7 +327,8 @@ class GSMProject(object):
 
         return mdl
     
-    def save_design(self, model, did, name, description='', conditions=None, base_model=None, overwrite=False):
+    def save_design(self, model, did, name, description='', conditions=None, base_model=None, parent=None,
+                    overwrite=False):
         """
         Creates a design from a diff of model_a and model_b
         
@@ -338,11 +342,16 @@ class GSMProject(object):
         :param description: text description of what it does
         :param conditions: conditions that should be applied for the design
         :param base_model: Model that the design should be derived from - specified model included in project
+        :param parent: string for parent design that this design is a diff from
         :param overwrite: overwrite and existing design (only applies if the id is already in use)
         """
         # Test, infesible designs should not be added
         model.solve()
-        
+
+        if parent is not None and parent not in self.designs:
+            # check that the parent design actually exists
+            raise DesignError('specified parent not found')
+
         did = str(did).replace(' ', '_')
         design_save_path = os.path.join(self.design_path, '{}.json'.format(did))
 
@@ -350,10 +359,13 @@ class GSMProject(object):
             raise IOError('File {} exists'.format(design_save_path))
 
         # Load either default model or model path
-        if type(base_model) in [type(None), unicode, str]:
+        if type(base_model) in [type(None), unicode, str] and parent is None:
             base_model = self.load_model(mpath=base_model)
             if conditions is not None:
                 self.load_conditions(conditions, base_model)
+        elif parent is not None:
+            # If a parent design is specified this model is loaded first
+            base_model = self.load_design(parent)
         
         if base_model is None:
             raise IOError('Base model not found')
@@ -366,11 +378,10 @@ class GSMProject(object):
         diff['name'] = name
         diff['conditions'] = conditions
         diff['base_model'] = base_model.id
+        diff['parent'] = parent
 
         with open(design_save_path, 'w+') as dsp:
             json.dump(diff, dsp, indent=4)
-        
-        # TODO: adding to mercurial repository
         
         return diff
     
