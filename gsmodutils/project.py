@@ -9,8 +9,9 @@ from gsmodutils.exceptions import ProjectNotFound, DesignError
 from gsmodutils.project_config import ProjectConfig, default_project_file
 from gsmodutils.tester import GSMTester
 
-from cameo.exceptions import Infeasible
+from cobra.exceptions import Infeasible
 from lockfile import LockFile
+from cameo.core.utils import load_medium
 
 
 class GSMProject(object):
@@ -282,32 +283,34 @@ class GSMProject(object):
             metab.compartment = metabolite['compartment']
             
             if metab.id not in mdl.metabolites:
-                mdl.add_metabolite(metab)  
+                mdl.add_metabolites([metab])
                 
         # Add new or changed reactions to model
         for rct in design['reactions']:
             if rct['id'] in mdl.reactions:
                 reaction = mdl.reactions.get_by_id(rct['id'])
-                reaction.clear_metabolites()
-                reaction.add_metabolites(rct['metabolites'])
-            else:
-                reaction = cobra.Reaction()
-                reaction.id = rct['id']
+                reaction.remove_from_model()
+
+            reaction = cobra.Reaction()
+            reaction.id = rct['id']
 
             reaction.name = rct['name']
             reaction.lower_bound = rct['lower_bound']
             reaction.upper_bound = rct['upper_bound']
-            reaction.objective_coefficient = rct['objective_coefficient']
+
             reaction.gene_reaction_rule = rct['gene_reaction_rule']
             reaction.subsystem = rct['subsystem']
             reaction.name = rct['name']
             reaction.variable_kind = rct['variable_kind']
 
-            if rct['id'] not in mdl.reactions:
-                mdl.add_reaction(reaction)
-                reaction = mdl.reactions.get_by_id(reaction.id)
-                reaction.add_metabolites(rct['metabolites'])
-            
+            mdl.add_reactions([reaction])
+            reaction = mdl.reactions.get_by_id(reaction.id)
+
+            metabolites = dict([(str(x), v) for x,v in rct['metabolites'].items()]) # fixes bug in cobra with unicode
+
+            reaction.add_metabolites(metabolites)
+            reaction.objective_coefficient = rct['objective_coefficient']
+
         # delete removed metabolites/reactions
         if 'removed_reactions' in design:
             for rtid in design['removed_reactions']:
@@ -345,8 +348,10 @@ class GSMProject(object):
         :param parent: string for parent design that this design is a diff from
         :param overwrite: overwrite and existing design (only applies if the id is already in use)
         """
-        # Test, infesible designs should not be added
-        model.solve()
+        # Test, infeasible designs should not be added
+        status = model.solver.optimize()
+        if status == 'infeasible':
+            raise Infeasible('Could not find valid solution')
 
         if parent is not None and parent not in self.designs:
             # check that the parent design actually exists
@@ -401,7 +406,7 @@ class GSMProject(object):
             mdl = model
         
         conditions_store = self.get_conditions(update=True)
-        mdl.load_medium(conditions_store['growth_conditions'][conditions_id]['media'])
+        load_medium(mdl, conditions_store['growth_conditions'][conditions_id]['media'])
         
         return mdl
 
@@ -427,15 +432,11 @@ class GSMProject(object):
         :return:
         """
         # If it can't get a solution then this will raise errors.
-
-        if observe_growth:
-            model.solve()
-        else:
-            try:
-                model.solve()
-                raise AssertionError('Model should not grow')
-            except Infeasible:
-                pass  # This is what should happen
+        status  = model.solver.optimize()
+        if not observe_growth and status != 'infeasible':
+            raise AssertionError('Model should not grow')
+        elif observe_growth and status == 'infeasible':
+            raise Infeasible('Cannot find valid solution - should conditions result in growth?')
 
         if apply_to is None:
             apply_to = []
@@ -481,8 +482,6 @@ class GSMProject(object):
         with self._project_context_lock:
             with open(self._conditions_file, 'w+') as cf:
                 json.dump(conditions_store, cf, indent=4)
-        
-        # TODO: mercurial commit
 
     def clean_project(self, auto_remove=False):
         """
@@ -491,6 +490,7 @@ class GSMProject(object):
         also removed.
         :return: tuple(list, list) of all orphan designs and conditions (ones removed if auto_remove is set to true)
         """
+        # TODO: remove bad designs
         with self._project_context_lock:
             bad_entries = []
             models = self.config.models
@@ -509,7 +509,3 @@ class GSMProject(object):
                         elif auto_remove and len(bad_entries):
                             conditions['models'] = [x for x in conditions['models'] if x not in bad_entries]
                             self._write_conditions(conditions_store)
-
-            # for designs we have to check if models and conditions have been removed
-
-        return

@@ -8,7 +8,7 @@ TODO: tests for command line interface
 from __future__ import print_function, absolute_import, division
 import pytest
 from gsmodutils.project import GSMProject
-import cameo
+import cobra
 import os
 from tutils import FakeProjectContext
 
@@ -43,7 +43,7 @@ def test_create_design():
         model.reactions.UDPGD.remove_from_model()
 
         # Add a reaction with a hetrologous metabolite
-        metabolite = cameo.Metabolite()
+        metabolite = cobra.Metabolite()
         metabolite.id = 'test_c'
         metabolite.name = 'test_metabolite'
         metabolite.charge = 0
@@ -52,9 +52,9 @@ def test_create_design():
         metabolite.annotation = {}
         metabolite.compartment = 'c'
         
-        model.add_metabolite(metabolite)
+        model.add_metabolites([metabolite])
         
-        reaction = cameo.Reaction()
+        reaction = cobra.Reaction()
     
         reaction.id = 'test_reaction'
         reaction.name = 'test'
@@ -70,9 +70,9 @@ def test_create_design():
             'o2_c':1
         })
         
-        model.add_demand(metabolite)
+        model.add_boundary(metabolite, type='demand')
         
-        # Add transporter for hetrologous metabolit
+        # Add transporter for hetrologous metabolite
         project.save_design(model, 'test_design', 'test design 01', 'This is a test', conditions='xylose_growth')
         del model
     
@@ -117,6 +117,4 @@ def test_load_conditions():
         
         assert new_model.reactions.EX_xyl__D_e.lower_bound == -8.00
         assert new_model.reactions.EX_glc__D_e.lower_bound == 0.0
-        
-        
-        
+

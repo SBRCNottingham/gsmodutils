@@ -12,8 +12,7 @@ def model_diff(model_a, model_b):
     new values
     
     Diff assumes l -> r (i.e. model_a is the base model)
-    
-    TODO: Make a model_diff object that is json serialisable/can be converted to a dict
+
     TODO: Make a command line tool that outputs a report file listing all of the ways in which two models are different
     """
     

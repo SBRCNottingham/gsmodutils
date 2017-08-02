@@ -8,7 +8,8 @@ import json
 from tutils import FakeProjectContext
 import os
 import pytest
-from cameo.exceptions import Infeasible
+from cobra.exceptions import Infeasible
+from cameo.core.utils import load_medium
 
 
 def test_json_tests():
@@ -56,7 +57,7 @@ def test_func(model, project, log):
     log.assertion(True, "Works", "Does not work", "Test")
     
 def test_model(model, project, log):
-    solution = model.solve()
+    solution = model.solver.optimize()
     log.assertion(solution.f > 0.0, "Model grows", "Model does not grow")
     
     """
@@ -102,11 +103,11 @@ def test_conditions():
             EX_zn2_e=-99999.0
         )
         mdl = fp.project.model
-        mdl.load_medium(conditions)
-        mdl.solve()
+        load_medium(mdl, conditions)
+        mdl.solver.optimize()
         fp.project.save_conditions(mdl, "xyl_src", apply_to=fp.project.config.default_model)
 
-        mdl.load_medium(dict())
+        load_medium(mdl, dict())
         fp.project.save_conditions(mdl, "bad", apply_to=fp.project.config.default_model, observe_growth=False)
 
         # Shouldn't allow conditions that don't grow without being formally specified

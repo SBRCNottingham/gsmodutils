@@ -1,5 +1,4 @@
 import cobra
-from cameo import Metabolite as cameoMetabolite
 
 
 class FrozenDict(dict):
@@ -56,7 +55,7 @@ def convert_stoich(stoich):
     """
     n_stoich = {}
     for meta, val in stoich.items():
-        if type(meta) in [cameoMetabolite, cobra.Metabolite]:
+        if type(meta) in [cobra.Metabolite]:
             n_stoich[meta.id] = val
         else:
             n_stoich[meta] = val

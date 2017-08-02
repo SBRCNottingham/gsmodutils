@@ -1,7 +1,6 @@
 from __future__ import print_function, absolute_import, division
 from gsmodutils.exceptions import ProjectConfigurationError
 import gsmodutils
-import hglib
 import cobra
 import os
 import shutil
@@ -35,7 +34,7 @@ class ProjectConfig(object):
         self.tests_dir = default_testsfp
         self.design_dir = default_designsfp
         self.conditions_file = default_model_conditionsfp
-        self.repository_type = 'hg'
+        self.repository_type = None
         self.default_model = None
         self.models = []
 
@@ -95,7 +94,7 @@ class ProjectConfig(object):
 
         return conditions_fp
 
-    def save_config(self, project_path, commit=False):
+    def save_config(self, project_path):
         """
         
         args:
@@ -105,13 +104,6 @@ class ProjectConfig(object):
 
         with open(configuration_fp, 'w+') as configf:
             json.dump(self._to_save_dict(), configf, indent=4)
-
-        if commit:
-            try:
-                repository = hglib.open(project_path)
-                repository.commit('Initial commit for model, auto generated commit by gsm_project.py')
-            except hglib.error.CommandError:
-                pass
 
         return configuration_fp
 
@@ -150,18 +142,6 @@ class ProjectConfig(object):
             addmodels = []
 
         try:
-            # Create a mercurial repo if there isn't an existing one
-            try:
-                hglib.init(project_path)
-                # For removal if there is an error in a directory that exists without a mercurial repo
-                added_directories.append(os.path.join(project_path, '.hg'))
-            except hglib.error.CommandError:
-                # We can work with an existing mercurial project if its there
-                # This might create some errors for users
-                pass
-            
-            repository = hglib.open(project_path)
-            
             # create the folder stcuture
             tests_directory = os.path.join(project_path, self.tests_dir)
             
@@ -200,32 +180,25 @@ class ProjectConfig(object):
                     if len(vcheck['errors']):
                         raise ProjectConfigurationError('Invalid model {}'.format(mdl_path))
 
-                # copy model file to repository (if not already there)
                 if cpy_path != mdl_path:
                     shutil.copy(mdl_path, cpy_path)
                     added_files.append(cpy_path)  # to delete copied files, not existing ones
                 
                 # Add the model to the configuration
                 self.models.append(os.path.basename(mdl_path))
-                repository.add(cpy_path)
 
             self.default_model = self.models[0]
 
             configuration_fp = self.save_config(project_path)
             added_files.append(configuration_fp)
-            repository.add(configuration_fp)
             
             conditions_fp = self._create_empty_conditions_file(project_path)
             added_files.append(conditions_fp)
-            repository.add(conditions_fp)
-            
+
             if docker:
                 docker_image_path = self._create_docker_file(project_path)
                 added_files.append(docker_image_path)
-                repository.add(docker_image_path)
-            
-            repository.commit('Initial commit for model, auto generated commit by gsm_project.py')
-            
+
         except:
             # Cleanup after ourselves upon failure - i.e. don't create a new project
             # This flag is important - the code should never delete an existing user space!

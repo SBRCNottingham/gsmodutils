@@ -1,4 +1,4 @@
-cameo>=0.10.3
+cameo>=0.11.0
 mercurial>=4.2.1
 pytest>=3.0.7
 python-hglib

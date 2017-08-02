@@ -1,5 +1,6 @@
 import gsmodutils
-from cameo.exceptions import Infeasible
+from cobra.exceptions import Infeasible
+from cobra.core import get_solution
 import sys
 from io import StringIO
 import contextlib
@@ -105,8 +106,11 @@ class GSMTester(object):
         broken up code for testing individual entries
         """
         try:
-            mdl.solve()
-                
+            status = mdl.solver.optimize()
+
+            if status == 'infeasible':
+                raise Infeasible('Cannot find solution')
+
             # Test entries that require non-zero fluxes
             for rid in entry['required_reactions']:
                 
@@ -275,13 +279,15 @@ class GSMTester(object):
         Check a model produces a steady state flux solution
         :return: bool
         """
-        try:
-            solution = model.solve()
-            if solution.f != 0:
-                return True
+
+        status = model.solver.optimize()
+        if status == 'infeasible':
             return False
-        except Infeasible:
-            return False
+
+        solution = get_solution(model)
+        if solution.f != 0:
+            return True
+        return False
 
     def _df_model_test(self, log, model_path, conditions=None):
         model = self.project.load_model(model_path)

@@ -13,7 +13,6 @@ import cameo
 import cobra
 import os
 import shutil
-import hglib
 import tempfile
 from tutils import FakeProjectContext
 
@@ -32,7 +31,7 @@ def project_creator(test_path, model=True, model_path=None):
         add_models = [model_path]
     
     configuration = dict(description='TEST PROJECT ONLY', author='test', author_email='123@abc.com', default_model=None,
-                         models=[], repository_type='hg', conditions_file=default_model_conditionsfp,
+                         models=[], repository_type=None, conditions_file=default_model_conditionsfp,
                          tests_dir='tests', design_dir='designs')
     
     cfg = ProjectConfig(**configuration)
@@ -56,9 +55,6 @@ def test_create_project():
 
         # check project loads
         GSMProject(ctx.path)
-        # check mercurial project exists and can load
-        assert os.path.exists(os.path.join(ctx.path, '.hg'))
-        hglib.open(ctx.path)
 
 
 def test_existing_project():

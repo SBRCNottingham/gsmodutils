@@ -327,4 +327,4 @@ cli.add_command(add_model)
 cli.add_command(create_project)
 
 if __name__ == "__main__":
-    cli()ix
+    cli()

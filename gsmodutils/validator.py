@@ -33,19 +33,20 @@ def validate_model(model):
             warnings.append("reaction '%s' is not balanced for %s" %
                             (reaction.id, ", ".join(sorted(balance))))
 
+    from cobra.core import get_solution
     # try solving
     try:
-        solution = model.solve()
+        status = model.solver.optimize()
+        solution = get_solution(model)
     except Exception as e:
         errors.append("model can not be solved %s" % e.message)
         return {"errors": errors, "warnings": warnings}
-    
+
     if solution.status != "optimal":
         errors.append("model can not be solved (status '%s')" % solution.status)
         return {"errors": errors, "warnings": warnings}
 
     # if there is no objective, then we know why the objective was low
-
     if solution.objective_value <= 0:
         warnings.append("model can not produce nonzero biomass")
     if solution.objective_value <= 1e-3:

@@ -3,8 +3,7 @@ import os
 import argparse
 import json
 import cobra
-import cameo
-
+from cameo.core.utils import load_medium
 
 def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
                        media=None, objective_reactions=None, obj_dir='max'):
@@ -24,16 +23,16 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
     rel_path = '/'.join(os.path.abspath(filepath).split('/')[:-1])
 
     reactions, metabolites = parse_file(os.path.abspath(filepath).split('/')[-1], rel_path=rel_path)
-    model = cameo.Model()
+    model = cobra.Model()
     for mid in metabolites:
-        m = cameo.Metabolite(id=mid)
-        model.add_metabolite(m)
+        m = cobra.Metabolite(id=mid)
+        model.add_metabolites([m])
     
     added_reactions = []
     for reaction in reactions:
         if reaction['id'] not in added_reactions:
-            r = cameo.Reaction(reaction['id'])
-            model.add_reaction(r)
+            r = cobra.Reaction(reaction['id'])
+            model.add_reactions([r])
             r.lower_bound = reaction['bounds'][0]
             r.upper_bound = reaction['bounds'][1]
             r.add_metabolites(reaction['metabolites'])
@@ -60,7 +59,7 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
             exch.lower_bound = -1000
             exch.upper_bound = 1000
 
-    model.load_medium(media)
+    load_medium(model, media)
     
     try:
         atpase = model.reactions.get_by_id(atpase_reaction)
