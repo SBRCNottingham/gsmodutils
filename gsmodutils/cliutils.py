@@ -251,7 +251,7 @@ def create_project(project_path, model_path):
 
 
 @click.command()
-@click.argument('path', help='path to model')
+@click.argument('path')
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--diff', default=True, help='Make sure model is unique to this project')
 @click.option('--validate/--no-validate', default=True, help='Chose to validate the model before it is added.')
@@ -273,8 +273,8 @@ def add_model(path, project_path, diff, validate):
 
 
 @click.command()
-@click.argument('path', help='path to model')
-@click.argument('ident', help='design identifier (save path)')
+@click.argument('path')
+@click.argument('ident')
 @click.argument('--name', default=None, help='Formal design name (longer than identifier)')
 @click.option('--description', default=None, help='Description of what the design does')
 @click.option('--project_path', default='.', help='gsmodutils project path')
@@ -291,8 +291,8 @@ def add_design(path, ident, name, description, project_path, parent, base_model)
 
 
 @click.command()
-@click.argument('path', help='path to model')
-@click.argument('ident', help='unique conditions identifier used for reloading')
+@click.argument('path')
+@click.argument('ident')
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--apply_to', default=None, help='Description of what the design does')
 @click.option('--growth/--no_growth', default=True, help='Should these conditions allow growth or not')
