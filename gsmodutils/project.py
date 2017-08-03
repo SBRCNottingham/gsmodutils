@@ -327,7 +327,7 @@ class GSMProject(object):
                     met.remove_from_model()
                 except KeyError:
                     pass
-
+        mdl.id += ":design_{}".format(design["id"])
         return mdl
     
     def save_design(self, model, did, name, description='', conditions=None, base_model=None, parent=None,
