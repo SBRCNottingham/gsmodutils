@@ -1,3 +1,4 @@
+cobra>=0.8.1
 cameo>=0.11.0
 mercurial>=4.2.1
 pytest>=3.0.7

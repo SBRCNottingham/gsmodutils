@@ -1,4 +1,4 @@
-from cameo import Reaction, Metabolite
+from cobra import Reaction, Metabolite
 import os
 from collections import defaultdict, Counter
 
@@ -80,18 +80,29 @@ def add_pathway(model, enzyme_ids=None, reaction_ids=None, db_path=None, copy=Fa
         reaction_ids += erids
 
     added_reactions = []
+    added_metabolites = []
     for rid in set(reaction_ids):
         if rid not in model.reactions:
-            react = add_reaction(model, rid, db)
+            react, ametabolites = add_reaction(model, rid, db)
             added_reactions.append(react)
+            added_metabolites += added_metabolites
 
+    added_boundaries = []
     for react in added_reactions:
         for metabolite in react.metabolites:
             # Check if orphan. if so, add transporter out
             if len(metabolite.reactions) == 1:
-                model.add_boundary(metabolite, type='exchange')
+                rb = model.add_boundary(metabolite, type='exchange')
+                added_boundaries.append(rb)
 
-    return model, added_reactions
+    rdict = dict(
+        model=model,
+        added_reactions=added_reactions,
+        added_metabolites=added_metabolites,
+        added_boundaries=added_boundaries,
+    )
+
+    return rdict
 
 
 def get_enzyme_reactions(eid, db):
@@ -120,13 +131,14 @@ def add_reaction(model, reaction_id, db):
         metabolites[mid] = -1 * coef
 
     model.add_reaction(reaction)
-
+    added_metabolites = []
     for mid in metabolites:
         if mid not in model.metabolites:
             m = Metabolite(id=mid)
             m.name = db['compounds'][mid]['COMMON-NAME']
             # TODO: add other metabolite info
-            model.add_metabolite(m)
+            model.add_metabolites([m])
+            added_metabolites.append(mid)
 
     reaction.add_metabolites(metabolites)
     if dbr['REACTION-DIRECTION'] in ['LEFT-TO-RIGHT', 'PHYSIOL-LEFT-TO-RIGHT']:
@@ -139,4 +151,4 @@ def add_reaction(model, reaction_id, db):
         reaction.lower_bound = -1000.0
         reaction.upper_bound = 1000.0
 
-    return reaction
+    return reaction, added_metabolites

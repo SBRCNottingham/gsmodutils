@@ -273,19 +273,20 @@ def add_model(path, project_path, diff, validate):
 
 
 @click.command()
-@click.argument('path')
-@click.argument('ident')
-@click.argument('--name', default=None, help='Formal design name (longer than identifier)')
+@click.argument('model_path')
+@click.argument('identifier')
+@click.option('--name', default=None, help='Formal design name (longer than identifier)')
 @click.option('--description', default=None, help='Description of what the design does')
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--parent', default=None, help='A parent design that was applied first to avoid replication.')
 @click.option('--base_model', default=None, help='Model that design is based on')
-def add_design(path, ident, name, description, project_path, parent, base_model):
+def add_design(model_path, identifier, name, description, project_path, parent, base_model):
     """Specify a path to a model and """
     import cameo
-    model = cameo.load_model(path)
+    model = cameo.load_model(model_path)
     project = load_project(project_path)
-    project.save_design(model, ident, name=name, description=description, parent=parent)
+
+    project.save_design(model, identifier, name=name, description=description, parent=parent)
 
     click.echo('Design successfully added to project')
 

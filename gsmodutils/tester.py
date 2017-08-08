@@ -332,7 +332,6 @@ class GSMTester(object):
         for ckey, cdf in self.project.conditions['growth_conditions'].items():
             # Load model that conditions applies to (default is all models in project)
             cmodels = self.project.config.models
-            print(ckey, cdf)
             if len(cdf['models']):
                 cmodels = cdf['models']
 
@@ -343,7 +342,7 @@ class GSMTester(object):
                 self.default_tests[tf_name] = (self._df_model_test, kwargs)
                 self._task_execs[tf_name] = self._exec_default
 
-        for design in self.project.designs:
+        for design in self.project.designs.values():
             # Load model design with design applied
             tf_name = 'design_{}'.format(design['id'])
             log = df_log.create_child(tf_name)

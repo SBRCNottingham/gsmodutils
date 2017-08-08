@@ -172,19 +172,39 @@ class GSMProject(object):
              
         for dpath in designs_direct:
             with open(dpath) as dsgn_ctx_file:
-                # TODO: validate design schema
-                # if designs don't conform to schema, ignore them
-                # maybe add option for throwing errors?
                 d_id = os.path.basename(dpath).split(".json")[0]
-                designs_s[d_id] = json.load(dsgn_ctx_file)
-        
+                ft = json.load(dsgn_ctx_file)
+                # if designs don't conform to schema, ignore them
+                if self._validate_design(ft):
+                    designs_s[d_id] = ft
+
         return designs_s
-    
+
+    @staticmethod
+    def _validate_design(ft):
+        """ validates design dictionaries for required fields"""
+        required_fields = ["id", "name", "description", "metabolites", "reactions", "genes"]
+        for field in required_fields:
+            if field not in ft:
+                return False
+
+        return True
+
     @property
-    def list_designs(self):
+    def list_designs(self, valid=False):
         designs_direct = glob.glob(
             os.path.join(self._project_path, self.config.design_dir, '*.json'))
-        
+
+        if valid:
+            n_direct = []
+            for dpath in designs_direct:
+                with open(dpath) as dsgn_ctx_file:
+                    ft = json.load(dsgn_ctx_file)
+                    if self._validate_design(ft):
+                        n_direct.append(dpath)
+
+            designs_direct = n_direct
+
         return [os.path.basename(dpath).split(".json")[0] for dpath in designs_direct]
     
     def _construct_design(self, design_id):
@@ -306,7 +326,7 @@ class GSMProject(object):
             mdl.add_reactions([reaction])
             reaction = mdl.reactions.get_by_id(reaction.id)
 
-            metabolites = dict([(str(x), v) for x,v in rct['metabolites'].items()]) # fixes bug in cobra with unicode
+            metabolites = dict([(str(x), v) for x, v in rct['metabolites'].items()])  # fixes bug in cobra with unicode
 
             reaction.add_metabolites(metabolites)
             reaction.objective_coefficient = rct['objective_coefficient']
@@ -432,7 +452,7 @@ class GSMProject(object):
         :return:
         """
         # If it can't get a solution then this will raise errors.
-        status  = model.solver.optimize()
+        status = model.solver.optimize()
         if not observe_growth and status != 'infeasible':
             raise AssertionError('Model should not grow')
         elif observe_growth and status == 'infeasible':
