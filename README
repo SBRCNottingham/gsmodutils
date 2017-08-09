@@ -1,7 +1,7 @@
-Genome scale model development framework.
+# Genome scale model development framework.
 Initially developed by the Nottingham SBRC for use with their genome scale models.
 
---gsm_project---
+## gsm_project
 Main script is gsm_project; this creates new genome scale model projects given an SBML or JSON file. This creates a folder structre in location with name specified.
 
 * An initial mercruial repository is created with a first commit message.
@@ -13,13 +13,13 @@ Main script is gsm_project; this creates new genome scale model projects given a
 * Mercurial hooks for pre-commits that run tests and create testing reports
 
 
----parse_scrumpy---
+## parse_scrumpy
 Parse scrumpy is a tool that allows a user to create COBRA JSON models from scrumpy but has some requirements.
 Note that this script is heavily experimental and only really tested with Nottingham's cupriavidus model. It should parse any model correctly but setting constraints requires a json file with fixed transporter fluxes.
 The flux for the ATPase reaction is also required. As most large scrumpy models are built from  metacyc/biocyc, this is assumed
 
 
--- Library utitlities --
+## Library utitlities
 
 Projects:
 
@@ -41,18 +41,18 @@ Projects:
     This means a design can be loaded and tests compared against design a and design b
     
 
--- Dependencies --
+## Dependencies
 python
 python-pip
 if using docker, docker is required to be installed and configured. 
 
--- Design Problems to resolve --
+## Design Problems to resolve 
 Updating things between versions of this software - what if we add new configuration options? what if structure of project changes?
 
 Test cases - default test cases should be part of the software, maybe include a __version__ check on the template test cases?
 
 
--- Command line utilities ---
+## Command line utilities
     * scrumpy_to_cobra (done)
     Takes a scrumpy (structural!) model and converts it to a cobra compatable model (so you don't need scrumpy installed).
     BIG TODO - have this work with minimisation of reaction fluxes objective function in cobrapy/cameo based models
@@ -81,7 +81,7 @@ Test cases - default test cases should be part of the software, maybe include a 
     * gsmodutils create_image
     Create a docker image of the project in its current state. This image can be run on any system with docker installed making the model and tests portable
     
--- TODO --
+## TODO
 
 * Model diff reports - human readable
 * Test reports - human readable
@@ -103,7 +103,7 @@ Test cases - default test cases should be part of the software, maybe include a 
 * User guide
 * Scripts for starting docker etc
 
--- Future features --
+## Future features
 Comparing diffed models to metanetx common database of reactions
     - Map two models from different sources to the database
     - Show reactions maintained between different models and differences between each other
