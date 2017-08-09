@@ -415,7 +415,7 @@ class GSMProject(object):
         Load a model with a given set of pre-saved media conditions
         :param conditions_id: identifier of conditions file
         :param model: string or cobrapy/cameo model
-        :param copy:
+        :param copy: return copy of model or modify inplace
         :return:
         """
         if model is None or type(model) is str:
@@ -426,17 +426,24 @@ class GSMProject(object):
             mdl = model
         
         conditions_store = self.get_conditions(update=True)
-        load_medium(mdl, conditions_store['growth_conditions'][conditions_id]['media'])
-        
+
+        cx = conditions_store['growth_conditions'][conditions_id]
+        load_medium(mdl, cx['media'])
+        if "carbon_source" in cx and cx["carbon_source"] is not None:
+            # Will throw error if invalid transporter
+            c_tx = mdl.reactions.get_by_id(cx["carbon_source"])
+            c_tx.upper_bound = c_tx.lower_bound
+
         return mdl
 
     def growth_condition(self, conditions_id):
         conditions_store = self.get_conditions(update=True)
         return conditions_store['growth_conditions'][conditions_id]['observe_growth']
 
-    def save_conditions(self, model, conditions_id, apply_to=None, observe_growth=True):
+    def save_conditions(self, model, conditions_id, carbon_source=None, apply_to=None, observe_growth=True):
         """
-        Add media conditions that a given model has to the project
+        Add media conditions that a given model has to the project. Essentially the lower bounds on transport reactions.
+        All other trnasport reactions will be switched off.
 
         In some cases, one may wish to set conditions under which a model should not grow.
         observe_growth allows this to be configured. If using a single model or if the condition should not grow under
@@ -446,7 +453,9 @@ class GSMProject(object):
         the project. All models specified must be contained within the project.
 
         :param model: cobrapy or cameo model
-        :param conditions_id: identifier for the conditions
+        :param conditions_id: identifier for the conditions should be unique
+        :param carbon_source: name of carbon source in the media that has a fixed uptake rate
+        if None this just becomes a lower bound
         :param apply_to: iterable of models that this set of conditions applies to
         :param observe_growth: bool or list.
         :return:
@@ -484,10 +493,15 @@ class GSMProject(object):
         
         # save to conditions file
         conditions_store = self.get_conditions(update=True)
+
+        if carbon_source not in media:
+            raise KeyError("carbon source not valid")
+
         conditions_store['growth_conditions'][conditions_id] = dict(
             media=media,
             models=apply_to,
             observe_growth=observe_growth,
+            carbon_source=carbon_source,
         )
         self._write_conditions(conditions_store)
 
