@@ -164,21 +164,7 @@ class GSMProject(object):
         """
         Return list of all the designs stored for the project
         """
-        designs_s = dict()
-        
-        # All designs in the config specified design dir
-        designs_direct = glob.glob(
-            os.path.join(self._project_path, self.config.design_dir, '*.json'))
-             
-        for dpath in designs_direct:
-            with open(dpath) as dsgn_ctx_file:
-                d_id = os.path.basename(dpath).split(".json")[0]
-                ft = json.load(dsgn_ctx_file)
-                # if designs don't conform to schema, ignore them
-                if self._validate_design(ft):
-                    designs_s[d_id] = ft
-
-        return designs_s
+        return self.list_designs()
 
     @staticmethod
     def _validate_design(ft):
@@ -190,7 +176,6 @@ class GSMProject(object):
 
         return True
 
-    @property
     def list_designs(self, valid=False):
         designs_direct = glob.glob(
             os.path.join(self._project_path, self.config.design_dir, '*.json'))
@@ -211,7 +196,7 @@ class GSMProject(object):
         """
         Loads an existing design
         """
-        if design_id not in self.list_designs:
+        if design_id not in self.designs:
             raise KeyError('Design {} not found'.format(design_id))
         
         des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design_id))
@@ -250,7 +235,7 @@ class GSMProject(object):
             parent_stack = []
 
         if type(design) is not dict:
-            if design in self.list_designs:
+            if design in self.designs:
                 design = self._construct_design(design)
             # just load a path
             elif os.path.exists(design):
@@ -263,7 +248,7 @@ class GSMProject(object):
                 raise IOError('Design {} not found.'.format(design))
 
         if 'parent' in design and design['parent'] not in [None, '']:
-            if type(design['parent']) is not str:
+            if type(design['parent']) not in [str, unicode]:
                 raise DesignError('Parent design must be a string identifier.')
 
             if design['parent'] in parent_stack:
@@ -347,7 +332,7 @@ class GSMProject(object):
                     met.remove_from_model()
                 except KeyError:
                     pass
-        mdl.id += ":design_{}".format(design["id"])
+        mdl.id += ":ds_{}".format(design["id"])
         return mdl
     
     def save_design(self, model, did, name, description='', conditions=None, base_model=None, parent=None,
@@ -399,7 +384,7 @@ class GSMProject(object):
         diff = model_diff(base_model, model)
         
         diff['description'] = description
-        diff['id'] = did,
+        diff['id'] = did
         diff['name'] = name
         diff['conditions'] = conditions
         diff['base_model'] = base_model.id

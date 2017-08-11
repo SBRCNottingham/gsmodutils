@@ -8,3 +8,4 @@ lockfile>=0.12.2
 pytest-cov>=2.5.1
 pytest-xdist>=1.18.1
 python-libsbml
+pandas
