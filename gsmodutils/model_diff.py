@@ -15,7 +15,7 @@ def model_diff(model_a, model_b):
     """
 
     if type(model_a) is not Model or type(model_b) is not Model:
-        raise TypeError('Cannot compare none cobra models')
+        raise TypeError('Can only compare cobra models')
 
     metfields = ['formula', 'charge', 'compartment', 'name']
     
@@ -90,5 +90,5 @@ def model_diff(model_a, model_b):
                     )
                 )
     diff['genes'] = []
-
+    diff['removed_genes'] = []
     return diff

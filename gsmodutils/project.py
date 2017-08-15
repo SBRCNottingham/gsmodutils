@@ -16,13 +16,13 @@ from gsmodutils.tester import GSMTester
 
 
 class GSMProject(object):
-    """
-    Project class finds a gsmodutlils.json file in a given path and creates a project which allows a user to load:
-        Models included within the project
-        Designs that the model uses
-    """
+
     def __init__(self, path='.'):
-        """Load a project"""
+        """
+        Project class finds a gsmodutlils.json file in a given path and creates a project which allows a user to load:
+            Models included within the project
+            Designs that the model uses
+        """
         self._project_path = os.path.abspath(path)
         self._loaded_model = None
         self.update()
@@ -209,6 +209,9 @@ class GSMProject(object):
         :param design: design identifier
         :return:
         """
+        if design not in self.list_designs:
+            raise DesignError("Design of name {} not found in project".format(design))
+
         if design not in self._designs_store:
             des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design))
             self._designs_store[design] = StrainDesign.from_json(design, des_path, self)
@@ -267,9 +270,11 @@ class GSMProject(object):
         if status == 'infeasible':
             raise Infeasible('Could not find valid solution')
 
-        if parent is not None and parent not in self.designs:
-            # check that the parent design actually exists
-            raise DesignError('specified parent not found')
+        if parent is not None:
+            if type(parent) is str:
+                parent = self.get_design(parent)
+            elif type(parent) is not StrainDesign or parent.id not in self.list_designs:
+                raise DesignError('Parent relate a valid project strain design')
 
         did = str(did).replace(' ', '_')
         design_save_path = os.path.join(self.design_path, '{}.json'.format(did))
@@ -277,32 +282,39 @@ class GSMProject(object):
         if os.path.exists(design_save_path) and not overwrite:
             raise IOError('File {} exists'.format(design_save_path))
 
-        # Load either default model or model path
-        if type(base_model) in [type(None), unicode, str] and parent is None:
-            base_model = self.load_model(mpath=base_model)
-            if conditions is not None:
-                self.load_conditions(conditions, base_model)
+        if base_model is None and parent is None:
+            base_model = self.config.default_model
         elif parent is not None:
             # If a parent design is specified this model is loaded first
-            base_model = self.load_design(parent)
-        
-        if base_model is None:
-            raise IOError('Base model not found')
-        
+            base_model = parent.base_model
+        elif base_model is not None and base_model not in self.config.models:
+            raise KeyError('Base model not found should be one of {}'.format(" ".join(self.config.models)))
+
+        if parent is None:
+            lmodel = self.load_model(base_model)
+        else:
+            lmodel = parent.load()
+
+        if conditions is not None:
+            self.load_conditions(conditions, lmodel)
+
         # Find all the differences between the models
-        diff = model_diff(base_model, model)
-        
+        diff = model_diff(lmodel, model)
+
+        if parent is not None:
+            parent = parent.id
+
         diff['description'] = description
         diff['id'] = did
         diff['name'] = name
         diff['conditions'] = conditions
-        diff['base_model'] = base_model.id
+        diff['base_model'] = base_model
         diff['parent'] = parent
 
         with open(design_save_path, 'w+') as dsp:
             json.dump(diff, dsp, indent=4)
 
-        des = self.load_design(did)
+        des = self.get_design(did)
         return des
     
     def load_conditions(self, conditions_id, model=None, copy=False):

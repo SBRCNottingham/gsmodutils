@@ -169,7 +169,10 @@ class StrainDesign(object):
         return df
 
     def to_dict(self):
-        """"""
+        """
+        Converts to design dict (compatible with model diffs)
+        :return:
+        """
         p_id = None
         if self.parent is not None:
             p_id = self.parent.id
