@@ -1,21 +1,22 @@
 from __future__ import print_function
-from gsmodutils.utils import FrozenDict, check_obj_sim, convert_stoich, equal_stoich
+
+from cobra import Model
+
+from gsmodutils.utils import check_obj_sim, convert_stoich, equal_stoich
 
 
 def model_diff(model_a, model_b):
     """
     Returns a dictionary that contains all of the changed reactions between model a and model b
-    
     This includes any reactions or metabolites removed, or any reactions or metabolites added/changed
-    
     This does not say HOW a model has changed if reactions or metabolites are changed they are just included with their
     new values
-    
     Diff assumes l -> r (i.e. model_a is the base model)
-
-    TODO: Make a command line tool that outputs a report file listing all of the ways in which two models are different
     """
-    
+
+    if type(model_a) is not Model or type(model_b) is not Model:
+        raise TypeError('Cannot compare none cobra models')
+
     metfields = ['formula', 'charge', 'compartment', 'name']
     
     diff = dict(
@@ -28,9 +29,9 @@ def model_diff(model_a, model_b):
     for ma in model_a.metabolites:
         # Find removed metabolites
         try:
-            mb = model_b.metabolites.get_by_id(ma.id)
+            model_b.metabolites.get_by_id(ma.id)
         except KeyError:
-            diff['removed_metabolites'].append(mb.id)
+            diff['removed_metabolites'].append(ma.id)
 
     for mb in model_b.metabolites:
         # find added metabolites
@@ -61,7 +62,7 @@ def model_diff(model_a, model_b):
     for ra in model_a.reactions:
         # reaction has been removed
         try:
-            rb = model_b.reactions.get_by_id(ra.id)
+            model_b.reactions.get_by_id(ra.id)
         except KeyError:
             diff['removed_reactions'].append(ra.id)
     
@@ -88,6 +89,6 @@ def model_diff(model_a, model_b):
                         metabolites=dict(convert_stoich(rb.metabolites))
                     )
                 )
-            
-            
+    diff['genes'] = []
+
     return diff

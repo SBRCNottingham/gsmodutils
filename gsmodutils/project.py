@@ -1,17 +1,18 @@
 from __future__ import print_function, absolute_import, division
-import os
-import json
+
 import glob
-import cobra
+import json
+import os
 
-from gsmodutils.model_diff import model_diff
-from gsmodutils.exceptions import ProjectNotFound, DesignError
-from gsmodutils.project_config import ProjectConfig, default_project_file
-from gsmodutils.tester import GSMTester
-
+from cameo.core.utils import load_medium
 from cobra.exceptions import Infeasible
 from lockfile import LockFile
-from cameo.core.utils import load_medium
+
+from gsmodutils.design import StrainDesign
+from gsmodutils.exceptions import ProjectNotFound, DesignError
+from gsmodutils.model_diff import model_diff
+from gsmodutils.project_config import ProjectConfig, default_project_file
+from gsmodutils.tester import GSMTester
 
 
 class GSMProject(object):
@@ -26,6 +27,7 @@ class GSMProject(object):
         self._loaded_model = None
         self.update()
         self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
+        self._designs_store = dict()  # In memory store for designs
 
     @property
     def project_path(self):
@@ -159,13 +161,6 @@ class GSMProject(object):
     def design_path(self):
         return os.path.join(self._project_path, self.config.design_dir)
 
-    @property
-    def designs(self):
-        """
-        Return list of all the designs stored for the project
-        """
-        return self.list_designs()
-
     @staticmethod
     def _validate_design(ft):
         """ validates design dictionaries for required fields"""
@@ -176,22 +171,24 @@ class GSMProject(object):
 
         return True
 
-    def list_designs(self, valid=False):
+    @property
+    def list_designs(self):
+        """ List designs stored in design dir """
         designs_direct = glob.glob(
             os.path.join(self._project_path, self.config.design_dir, '*.json'))
 
-        if valid:
-            n_direct = []
-            for dpath in designs_direct:
-                with open(dpath) as dsgn_ctx_file:
-                    ft = json.load(dsgn_ctx_file)
-                    if self._validate_design(ft):
-                        n_direct.append(dpath)
-
-            designs_direct = n_direct
-
         return [os.path.basename(dpath).split(".json")[0] for dpath in designs_direct]
-    
+
+    @property
+    def designs(self):
+        """
+        Return list of all the designs stored for the project
+        """
+        for design in self.list_designs:
+            self.get_design(design)
+
+        return self._designs_store
+
     def _construct_design(self, design_id):
         """
         Loads an existing design
@@ -205,8 +202,20 @@ class GSMProject(object):
             design_dict = json.load(dsn_ctx)
         
         return design_dict
-    
-    def load_design(self, design, model=None, copy=False, parent_stack=None):
+
+    def get_design(self, design):
+        """
+        Get the StrainDesign object (not resulting model) of a design
+        :param design: design identifier
+        :return:
+        """
+        if design not in self._designs_store:
+            des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design))
+            self._designs_store[design] = StrainDesign.from_json(design, des_path, self)
+
+        return self._designs_store[design]
+
+    def load_design(self, design, model=None, copy=False):
         """
         Returns a model with a specified design modification
         
@@ -230,110 +239,10 @@ class GSMProject(object):
         Note if conditions is specified it is loaded first
         other bounds are set afterwards
         """
-
-        if parent_stack is None:
-            parent_stack = []
-
-        if type(design) is not dict:
-            if design in self.designs:
-                design = self._construct_design(design)
-            # just load a path
-            elif os.path.exists(design):
-                # Design is a path
-                with open(design) as dfctx:
-                    design = json.load(dfctx)
-            elif len(parent_stack):
-                raise DesignError('Parent design {} does not exist.'.format(parent_stack[-1]))
-            else:
-                raise IOError('Design {} not found.'.format(design))
-
-        if 'parent' in design and design['parent'] not in [None, '']:
-            if type(design['parent']) not in [str, unicode]:
-                raise DesignError('Parent design must be a string identifier.')
-
-            if design['parent'] in parent_stack:
-                raise DesignError('Cyclic behaviour detected in parental design. Consider running a project clean.')
-
-            parent_stack += [design['parent']]
-            mdl = self.load_design(design['parent'], model=model, copy=copy, parent_stack=parent_stack)
-        elif type(model) in [type(None), str, unicode]:
-            mdl = self.load_model(mpath=model)
-            # TODO: type check model is actually a constraints based model (cameo/cobra)
-        elif copy:
-            mdl = model.copy()
-        else:
-            # TODO: type check model is actually a constraints based model (cameo/cobra)
-            mdl = model
-
-        # load specified conditions
-        if 'conditions' in design and design['conditions'] is not None:
-            self.load_conditions(design['conditions'], mdl, copy=False)
-        
-        # TODO: Check design conforms to valid scheme
-        # Add new or changed metabolites to model
-        for metabolite in design['metabolites']:
-            # create new metabolite object if its not in the model already
-            if metabolite['id'] in mdl.metabolites:
-                metab = mdl.metabolites.get_by_id(metabolite['id'])
-            else:
-                metab = cobra.Metabolite()
-            
-            # Note that we don't check any of these properties, just update them
-            metab.id = metabolite['id']
-            metab.name = metabolite['name']
-            metab.charge = metabolite['charge']
-            metab.formula = metabolite['formula']
-            metab.notes = metabolite['notes']
-            metab.annotation = metabolite['annotation']
-            metab.compartment = metabolite['compartment']
-            
-            if metab.id not in mdl.metabolites:
-                mdl.add_metabolites([metab])
-                
-        # Add new or changed reactions to model
-        for rct in design['reactions']:
-            if rct['id'] in mdl.reactions:
-                reaction = mdl.reactions.get_by_id(rct['id'])
-                reaction.remove_from_model()
-
-            reaction = cobra.Reaction()
-            reaction.id = rct['id']
-
-            reaction.name = rct['name']
-            reaction.lower_bound = rct['lower_bound']
-            reaction.upper_bound = rct['upper_bound']
-
-            reaction.gene_reaction_rule = rct['gene_reaction_rule']
-            reaction.subsystem = rct['subsystem']
-            reaction.name = rct['name']
-            reaction.variable_kind = rct['variable_kind']
-
-            mdl.add_reactions([reaction])
-            reaction = mdl.reactions.get_by_id(reaction.id)
-
-            metabolites = dict([(str(x), v) for x, v in rct['metabolites'].items()])  # fixes bug in cobra with unicode
-
-            reaction.add_metabolites(metabolites)
-            reaction.objective_coefficient = rct['objective_coefficient']
-
-        # delete removed metabolites/reactions
-        if 'removed_reactions' in design:
-            for rtid in design['removed_reactions']:
-                try:
-                    reaction = mdl.reactions.get_by_id(rtid)
-                    reaction.remove_from_model()
-                except KeyError:
-                    pass
-        
-        if 'removed_metabolites' in design:
-            for metid in design['removed_metabolites']:
-                try:
-                    met = mdl.metabolites.get_by_id(metid)
-                    met.remove_from_model()
-                except KeyError:
-                    pass
-        mdl.id += ":ds_{}".format(design["id"])
-        return mdl
+        des = self.get_design(design)
+        if model is None:
+            model = self.model
+        return des.add_to_model(model, copy=copy)
     
     def save_design(self, model, did, name, description='', conditions=None, base_model=None, parent=None,
                     overwrite=False):
@@ -392,8 +301,9 @@ class GSMProject(object):
 
         with open(design_save_path, 'w+') as dsp:
             json.dump(diff, dsp, indent=4)
-        
-        return diff
+
+        des = self.load_design(did)
+        return des
     
     def load_conditions(self, conditions_id, model=None, copy=False):
         """
@@ -479,7 +389,7 @@ class GSMProject(object):
         # save to conditions file
         conditions_store = self.get_conditions(update=True)
 
-        if carbon_source not in media:
+        if carbon_source is not None and carbon_source not in media:
             raise KeyError("carbon source not valid")
 
         conditions_store['growth_conditions'][conditions_id] = dict(
