@@ -1,13 +1,15 @@
-import gsmodutils
-from cobra.exceptions import Infeasible
-from cobra.core import get_solution
-import sys
-from io import StringIO
 import contextlib
-import os
 import glob
 import json
+import os
+import sys
 from collections import defaultdict
+from io import StringIO
+
+from cobra.core import get_solution
+from cobra.exceptions import Infeasible
+
+import gsmodutils
 from gsmodutils.testutils import TestRecord
 
 
@@ -342,9 +344,9 @@ class GSMTester(object):
                 self.default_tests[tf_name] = (self._df_model_test, kwargs)
                 self._task_execs[tf_name] = self._exec_default
 
-        for design in self.project.designs.values():
+        for design in self.project.list_designs:
             # Load model design with design applied
-            tf_name = 'design_{}'.format(design['id'])
+            tf_name = 'design_{}'.format(design)
             log = df_log.create_child(tf_name)
             kwargs = dict(log=log, design=design)
             self.default_tests[tf_name] = (self._df_design_test, kwargs)
