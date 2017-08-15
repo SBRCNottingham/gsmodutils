@@ -6,11 +6,14 @@ TODO: tests for command line interface
 
 
 from __future__ import print_function, absolute_import, division
-import pytest
-from gsmodutils.project import GSMProject
-import cobra
+
 import os
+
+import cobra
+import pytest
 from tutils import FakeProjectContext
+
+from gsmodutils.project import GSMProject
 
 
 def test_load_project():
@@ -25,9 +28,6 @@ def test_create_design():
     Create a design that adds and removes reactions
     """
     with FakeProjectContext() as ctx:
-        project = GSMProject(ctx.path)
-        model = project.model
-        
         project = GSMProject(ctx.path)
         model = project.model
         # Growth on xylose instead of glucose
@@ -67,7 +67,7 @@ def test_create_design():
             'h2o_c': -1,
             'glx_c': -1,
             'test_c': 1,
-            'o2_c':1
+            'o2_c': 1
         })
         
         model.add_boundary(metabolite, type='demand')
@@ -117,4 +117,3 @@ def test_load_conditions():
         
         assert new_model.reactions.EX_xyl__D_e.lower_bound == -8.00
         assert new_model.reactions.EX_glc__D_e.lower_bound == 0.0
-
