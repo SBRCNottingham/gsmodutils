@@ -89,6 +89,33 @@ def model_diff(model_a, model_b):
                         metabolites=dict(convert_stoich(rb.metabolites))
                     )
                 )
+
+    # Gene reaction rules are stored in reactions, however models also contains metadata for genes
     diff['genes'] = []
     diff['removed_genes'] = []
+
+    genefields = ["name", "annotation", "notes"]
+
+    for ga in model_a.genes:
+        try:
+            model_b.genes.get_by_id(ga.id)
+        except KeyError:
+            diff['removed_genes'].append(ga.id)
+
+    for gb in model_b.genes:
+        try:
+            ga = model_a.genes.get_by_id(gb.id)
+        except KeyError:
+            ga = None
+            # reaction has changed or is new
+        if ga is None or not check_obj_sim(ga, gb, genefields):
+            diff['genes'].append(
+                dict(
+                    id=gb.id,
+                    name=gb.name,
+                    annotation=gb.annotation,
+                    notes=gb.notes,
+                    functional=gb.functional,
+                )
+            )
     return diff

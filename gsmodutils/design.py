@@ -337,7 +337,6 @@ class StrainDesign(object):
             reaction.objective_coefficient = rct['objective_coefficient']
 
         # delete removed metabolites/reactions
-
         for rtid in self.removed_reactions:
             try:
                 reaction = mdl.reactions.get_by_id(rtid)
@@ -352,7 +351,22 @@ class StrainDesign(object):
             except KeyError:
                 pass
         mdl.id += ":ds_{}".format(self.id)
-        return model
+
+        # Add gene annotation
+        for gene in self.genes:
+
+            try:
+                gobj = model.genes.get_by_id(gene['id'])
+            except KeyError:
+                # genes should already be contained in the model if they have a reaction relationship
+                # However, tolerate bad designs
+                continue
+            gobj.name = gene['name']
+            gobj.functional = gene['functional']
+            gobj.annotation = gene['annotation']
+            gobj.notes = gene['notes']
+
+        return mdl
 
     @staticmethod
     def validate_dict(design_dict, throw_exceptions=True):
