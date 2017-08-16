@@ -5,6 +5,7 @@ import json
 import cobra
 from cameo.core.utils import load_medium
 
+
 def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
                        media=None, objective_reactions=None, obj_dir='max'):
     """
