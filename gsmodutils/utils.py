@@ -1,6 +1,6 @@
 import cobra
-from six import string_types
 from cobra.exceptions import Infeasible
+from six import string_types
 
 
 class FrozenDict(dict):
@@ -70,7 +70,7 @@ def equal_stoich(reaction_a, reaction_b):
     Confirms if the stoich of two reactions is equivalent
     This ignores the metabolite objects in cobra reactions and converts them to metabolite ids
     """
-    if not isinstance(reaction_a, cobra.Reaction) or isinstance(reaction_a, cobra.Reaction):
+    if not (isinstance(reaction_a, cobra.Reaction) and isinstance(reaction_b, cobra.Reaction)):
         raise TypeError('Expecing reaction object or reaction identifier string')
 
     return convert_stoich(reaction_a.metabolites) == convert_stoich(reaction_b.metabolites)
