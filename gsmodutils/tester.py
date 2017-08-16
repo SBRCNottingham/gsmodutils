@@ -34,7 +34,7 @@ class GSMTester(object):
     def __init__(self, project):
         """Creates the storage locations for logs"""
         
-        if type(project) is not gsmodutils.project.GSMProject:
+        if not isinstance(project, gsmodutils.project.GSMProject):
             raise TypeError('Requires valid gsmodutils project')
             
         self.project = project

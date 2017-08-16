@@ -14,7 +14,7 @@ def model_diff(model_a, model_b):
     Diff assumes l -> r (i.e. model_a is the base model)
     """
 
-    if type(model_a) is not Model or type(model_b) is not Model:
+    if not (isinstance(model_a, Model) and isinstance(model_b, Model)):
         raise TypeError('Can only compare cobra models')
 
     metfields = ['formula', 'charge', 'compartment', 'name']

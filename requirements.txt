@@ -7,5 +7,6 @@ click>=6.7
 lockfile>=0.12.2
 pytest-cov>=2.5.1
 pytest-xdist>=1.18.1
-python-libsbml
-pandas
+python-libsbml>=5.15.0
+pandas>=0.20.3
+six>=1.10.0

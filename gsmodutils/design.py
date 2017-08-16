@@ -69,7 +69,7 @@ class StrainDesign(object):
         if self.parent is None:
             return True
 
-        if type(self.parent) is not StrainDesign:
+        if isinstance(self.parent, StrainDesign):
             raise TypeError('invalid parent design')
 
         return self.parent.check_parents(p_stack)
@@ -279,7 +279,7 @@ class StrainDesign(object):
         :return:
         """
 
-        if type(model) is not cobra.Model:
+        if not isinstance(model, cobra.Model):
             raise TypeError('Expected cobra model')
 
         mdl = model

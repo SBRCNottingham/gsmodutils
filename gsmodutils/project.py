@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import, division
-
+from six import string_types
 import glob
 import json
 import os
@@ -271,9 +271,9 @@ class GSMProject(object):
             raise Infeasible('Could not find valid solution')
 
         if parent is not None:
-            if type(parent) is str:
+            if isinstance(parent, string_types):
                 parent = self.get_design(parent)
-            elif type(parent) is not StrainDesign or parent.id not in self.list_designs:
+            elif not isinstance(parent, StrainDesign) or parent.id not in self.list_designs:
                 raise DesignError('Parent relate a valid project strain design')
 
         did = str(did).replace(' ', '_')
@@ -325,7 +325,7 @@ class GSMProject(object):
         :param copy: return copy of model or modify inplace
         :return:
         """
-        if model is None or type(model) is str:
+        if model is None or isinstance(model, string_types):
             mdl = self.load_model(model)
         elif copy:
             mdl = model.copy()
@@ -377,7 +377,7 @@ class GSMProject(object):
         if apply_to is None:
             apply_to = []
         else:
-            if type(apply_to) is not list:
+            if not isinstance(apply_to, list):
                 apply_to = [apply_to]
 
             for mdl_path in apply_to:
