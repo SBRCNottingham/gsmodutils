@@ -197,8 +197,8 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
 
 
 @click.command()
-@click.option('--project_path', type=click.Path(writable=True), help='new gsmodutils project path')
-@click.option('--model_path', type=str, default=None, help='path to a given model')
+@click.argument('project_path', type=click.Path(writable=True))
+@click.argument('model_path', type=str, default=None)
 def create_project(project_path, model_path):
     """Create a new gsmodutils project"""
     from gsmodutils.project_config import ProjectConfig

@@ -424,6 +424,30 @@ class GSMProject(object):
             with open(self._conditions_file, 'w+') as cf:
                 json.dump(conditions_store, cf, indent=4)
 
+    @classmethod
+    def create_project(cls, models, description, author, author_email, project_path):
+        """
+
+        :param models: iterable of models can be strings to path locations or cobra model instances. If cobra models,
+        they must contain an id field that is non blank
+        :param description: String description of project
+        :param author: string author names, separate with &
+        :param author_email: email of project owner. separate with ';'
+        :param project_path: location on disk to place project. Must not contain existing gsmodutils project.
+        If new directory, it will be created.
+        :return:
+        """
+        configuration = dict(
+            description=description,
+            author=author,
+            author_email=author_email
+        )
+
+        cfg = ProjectConfig(**configuration)
+        cfg.create_project(project_path, addmodels=models)
+
+        return cls(project_path)
+
     def clean_project(self, auto_remove=False):
         """
         Check all design and condition settings to see if they contain orphans or links to non-existing models

@@ -168,21 +168,31 @@ class ProjectConfig(object):
                 added_files.append(mdl_path)
             
             for mdl_path in addmodels:
-                mdl_path = os.path.abspath(mdl_path)
-                cpy_path = os.path.abspath( 
-                        os.path.join(project_path, os.path.basename(mdl_path)))
-                
-                if not os.path.exists(mdl_path):
-                    raise IOError('No such model file exists {}'.format(mdl_path))
 
-                if validate:
-                    vcheck = validate_model_file(mdl_path)
-                    if len(vcheck['errors']):
-                        raise ProjectConfigurationError('Invalid model {}'.format(mdl_path))
+                if isinstance(mdl_path, cobra.Model):
+                    if mdl_path.id in [" ", ""]:
+                        raise NameError("Passed model without identifier, cannot write to disk")
 
-                if cpy_path != mdl_path:
-                    shutil.copy(mdl_path, cpy_path)
-                    added_files.append(cpy_path)  # to delete copied files, not existing ones
+                    # write new model object to disk
+                    save_path = os.path.abspath(os.path.join(project_path, mdl_path.id + ".json"))
+                    cobra.io.save_json_model(mdl_path, save_path, pretty=True)
+                    mdl_path = save_path
+                else:
+                    mdl_path = os.path.abspath(mdl_path)
+                    cpy_path = os.path.abspath(
+                            os.path.join(project_path, os.path.basename(mdl_path)))
+
+                    if not os.path.exists(mdl_path):
+                        raise IOError('No such model file exists {}'.format(mdl_path))
+
+                    if validate:
+                        vcheck = validate_model_file(mdl_path)
+                        if len(vcheck['errors']):
+                            raise ProjectConfigurationError('Invalid model {}'.format(mdl_path))
+
+                    if cpy_path != mdl_path:
+                        shutil.copy(mdl_path, cpy_path)
+                        added_files.append(cpy_path)  # to delete copied files, not existing ones
                 
                 # Add the model to the configuration
                 self.models.append(os.path.basename(mdl_path))
