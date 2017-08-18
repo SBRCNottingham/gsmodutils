@@ -183,7 +183,7 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
         click.echo(
             click.style(barstr + ' TESTS FOUND ' + barstr, fg='green')
         )
-        # display tests with indentations for test files/cases
+        # display tests with indentations for test files/casesand
         json_tests, py_tests = tester.tests
         for id_key in json_tests:
             click.echo('JSON test file - {}'.format(id_key))
@@ -206,8 +206,8 @@ def create_project(project_path, model_path):
 
     click.echo('Using mode {}'.format(project_path))
 
-    description = click.prompt('Please enter a project description', type=unicode)
-    author = click.prompt('Author name', type=unicode)
+    description = click.prompt('Please enter a project description', type=str)
+    author = click.prompt('Author name', type=str)
     author_email = click.prompt('Author email', type=str)
 
     configuration = dict(

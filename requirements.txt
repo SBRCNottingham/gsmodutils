@@ -10,3 +10,4 @@ pytest-xdist>=1.18.1
 python-libsbml>=5.15.0
 pandas>=0.20.3
 six>=1.10.0
+ggplot

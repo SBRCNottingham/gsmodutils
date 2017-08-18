@@ -11,6 +11,7 @@ from cobra.exceptions import Infeasible
 
 import gsmodutils
 from gsmodutils.testutils import TestRecord
+from six import  exec_
 
 
 @contextlib.contextmanager
@@ -249,7 +250,7 @@ class GSMTester(object):
             )
             
             try:
-                exec compiled_code in global_namespace
+                exec_(compiled_code, global_namespace)
             except Exception as ex:
                 # the whole module has an error somewhere, no functions will run
                 log.add_error("Error with code file {} error - {}".format(tf_name, str(ex)), ".compile_error")
@@ -257,6 +258,7 @@ class GSMTester(object):
             try:
                 # Call the function
                 # Uses standardised prototypes
+                # TODO: fix lint warning
                 global_namespace[test_func](self.project.load_model(), self.project, log)
             except Exception as ex:
                 # the specific test case has an erro
@@ -371,7 +373,7 @@ class GSMTester(object):
             for t in self.python_tests[k]:
                 kptests.append((k, t))
                 
-        return self.json_tests.items() + kptests
+        return list(self.json_tests.items()) + kptests
         
     def run_by_id(self, tid):
         """ Returns result of individual test function """
