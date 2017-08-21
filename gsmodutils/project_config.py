@@ -1,10 +1,13 @@
 from __future__ import print_function, absolute_import, division
-from gsmodutils.exceptions import ProjectConfigurationError
-import gsmodutils
-import cobra
+
+import json
 import os
 import shutil
-import json
+
+import cobra
+
+import gsmodutils
+from gsmodutils.exceptions import ProjectConfigurationError
 from gsmodutils.validator import validate_model_file
 
 default_project_file = '.gsmod_project.json'
@@ -45,8 +48,8 @@ class ProjectConfig(object):
         # used for the optional config parameters
         for arg, val in kwargs.items():
             setattr(self, arg.lower(), val)
-    
-    def _to_save_dict(self):
+
+    def to_save_dict(self):
         """
         Could possibly just use self.__dict__ but this is the set of configuration options
         """
@@ -103,7 +106,7 @@ class ProjectConfig(object):
         configuration_fp = os.path.join(project_path, default_project_file)
 
         with open(configuration_fp, 'w+') as configf:
-            json.dump(self._to_save_dict(), configf, indent=4)
+            json.dump(self.to_save_dict(), configf, indent=4)
 
         return configuration_fp
 

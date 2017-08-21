@@ -2,9 +2,13 @@
 This module contains the main command line interface for project creation, testing and handling
 """
 from __future__ import absolute_import, division, generators, print_function, nested_scopes, with_statement
-import os
+
 import json
+import os
+
 import click
+import cobra
+
 from gsmodutils.exceptions import ProjectNotFound
 
 
@@ -280,13 +284,15 @@ def add_model(path, project_path, diff, validate):
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--parent', default=None, help='A parent design that was applied first to avoid replication.')
 @click.option('--base_model', default=None, help='Model that design is based on')
-def add_design(model_path, identifier, name, description, project_path, parent, base_model):
+@click.option('--overwrite/--no-overwrite', default=False, help='model id')
+def add_design(model_path, identifier, name, description, project_path, parent, base_model, overwrite):
     """Specify a path to a model and """
     import cameo
     model = cameo.load_model(model_path)
     project = load_project(project_path)
 
-    project.save_design(model, identifier, name=name, description=description, parent=parent)
+    project.save_design(model, identifier, name=name, description=description, parent=parent, base_model=base_model,
+                        overwrite=overwrite)
 
     click.echo('Design successfully added to project')
 
@@ -305,27 +311,87 @@ def add_conditions(path, ident, project_path, apply_to, growth):
     project.save_conditions(model, ident, apply_to=apply_to, observe_growth=growth)
 
 
+_output_fmts = ('json', 'yaml', 'sbml', 'matlab', 'mat', 'm', 'scrumpy', 'spy')
+
+
 @click.command()
-@click.option('--filepath', default=None, help='output filename')
+@click.argument('file_format', default=None, type=click.Choice(_output_fmts))
+@click.argument('filepath')
 @click.option('--project_path', default='.', help='gsmodutils project path')
-@click.option('--model_id', default=None, help='Base model id')
+@click.option('--model_id', default=None, help='model id')
 @click.option('--conditions', default=None, help='conditions to apply')
 @click.option('--design', default=None, help='design to apply')
-@click.option('--format', default=None, help='output to smbl, json, matlab format')
-def export(filepath, project_path, model_id, design, conditions, file_format):
+@click.option('--overwrite/--no-overwrite', default=False, help='model id')
+def export(file_format, filepath, project_path, model_id, design, conditions, overwrite):
     """ Export a given model with a specific design and conditions applied """
-    pass
+    if os.path.exists(filepath) and not overwrite:
+        click.echo('error - {} already exists. Must use overwrite option'.format(filepath))
+        exit()
+
+    project = load_project(project_path)
+    model = project.load_model(model_id)
+
+    if conditions is not None:
+        project.load_conditions(model=model, conditions_id=conditions)
+    # always load designs last
+    if design is not None:
+        model = project.load_design(design, model)
+
+    if file_format == 'json':
+        cobra.io.save_json_model(model, filepath, pretty=True)
+    elif file_format in ['spy', 'scrumpy']:
+        click.echo('Scrumpy exports are currently not implemented.')
+        exit()
+    elif file_format in ['matlab', 'm', 'mat']:
+        cobra.io.save_matlab_model(model, filepath)
+    elif file_format == 'yaml':
+        cobra.io.save_yaml_model(model, filepath)
+    elif file_format == 'sbml':
+        cobra.io.write_sbml_model(model, filepath)
+
+    click.echo('Model {} successfully written'.format(filepath))
 
 
 @click.command()
-def info():
+@click.option('--project_path', default='.', help='gsmodutils project path')
+def info(project_path):
     """ Display all the information about a gsmodutils project (list models, paths, designs etc. """
-    pass
-    
+    project = load_project(project_path)
+    click.echo('''--------------------------------------------------------------------------------------------------
+Project description - {description}
+Author(s): - {author}
+Author email - {author_email}
+Designs directory - {design_dir}
+Tests directory - {tests_dir}   
+    '''.format(**project.config.to_save_dict()))
+
+    click.echo("Models:")
+    for mdl_path in project.config.models:
+        model = project.load_model(mdl_path)
+        click.echo("\t* {}".format(mdl_path))
+        click.echo("\t\t {}".format(model.id))
+        click.echo("\t\t {}".format(model.description))
+
+    click.echo("Designs:")
+    for d in project.designs:
+        design = project.get_design(d)
+        click.echo("\t* {}".format(design.id))
+        click.echo("\t\t {}".format(design.name))
+        click.echo("\t\t {}".format(design.description))
+        if design.parent is not None:
+            click.echo("\t\t Parent: {}".format(design.parent.id))
+
+    click.echo("Conditions:")
+    for c in project.conditions['growth_conditions']:
+        click.echo("\t* {}".format(c))
+    click.echo('''--------------------------------------------------------------------------------------------------''')
+
 
 cli.add_command(test)
 cli.add_command(add_model)
+cli.add_command(export)
 cli.add_command(create_project)
+cli.add_command(info)
 
 if __name__ == "__main__":
     cli()
