@@ -69,7 +69,7 @@ class StrainDesign(object):
         if self.parent is None:
             return True
 
-        if isinstance(self.parent, StrainDesign):
+        if not isinstance(self.parent, StrainDesign):
             raise TypeError('invalid parent design')
 
         return self.parent.check_parents(p_stack)
@@ -397,7 +397,7 @@ class StrainDesign(object):
             reactions=len(self.reactions),
             genes=len(self.genes),
             metabolites=len(self.metabolites),
-            parent=self.parent,
+            parent=self.parent.id,
         )
         return info
 
