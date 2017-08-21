@@ -28,6 +28,24 @@ allowing controlled environments to improve collabortation where users require m
 complex analysis.
 
 
+## Installation
+
+(TODO) To install the latest release from pip:
+
+    pip install gsmodutils
+
+To install this software clone the git repository and type:
+
+    pip install -r requriements.txt
+    python setup.py install
+    
+To run the tests for this project, install pytest and, from the project root directory simply run
+
+    pytest
+    
+gsmodutils is fully compatible with python 2.7+ and python 3.5+.
+(TODO) Software has been tested on linux (Ubuntut, manjaro/arch), windows and MacOSX. 
+
 ## gsm_project
 Main script is gsm_project; this creates new genome scale model projects given an SBML or JSON file. This creates a folder structre in location with name specified.
 
@@ -143,3 +161,16 @@ Better design for executable tests
 * figure out a way to list all tests 
 
 
+## See also
+
+This project would be nothing without other great open source software projects.
+In particular, we would like to draw attention to ```cameo``` and ```cobrapy```.
+These projects offer a wide array of functionality for FBA and other constraints based
+analysis within the python open source stack.
+
+
+## Contributors
+James Gilbert  University of Nottingham - main software developer.
+Nicole Pearcy - Testing, ideas and knowledge of genome scale models.
+
+If you would like to collaborate, please get in touch!
