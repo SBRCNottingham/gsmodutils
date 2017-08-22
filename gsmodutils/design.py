@@ -261,21 +261,28 @@ class StrainDesign(object):
         """
         Loads a cobra model with just the reactions present in this design
         Can be useful for the cobra.Model methods
+
+
+        # TODO: add full metabolite info from parent model (optional, as it will be slower)
         :return: mdl instance of cobra.Model
         """
+
         if self._p_model is not None:
             return self._p_model
 
         mdl = cobra.Model()
-        mdl = self.add_to_model(mdl)
+        mdl.id = ''
+        mdl = self.add_to_model(mdl, add_missing=True)
         self._p_model = mdl
+
         return self._p_model
 
-    def add_to_model(self, model, copy=False):
+    def add_to_model(self, model, copy=False, add_missing=True):
         """
         Add this design to a given cobra model
         :param model:
         :param copy:
+        :param add_missing: add missing metabolites to the model
         :return:
         """
 
@@ -331,7 +338,15 @@ class StrainDesign(object):
             mdl.add_reactions([reaction])
             reaction = mdl.reactions.get_by_id(reaction.id)
 
-            metabolites = dict([(str(x), v) for x, v in rct['metabolites'].items()])  # fixes bug in cobra with unicode
+            metabolites = dict([(str(x), v) for x, v in rct['metabolites'].items()])
+
+            if add_missing:
+                for mid in metabolites:
+                    try:
+                        mdl.metabolites.get_by_id(mid)
+                    except KeyError:
+                        metab = cobra.Metabolite(id=mid)
+                        mdl.add_metabolites(metab)
 
             reaction.add_metabolites(metabolites)
             reaction.objective_coefficient = rct['objective_coefficient']
@@ -390,6 +405,9 @@ class StrainDesign(object):
 
     @property
     def __info__(self):
+        pid = None
+        if self.parent is not None:
+            pid = self.parent.id
         info = dict(
             name=self.name,
             id=self.id,
@@ -397,7 +415,7 @@ class StrainDesign(object):
             reactions=len(self.reactions),
             genes=len(self.genes),
             metabolites=len(self.metabolites),
-            parent=self.parent.id,
+            parent=pid,
         )
         return info
 
