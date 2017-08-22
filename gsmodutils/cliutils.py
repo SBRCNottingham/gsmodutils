@@ -10,6 +10,7 @@ import click
 import cobra
 
 from gsmodutils.exceptions import ProjectNotFound
+from gsmodutils.model_diff import model_diff
 
 
 def load_project(project_path):
@@ -246,13 +247,64 @@ def create_project(project_path, model_path):
         click.echo(
             click.style('{}'.format(ex), fg='red')
         )
-        
-        
-# @click.command()
-# def model_diff(model_a=None, model_b=None):
-    # """ Create a diff report of two models """
-    # click.echo('')
 
+
+@click.command()
+@click.argument('model_path')
+@click.option('--base_model', default=None, help='Project model to compare with')
+@click.option('--project_path', default='.', help='gsmodutils project path')
+@click.option('--parent', default=None, help='A parent design')
+@click.option('--output', default=None, help='A location to output the diff as a sjon file')
+@click.option('--names/--no-names', default=True, help='Output names of added or changed metabolites and reactions')
+def diff(model_path, base_model, project_path, parent, output, names):
+    """ View the changed reactions between a model and a base model """
+
+    import cameo
+
+    project = load_project(project_path)
+    base_model = project.load_model(base_model)
+    if parent is not None:
+        base_model = project.load_design(parent, base_model)
+
+    nmdl = cameo.load_model(model_path)
+
+    click.echo('Comparing models...')
+    mdiff = model_diff(base_model, nmdl)
+    click.echo('new model has {} removed reactions'.format(len(mdiff['removed_reactions'])))
+    click.echo('new model has {} added or changed reactions'.format(len(mdiff['reactions'])))
+
+    click.echo('new model has {} removed metabolites'.format(len(mdiff['removed_metabolites'])))
+    click.echo('new model has {} added or changed metabolites'.format(len(mdiff['metabolites'])))
+
+    if names:
+
+        if len(mdiff['removed_reactions']):
+            click.echo('Removed reactions:')
+
+        for reaction in mdiff['removed_reactions']:
+            click.echo('\t {}'.format(reaction))
+
+        if len(mdiff['reactions']):
+            click.echo('Added or changed reactions:')
+
+        for reaction in mdiff['reactions']:
+            click.echo('\t {} - {}'.format(reaction['id'], reaction['name']))
+
+        if len(mdiff['removed_metabolites']):
+            click.echo('Removed metabolites:')
+
+        for metabolite in mdiff['removed_metabolites']:
+            click.echo('\t {}'.format(metabolite))
+
+        if len(mdiff['metabolites']):
+            click.echo('Added or changed metabolites:')
+
+        for metabolite in mdiff['metabolites']:
+            click.echo('\t {} - {}'.format(metabolite['id'], metabolite['name']))
+
+    if output is not None:
+        with open(output, 'w+') as outfile:
+            json.dump(mdiff, outfile)
 
 @click.command()
 @click.argument('path')
@@ -418,6 +470,7 @@ cli.add_command(export)
 cli.add_command(dimport)
 cli.add_command(create_project)
 cli.add_command(info)
+cli.add_command(diff)
 
 if __name__ == "__main__":
     cli()
