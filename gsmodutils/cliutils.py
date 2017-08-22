@@ -306,6 +306,7 @@ def diff(model_path, base_model, project_path, parent, output, names):
         with open(output, 'w+') as outfile:
             json.dump(mdiff, outfile)
 
+
 @click.command()
 @click.argument('path')
 @click.option('--project_path', default='.', help='gsmodutils project path')
@@ -380,8 +381,8 @@ def dimport(model_path, identifier, name, description, project_path, parent, bas
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--apply_to', default=None, help='Description of what the design does')
 @click.option('--growth/--no_growth', default=True, help='Should these conditions allow growth or not')
-def add_conditions(path, ident, project_path, apply_to, growth):
-    """ Add a given set of media condtions from a model """
+def iconditions(path, ident, project_path, apply_to, growth):
+    """ Add a given set of media condtions from a model (this ignores any added or removed reactions or metabolites)"""
     import cameo
     model = cameo.load_model(path)
     project = load_project(project_path)
@@ -471,6 +472,7 @@ cli.add_command(dimport)
 cli.add_command(create_project)
 cli.add_command(info)
 cli.add_command(diff)
+cli.add_command(iconditions)
 
 if __name__ == "__main__":
     cli()
