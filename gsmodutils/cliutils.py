@@ -284,12 +284,37 @@ def add_model(path, project_path, diff, validate):
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--parent', default=None, help='A parent design that was applied first to avoid replication.')
 @click.option('--base_model', default=None, help='Model that design is based on')
-@click.option('--overwrite/--no-overwrite', default=False, help='model id')
-def add_design(model_path, identifier, name, description, project_path, parent, base_model, overwrite):
-    """Specify a path to a model and """
-    import cameo
-    model = cameo.load_model(model_path)
+@click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing design')
+@click.option('--from-diff/--not-from-diff', default=False, help='load a diff file instead of compatible model')
+def dimport(model_path, identifier, name, description, project_path, parent, base_model, overwrite, diff):
+    """ Import a design into a model. This can be new or overwrite an existing design. """
+
     project = load_project(project_path)
+    if diff:
+        with open(model_path) as diff_file:
+            df = json.load(diff_file)
+            # model_path is a json diff file
+            model = project.load_diff(df, base_model=base_model)
+    else:
+        import cameo
+        model = cameo.load_model(model_path)
+    # Check if the design already exists
+    new = True
+    if identifier in project.list_designs and not overwrite:
+        click.echo('Error: Design {} already exists. Use --overwrite to replace'.format(identifier))
+        exit()
+    elif identifier in project.list_designs:
+        new = False
+
+    if parent is not None and parent not in project.list_designs:
+        click.echo('Error: Parent design {} does not exist'.format(parent))
+        exit()
+
+    if name is None and new:
+        name = click.prompt('Please enter a name for this design', type=str)
+
+    if description is None and new:
+        description = click.prompt('Please enter a description for this design', type=str)
 
     project.save_design(model, identifier, name=name, description=description, parent=parent, base_model=base_model,
                         overwrite=overwrite)
@@ -390,6 +415,7 @@ Tests directory - {tests_dir}
 cli.add_command(test)
 cli.add_command(add_model)
 cli.add_command(export)
+cli.add_command(dimport)
 cli.add_command(create_project)
 cli.add_command(info)
 

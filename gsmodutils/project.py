@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import, division
-from six import string_types
+
 import glob
 import json
 import os
@@ -7,6 +7,7 @@ import os
 from cameo.core.utils import load_medium
 from cobra.exceptions import Infeasible
 from lockfile import LockFile
+from six import string_types
 
 from gsmodutils.design import StrainDesign
 from gsmodutils.exceptions import ProjectNotFound, DesignError
@@ -316,7 +317,18 @@ class GSMProject(object):
 
         des = self.get_design(did)
         return des
-    
+
+    def load_diff(self, diff, base_model=None):
+        """ Take a diff dictionary and add it to a model (does not require saving a design file) """
+        diff['description'] = 'tmp diff loaded'
+        diff['id'] = 'tmp_design_diff'
+        diff['name'] = 'tmp_design_diff'
+        diff['conditions'] = None
+        diff['base_model'] = base_model
+        diff['parent'] = None
+        tmp_design = StrainDesign.from_dict('tmp_design', diff, self)
+        return tmp_design.load()
+
     def load_conditions(self, conditions_id, model=None, copy=False):
         """
         Load a model with a given set of pre-saved media conditions
