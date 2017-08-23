@@ -56,7 +56,7 @@ class ProjectConfig(object):
         return dict([(it, getattr(self, it)) for it in self._cfg_params])
 
     @staticmethod
-    def _create_docker_file(path, dockerfile_name='Dockerfile'):
+    def create_docker_file(path, dockerfile_name='Dockerfile'):
         """
         Create a default docker container for running a model in test container
         Users may want to modify this for their own purposes, for now this is just a simple way of running the tests
@@ -209,7 +209,7 @@ class ProjectConfig(object):
             added_files.append(conditions_fp)
 
             if docker:
-                docker_image_path = self._create_docker_file(project_path)
+                docker_image_path = self.create_docker_file(project_path)
                 added_files.append(docker_image_path)
 
         except:

@@ -27,7 +27,7 @@ def load_project(project_path):
 
 @click.group()
 def cli():
-    """Command line tools for management of gsmodutils projects"""
+    """Command line tools for management of gsmodutils genome scale model projects"""
     pass
 
 
@@ -465,6 +465,23 @@ Tests directory - {tests_dir}
     click.echo('''--------------------------------------------------------------------------------------------------''')
 
 
+@click.command()
+@click.option('--project_path', default='.', help='gsmodutils project path')
+@click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing dockerfile')
+def docker(project_path, overwrite):
+    """ Create a dockerfile for the project """
+    project = load_project(project_path)
+    if os.path.exists(os.path.join(project_path, 'Dockerfile')) and not overwrite:
+        click.echo('**** A Dockerfile already exists, use --overwrite to replace **** \n')
+    else:
+        project.config.create_docker_file(project_path)
+        click.echo('**** Created Dockerfile **** \n')
+
+    click.echo('''Use "docker build -t=\'container_name\'" to build a container.
+    and use "docker save container_name -o container_name" to create a shareable image''')
+
+    click.echo('\n\nIf docker is not configured on your system please consult the documentation at docs.docker.com')
+
 cli.add_command(test)
 cli.add_command(add_model)
 cli.add_command(export)
@@ -473,6 +490,7 @@ cli.add_command(create_project)
 cli.add_command(info)
 cli.add_command(diff)
 cli.add_command(iconditions)
+cli.add_command(docker)
 
 if __name__ == "__main__":
     cli()
