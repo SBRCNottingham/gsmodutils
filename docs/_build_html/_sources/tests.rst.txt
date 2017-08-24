@@ -68,7 +68,7 @@ GSMtester class
 ----------------
 
 .. automodule:: gsmodutils.tester
-:members:
-        :undoc-members:
-            :inherited-members:
-            :show-inheritance:
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

@@ -1,0 +1,140 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ScrumPy Files &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="scrumpy-files">
+<h1>ScrumPy Files<a class="headerlink" href="#scrumpy-files" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-gsmodutils.scrumpy">
+<span id="code-docs"></span><h2>Code docs<a class="headerlink" href="#module-gsmodutils.scrumpy" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gsmodutils.scrumpy.get_tokens">
+<code class="descclassname">gsmodutils.scrumpy.</code><code class="descname">get_tokens</code><span class="sig-paren">(</span><em>line_dt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/scrumpy.html#get_tokens"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.scrumpy.get_tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Goes through each charachter in scrumpy file attempting to find tokens</p>
+<p>BUG: if there is a numeric after a direction token this fails
+e.g. ‘-&gt;2 “PROTON”’ fails but ‘-&gt; 2 “PROTON”’ works</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.scrumpy.load_scrumpy_model">
+<code class="descclassname">gsmodutils.scrumpy.</code><code class="descname">load_scrumpy_model</code><span class="sig-paren">(</span><em>filepath</em>, <em>atpase_reaction='ATPase'</em>, <em>atpase_flux=3.0</em>, <em>media=None</em>, <em>objective_reactions=None</em>, <em>obj_dir='max'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/scrumpy.html#load_scrumpy_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.scrumpy.load_scrumpy_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify a base scrumpy structural model file and returns a cameo model.
+This hasn’t be thoroughly tested so expect there to be bugs</p>
+<p>To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.scrumpy.parse_file">
+<code class="descclassname">gsmodutils.scrumpy.</code><code class="descname">parse_file</code><span class="sig-paren">(</span><em>filepath</em>, <em>fp_stack=None</em>, <em>rel_path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/scrumpy.html#parse_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.scrumpy.parse_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions</p>
+<p>This code is not that stable. Expect bugs.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.scrumpy.scrumpy_to_cobra">
+<code class="descclassname">gsmodutils.scrumpy.</code><code class="descname">scrumpy_to_cobra</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/scrumpy.html#scrumpy_to_cobra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.scrumpy.scrumpy_to_cobra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gsmodutils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="project.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="designs.html">Creating Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="designs.html#exporting-and-importing-designs-and-conditions">Exporting and importing designs and conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command line interface utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Running model tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Sharing projects with docker</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, James Gilbert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/scumpy.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

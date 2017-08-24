@@ -24,6 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sharing projects with docker" href="docker.html" />
+    <link rel="prev" title="Command line interface utilities" href="cli.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -97,43 +99,62 @@ test reports.</p>
 </div>
 <div class="section" id="module-gsmodutils.tester">
 <span id="gsmtester-class"></span><h2>GSMtester class<a class="headerlink" href="#module-gsmodutils.tester" title="Permalink to this headline">¶</a></h2>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field">
-    <th class="field-name">undoc-members:</th>
-    <td class="field-body">
-        <table class="first last docutils field-list" frame="void" rules="none">
-            <col class="field-name"/>
-            <col class="field-body"/>
-            <tbody valign="top">
-            <tr class="field-odd field">
-                <th class="field-name" colspan="2">inherited-members:</th>
-            </tr>
-            <tr class="field-odd field">
-                <td>&#160;</td>
-                <td class="field-body"></td>
-</tr>
-            <tr class="field-even field">
-                <th class="field-name" colspan="2">show-inheritance:</th>
-            </tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"></td>
-</tr>
-            </tbody>
-        </table>
-    </td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="class">
+<dt id="gsmodutils.tester.GSMTester">
+<em class="property">class </em><code class="descclassname">gsmodutils.tester.</code><code class="descname">GSMTester</code><span class="sig-paren">(</span><em>project</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/tester.html#GSMTester"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.tester.GSMTester" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Loads models and executes user specified tests for the genome scale models</p>
+<dl class="method">
+<dt id="gsmodutils.tester.GSMTester.collect_tests">
+<code class="descname">collect_tests</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/tester.html#GSMTester.collect_tests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.tester.GSMTester.collect_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects all tests but does not run them</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.tester.GSMTester.iter_basetf">
+<code class="descname">iter_basetf</code><span class="sig-paren">(</span><em>base_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/tester.html#GSMTester.iter_basetf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.tester.GSMTester.iter_basetf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a base test file (.json or .py)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.tester.GSMTester.iter_tests">
+<code class="descname">iter_tests</code><span class="sig-paren">(</span><em>recollect=False</em>, <em>skip_default=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/tester.html#GSMTester.iter_tests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.tester.GSMTester.iter_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate each test function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.tester.GSMTester.run_all">
+<code class="descname">run_all</code><span class="sig-paren">(</span><em>recollect=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/tester.html#GSMTester.run_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.tester.GSMTester.run_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find and run all tests for a project, executes rather than returning generator</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.tester.GSMTester.run_by_id">
+<code class="descname">run_by_id</code><span class="sig-paren">(</span><em>tid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/tester.html#GSMTester.run_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.tester.GSMTester.run_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns result of individual test function</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.tester.GSMTester.tests">
+<code class="descname">tests</code><a class="headerlink" href="#gsmodutils.tester.GSMTester.tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of dict tests and executable tests</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.tester.GSMTester.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/tester.html#GSMTester.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.tester.GSMTester.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>json serialisable log - call after running tests</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.tester.stdout_ctx">
+<code class="descclassname">gsmodutils.tester.</code><code class="descname">stdout_ctx</code><span class="sig-paren">(</span><em>stdout=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/tester.html#stdout_ctx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.tester.stdout_ctx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context to capture standard output of python executed tests during run time
+This is displayed to the user for them to see</p>
+</dd></dl>
+
 </div>
 </div>
 
@@ -153,11 +174,33 @@ test reports.</p>
 
 
 <h3>Navigation</h3>
+<p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="project.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="designs.html">Creating Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="designs.html#exporting-and-importing-designs-and-conditions">Exporting and importing designs and conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command line interface utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running model tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-default-tests">Running the default tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-tests">Custom tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-python-test-cases">Writing python test cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.tester">GSMtester class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Sharing projects with docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="metacyc.html">MetaCyc Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrumpy.html">ScrumPy Utilities</a></li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cli.html" title="previous chapter">Command line interface utilities</a></li>
+      <li>Next: <a href="docker.html" title="next chapter">Sharing projects with docker</a></li>
   </ul></li>
 </ul>
 </div>
