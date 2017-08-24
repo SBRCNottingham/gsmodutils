@@ -1,7 +1,9 @@
 from __future__ import print_function
-import os
+
 import argparse
 import json
+import os
+
 import cobra
 from cameo.core.utils import load_medium
 
@@ -11,8 +13,16 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
     """
     Specify a base scrumpy structural model file and returns a cameo model.
     This hasn't be thoroughly tested so expect there to be bugs
-    
+
     To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media
+
+    :param filepath:
+    :param atpase_reaction:
+    :param atpase_flux:
+    :param media:
+    :param objective_reactions:
+    :param obj_dir:
+    :return:
     """
 
     if objective_reactions is None:
@@ -85,10 +95,13 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
 def get_tokens(line_dt):
     """
     Goes through each charachter in scrumpy file attempting to find tokens
-    
-    BUG: if there is a numeric after a direction token this fails
+
+    FIXME: if there is a numeric after a direction token this fails
     e.g. '->2 "PROTON"' fails but '-> 2 "PROTON"' works
+    :param line_dt:
+    :return:
     """
+
     tokens = []
     
     quoted = False
@@ -129,9 +142,13 @@ def get_tokens(line_dt):
     
 def parse_file(filepath, fp_stack=None, rel_path=''):
     """
-    Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions
-    
-    This code is not that stable. Expect bugs.
+     Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions
+
+    Note this code is not fully tested. Expect some bugs.
+    :param filepath:
+    :param fp_stack:
+    :param rel_path:
+    :return:
     """
     if fp_stack is None:
         fp_stack = []
@@ -245,7 +262,12 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
 
 
 def scrumpy_to_cobra():
-    
+    """
+    Command line utility for parsing scrumpy files and creating cobrapy models
+    TODO: update to use click rather than argparse
+    TODO: update for better handling of import constraints
+    TODO: setting minimisation of sum of fluxes as an objective rather than biomass maximisation
+    """
     # Parser argument
     parser = argparse.ArgumentParser(description='parse a scrumpy file and output a json cobra compatable model')
    

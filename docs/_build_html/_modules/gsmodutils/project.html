@@ -58,7 +58,7 @@
 <span class="kn">from</span> <span class="nn">gsmodutils.tester</span> <span class="k">import</span> <span class="n">GSMTester</span>
 
 
-<div class="viewcode-block" id="GSMProject"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject">[docs]</a><span class="k">class</span> <span class="nc">GSMProject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject">[docs]</a><span class="k">class</span> <span class="nc">GSMProject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -91,7 +91,7 @@
         <span class="sd">&quot;&quot;&quot; Tests directory &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tests_dir</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GSMProject.project_tester"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.project_tester">[docs]</a>    <span class="k">def</span> <span class="nf">project_tester</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.project_tester"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.project_tester">[docs]</a>    <span class="k">def</span> <span class="nf">project_tester</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a tester for this project instance&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">GSMTester</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
@@ -105,7 +105,7 @@
         <span class="n">lock_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="s1">&#39;.gsmodultils_project_lock&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">LockFile</span><span class="p">(</span><span class="n">lock_path</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GSMProject.update"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.update"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates this class from configuration file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -122,7 +122,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_conditions_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">conditions_file</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GSMProject.get_conditions"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.get_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">get_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.get_conditions"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.get_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">get_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load the saved conditions file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -137,7 +137,7 @@
     <span class="k">def</span> <span class="nf">conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conditions</span><span class="p">()</span>
 
-<div class="viewcode-block" id="GSMProject.iter_models"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.iter_models">[docs]</a>    <span class="k">def</span> <span class="nf">iter_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.iter_models"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.iter_models">[docs]</a>    <span class="k">def</span> <span class="nf">iter_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generator for models</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -151,7 +151,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter_models</span><span class="p">())</span>
 
-<div class="viewcode-block" id="GSMProject.load_model"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.load_model">[docs]</a>    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.load_model"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.load_model">[docs]</a>    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a model stored by the project</span>
 <span class="sd">        mpath refers to the relative path of the model</span>
@@ -179,7 +179,7 @@
             
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loaded_model</span>
 
-<div class="viewcode-block" id="GSMProject.add_model"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.add_model">[docs]</a>    <span class="k">def</span> <span class="nf">add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_path</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.add_model"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.add_model">[docs]</a>    <span class="k">def</span> <span class="nf">add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_path</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a model given a path to it copy it to model directory unless its in the project path already.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -246,7 +246,7 @@
         
         <span class="k">return</span> <span class="n">design_dict</span>
 
-<div class="viewcode-block" id="GSMProject.get_design"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.get_design">[docs]</a>    <span class="k">def</span> <span class="nf">get_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.get_design"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.get_design">[docs]</a>    <span class="k">def</span> <span class="nf">get_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the StrainDesign object (not resulting model) of a design</span>
 <span class="sd">        :param design: design identifier</span>
@@ -261,7 +261,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span><span class="p">[</span><span class="n">design</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="GSMProject.load_design"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.load_design">[docs]</a>    <span class="k">def</span> <span class="nf">load_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.load_design"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.load_design">[docs]</a>    <span class="k">def</span> <span class="nf">load_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a model with a specified design modification</span>
 <span class="sd">        </span>
@@ -290,7 +290,7 @@
             <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
         <span class="k">return</span> <span class="n">des</span><span class="o">.</span><span class="n">add_to_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="GSMProject.save_design"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.save_design">[docs]</a>    <span class="k">def</span> <span class="nf">save_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">conditions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">base_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="GSMProject.save_design"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.save_design">[docs]</a>    <span class="k">def</span> <span class="nf">save_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">conditions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">base_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a design from a diff of model_a and model_b</span>
@@ -360,7 +360,7 @@
         <span class="n">des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_design</span><span class="p">(</span><span class="n">did</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">des</span></div>
 
-<div class="viewcode-block" id="GSMProject.load_diff"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.load_diff">[docs]</a>    <span class="k">def</span> <span class="nf">load_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">base_model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.load_diff"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.load_diff">[docs]</a>    <span class="k">def</span> <span class="nf">load_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">base_model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Take a diff dictionary and add it to a model (does not require saving a design file) &quot;&quot;&quot;</span>
         <span class="n">diff</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tmp diff loaded&#39;</span>
         <span class="n">diff</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tmp_design_diff&#39;</span>
@@ -371,7 +371,7 @@
         <span class="n">tmp_design</span> <span class="o">=</span> <span class="n">StrainDesign</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="s1">&#39;tmp_design&#39;</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tmp_design</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="GSMProject.load_conditions"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.load_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">load_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conditions_id</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.load_conditions"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.load_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">load_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conditions_id</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a model with a given set of pre-saved media conditions</span>
 <span class="sd">        :param conditions_id: identifier of conditions file</span>
@@ -397,11 +397,11 @@
 
         <span class="k">return</span> <span class="n">mdl</span></div>
 
-<div class="viewcode-block" id="GSMProject.growth_condition"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.growth_condition">[docs]</a>    <span class="k">def</span> <span class="nf">growth_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conditions_id</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.growth_condition"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.growth_condition">[docs]</a>    <span class="k">def</span> <span class="nf">growth_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conditions_id</span><span class="p">):</span>
         <span class="n">conditions_store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conditions</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">conditions_store</span><span class="p">[</span><span class="s1">&#39;growth_conditions&#39;</span><span class="p">][</span><span class="n">conditions_id</span><span class="p">][</span><span class="s1">&#39;observe_growth&#39;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="GSMProject.save_conditions"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.save_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">save_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">conditions_id</span><span class="p">,</span> <span class="n">carbon_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">apply_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">observe_growth</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.save_conditions"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.save_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">save_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">conditions_id</span><span class="p">,</span> <span class="n">carbon_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">apply_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">observe_growth</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add media conditions that a given model has to the project. Essentially the lower bounds on transport reactions.</span>
 <span class="sd">        All other trnasport reactions will be switched off.</span>
@@ -478,7 +478,7 @@
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_conditions_file</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cf</span><span class="p">:</span>
                 <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">conditions_store</span><span class="p">,</span> <span class="n">cf</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GSMProject.create_project"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.create_project">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GSMProject.create_project"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.create_project">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_project</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">author</span><span class="p">,</span> <span class="n">author_email</span><span class="p">,</span> <span class="n">project_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
@@ -502,7 +502,7 @@
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">project_path</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GSMProject.clean_project"><a class="viewcode-back" href="../../tests.html#gsmodutils.project.GSMProject.clean_project">[docs]</a>    <span class="k">def</span> <span class="nf">clean_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auto_remove</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMProject.clean_project"><a class="viewcode-back" href="../../project.html#gsmodutils.project.GSMProject.clean_project">[docs]</a>    <span class="k">def</span> <span class="nf">clean_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auto_remove</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check all design and condition settings to see if they contain orphans or links to non-existing models</span>
 <span class="sd">        If auto_remove is true applied, any orphan files are automatically deleted and entries to missing models are</span>
@@ -545,6 +545,20 @@
 
 
 <h3>Navigation</h3>
+<p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../project.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../designs.html">Creating Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../designs.html#exporting-and-importing-designs-and-conditions">Exporting and importing designs and conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command line interface utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tests.html">Running model tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">Sharing projects with docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../metacyc.html">MetaCyc Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scrumpy.html">ScrumPy Utilities</a></li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>

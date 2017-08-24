@@ -1,9 +1,11 @@
-from cobra import Reaction, Metabolite
 import os
 from collections import defaultdict, Counter
 
+from cobra import Reaction, Metabolite
+
 
 def parse_db(db_path):
+    """ Parse metacyc dat files to build dict containing entries """
     compounds_path = os.path.join(db_path, 'compounds.dat')
     enzymes_path = os.path.join(db_path, 'enzrxns.dat')
     reactions_path = os.path.join(db_path, 'reactions.dat')
@@ -17,6 +19,12 @@ def parse_db(db_path):
 
 
 def parse_metacyc_file(fpath, unique_fields):
+    """
+    Parses a dat file
+    :str fpath: path to dat file
+    :list unique_fields: list of fields that there should only be a single item of in each entry
+    :return:
+    """
     db = dict()
 
     with open(fpath) as datfile:
@@ -61,8 +69,15 @@ def parse_metacyc_file(fpath, unique_fields):
 
 
 def add_pathway(model, enzyme_ids=None, reaction_ids=None, db_path=None, copy=False):
-    """For a given model add enzymes"""
-
+    """
+    For a given model add enzymes from metacyc database
+    :param model: cobra model object
+    :param enzyme_ids: list of EC entires in format ["EC-x.x.x.x", ...]
+    :param reaction_ids: set of reaction ids to add to model
+    :param db_path: path to the metacyc dat files on disk
+    :param copy:
+    :return:
+    """
     if copy:
         model = model.copy()
 
@@ -106,7 +121,12 @@ def add_pathway(model, enzyme_ids=None, reaction_ids=None, db_path=None, copy=Fa
 
 
 def get_enzyme_reactions(eid, db):
-    """For a given ec number return associated reaction ids"""
+    """
+    For a given ec number return associated reaction ids
+    :param eid: enzyme id format "EC-x.x.x.x"
+    :param db: database dict
+    :return:
+    """
     erids = []
 
     for rid, react in db['reactions'].items():
@@ -117,7 +137,13 @@ def get_enzyme_reactions(eid, db):
 
 
 def add_reaction(model, reaction_id, db):
-
+    """
+    Add a metacyc reaction id to a cobrapy model
+    :param model: cobrapy model instance
+    :param reaction_id: reaction identifier in metacyc
+    :param db: dictionary db object
+    :return: tuple(reaction, added_metabolites) cobrapy Reaction and Metabolite instances
+    """
     metabolites = dict()
     reaction = Reaction(reaction_id)
 

@@ -1,7 +1,4 @@
-.. gsmodutils documentation master file, created by
-sphinx-quickstart on Thu Aug 24 10:33:30 2017.
-You can adapt this file completely to your liking, but it should at least
-contain the root `toctree` directive.
+.. gsmodutils documentation master file, created by sphinx-quickstart on Thu Aug 24 10:33:30 2017.
 
 gsmodutils - genome scale model management utilities
 ===========================================================
@@ -92,23 +89,25 @@ Project creation is the first step. This can be done as simply
 This will give a step by step guide.
 
 .. toctree::
-project
-   designs
-   cli
-   tests
-   docker
-   :maxdepth: 2
-           :caption: User Guide:
+    project
+    designs
+    cli
+    tests
+    docker
+    :maxdepth: 2
+    :caption: User Guide:
 
 
 Other utilities
 ---------------
+gsmodutils also includes utilities for genome scale model managament.
+Particularly the parsing of ScrumPy files (constraints based models developed at oxford brookes university).
 
 .. toctree::
-metacyc
-   scrumpy
-   :maxdepth: 2
-           :caption: Utilities:
+    metacyc
+    scrumpy
+    :maxdepth: 2
+    :caption: Utilities:
 
 Indices and tables
 ------------------

@@ -558,7 +558,7 @@ StrainDesign class
 ------------------
 
 .. automodule:: gsmodutils.design
-:members:
-        :undoc-members:
-            :inherited-members:
-            :show-inheritance:
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

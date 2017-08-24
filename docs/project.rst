@@ -110,8 +110,8 @@ GSMProject class
 ----------------
 
 .. automodule:: gsmodutils.project
-:members:
-        :undoc-members:
-            :inherited-members:
-            :show-inheritance:
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:
 
