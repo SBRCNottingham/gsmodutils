@@ -54,20 +54,67 @@ our case this is a pathway that should be conserved and used in all FBA
 cases. If a modification were to break this (without being a specific
 engineering goal) the model's validity comes in to question.
 
+.. code-block:: guess
+
+    TODO: Add an example custom test!
+
 Writing python test cases
 -------------------------
 
 For many use cases, it may require the use of more complex
 functionality. For this reason, gsmodutils allows users to write fully
 featured python test cases. This means that any code written in python
-can be used and assertion statments can be written and included in the
+can be used and assertion statements can be written and included in the
 test reports.
+
+Any file of the format ``tests/test_*.py`` will be included in the test
+cases run by the project tester instance.
+
+Only functions of the prototype  ``def func_<name>(model, project, log)``
+will be called by the tester.
+
+For test cases use the method
+``log.assertion(<bool: statement>, <str: success>, <str:failure>)``
+to record the result of a given test assertion.
+
+``log`` is always an instance of the ``gsmodutils.testutils.TestRecord``
+class.
+
+For example, create the python module ``tests/test_my_model.py``
+and then add the code:
+
+.. code-block:: python
+
+    def test_model(model, project, log):
+        solution = model.solver.optimize()
+        log.assertion(solution.f > 0.0, "Model grows", "Model does not grow")
+
+
+When creating tests the class ``gsmodutils.testutils.ModelTestSelector``
+can be used as a helper decorator to load models and designs of specific names.
+The same test function will be called repeatedly with all combinations of
+models, designs and conditions specified.
+
+.. code-block:: python
+
+    from gsmodutils.testutils import ModelTestSelector
+
+    @ModelTestSelector(models=[], conditions=[], designs=[])
+    def test_func(model, project, log):
+        log.assertion(True, "Works", "Does not work", "Test")
 
 
 GSMtester class
 ----------------
-
 .. automodule:: gsmodutils.tester
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:
+
+testutils module
+---------
+.. automodule:: gsmodutils.testutils
     :members:
     :undoc-members:
     :inherited-members:

@@ -88,14 +88,44 @@ organism functions.</p>
 our case this is a pathway that should be conserved and used in all FBA
 cases. If a modification were to break this (without being a specific
 engineering goal) the model’s validity comes in to question.</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span><span class="n">TODO</span><span class="o">:</span> <span class="n">Add</span> <span class="n">an</span> <span class="n">example</span> <span class="n">custom</span> <span class="n">test</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="writing-python-test-cases">
 <h2>Writing python test cases<a class="headerlink" href="#writing-python-test-cases" title="Permalink to this headline">¶</a></h2>
 <p>For many use cases, it may require the use of more complex
 functionality. For this reason, gsmodutils allows users to write fully
 featured python test cases. This means that any code written in python
-can be used and assertion statments can be written and included in the
+can be used and assertion statements can be written and included in the
 test reports.</p>
+<p>Any file of the format <code class="docutils literal"><span class="pre">tests/test_*.py</span></code> will be included in the test
+cases run by the project tester instance.</p>
+<p>Only functions of the prototype  <code class="docutils literal"><span class="pre">def</span> <span class="pre">func_&lt;name&gt;(model,</span> <span class="pre">project,</span> <span class="pre">log)</span></code>
+will be called by the tester.</p>
+<p>For test cases use the method
+<code class="docutils literal"><span class="pre">log.assertion(&lt;bool:</span> <span class="pre">statement&gt;,</span> <span class="pre">&lt;str:</span> <span class="pre">success&gt;,</span> <span class="pre">&lt;str:failure&gt;)</span></code>
+to record the result of a given test assertion.</p>
+<p><code class="docutils literal"><span class="pre">log</span></code> is always an instance of the <code class="docutils literal"><span class="pre">gsmodutils.testutils.TestRecord</span></code>
+class.</p>
+<p>For example, create the python module <code class="docutils literal"><span class="pre">tests/test_my_model.py</span></code>
+and then add the code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">assertion</span><span class="p">(</span><span class="n">solution</span><span class="o">.</span><span class="n">f</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;Model grows&quot;</span><span class="p">,</span> <span class="s2">&quot;Model does not grow&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When creating tests the class <code class="docutils literal"><span class="pre">gsmodutils.testutils.ModelTestSelector</span></code>
+can be used as a helper decorator to load models and designs of specific names.
+The same test function will be called repeatedly with all combinations of
+models, designs and conditions specified.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils.testutils</span> <span class="kn">import</span> <span class="n">ModelTestSelector</span>
+
+<span class="nd">@ModelTestSelector</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="p">[],</span> <span class="n">conditions</span><span class="o">=</span><span class="p">[],</span> <span class="n">designs</span><span class="o">=</span><span class="p">[])</span>
+<span class="k">def</span> <span class="nf">test_func</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">assertion</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="s2">&quot;Works&quot;</span><span class="p">,</span> <span class="s2">&quot;Does not work&quot;</span><span class="p">,</span> <span class="s2">&quot;Test&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="module-gsmodutils.tester">
 <span id="gsmtester-class"></span><h2>GSMtester class<a class="headerlink" href="#module-gsmodutils.tester" title="Permalink to this headline">¶</a></h2>
@@ -156,6 +186,68 @@ This is displayed to the user for them to see</p>
 </dd></dl>
 
 </div>
+<div class="section" id="testutils-module">
+<h2>testutils module<a class="headerlink" href="#testutils-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-gsmodutils.testutils"></span><p>Utilities for test functions</p>
+<p>This code assumes that the namespace that python based tests are in is correctly assigned, otherwise global
+variables won’t be present and this will throw errors</p>
+<dl class="class">
+<dt id="gsmodutils.testutils.ModelTestSelector">
+<em class="property">class </em><code class="descclassname">gsmodutils.testutils.</code><code class="descname">ModelTestSelector</code><span class="sig-paren">(</span><em>models=None</em>, <em>conditions=None</em>, <em>designs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/testutils.html#ModelTestSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.testutils.ModelTestSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="gsmodutils.testutils.TestRecord">
+<em class="property">class </em><code class="descclassname">gsmodutils.testutils.</code><code class="descname">TestRecord</code><span class="sig-paren">(</span><em>tid=''</em>, <em>parent=None</em>, <em>param_child=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/testutils.html#TestRecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.testutils.TestRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class for handling logging of errors in tester
+follows a hierarchical pattern as log records allow child records
+This is a bit of a weird data structure but the objective is to (in a future version) encapsulate all tests inside
+an instance of Test Record</p>
+<dl class="method">
+<dt id="gsmodutils.testutils.TestRecord.add_error">
+<code class="descname">add_error</code><span class="sig-paren">(</span><em>msg</em>, <em>desc=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/testutils.html#TestRecord.add_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.testutils.TestRecord.add_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>For errors loading tests, e.g. success cases can’t be reached because the model doesn’t load or can’t get a
+feasable solution</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.testutils.TestRecord.assertion">
+<code class="descname">assertion</code><span class="sig-paren">(</span><em>statement</em>, <em>success_msg</em>, <em>error_msg</em>, <em>desc=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/testutils.html#TestRecord.assertion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.testutils.TestRecord.assertion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called within test functions to store errors and successes
+Results will be appended to the correct log reccords</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.testutils.TestRecord.create_child">
+<code class="descname">create_child</code><span class="sig-paren">(</span><em>new_id</em>, <em>param_child=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/testutils.html#TestRecord.create_child"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.testutils.TestRecord.create_child" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used within decorator helper functions to allow multiple tests with the same function but where other parameters
+change</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.testutils.TestRecord.is_success">
+<code class="descname">is_success</code><a class="headerlink" href="#gsmodutils.testutils.TestRecord.is_success" title="Permalink to this definition">¶</a></dt>
+<dd><p>The test function is considered a failure if there are one or more error logs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.testutils.TestRecord.log_count">
+<code class="descname">log_count</code><a class="headerlink" href="#gsmodutils.testutils.TestRecord.log_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>count total errors for self and children</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.testutils.TestRecord.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><em>stk=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/testutils.html#TestRecord.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.testutils.TestRecord.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>converts log into dictionary form for portability
+stk stops cyclic behaviour</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -185,6 +277,7 @@ This is displayed to the user for them to see</p>
 <li class="toctree-l2"><a class="reference internal" href="#custom-tests">Custom tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#writing-python-test-cases">Writing python test cases</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.tester">GSMtester class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testutils-module">testutils module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
