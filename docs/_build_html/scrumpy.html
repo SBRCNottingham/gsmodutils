@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ScrumPy Utilities &#8212; gsmodutils 0.0.1 documentation</title>
+    <title>ScrumPy &#8212; gsmodutils 0.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -40,8 +40,39 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="scrumpy-utilities">
-<h1>ScrumPy Utilities<a class="headerlink" href="#scrumpy-utilities" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="scrumpy">
+<h1>ScrumPy<a class="headerlink" href="#scrumpy" title="Permalink to this headline">¶</a></h1>
+<p>The ScrumPy modelling software is developed at Oxford Brookes univeristy by the cell systems modelling group:</p>
+<p><a class="reference external" href="http://mudshark.brookes.ac.uk/ScrumPy">http://mudshark.brookes.ac.uk/ScrumPy</a>
+<a class="reference external" href="http://mudshark.brookes.ac.uk/">http://mudshark.brookes.ac.uk/</a></p>
+<p>This utility is mainly based around the <code class="docutils literal"><span class="pre">scrumpy_to_cobra</span></code> cli utility</p>
+<div class="section" id="example-usage">
+<h2>Example usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ scrumpy_to_cobra --model SCRUMPY_FILE.spy --output OUTPUT_FILE.json
+</pre></div>
+</div>
+<p>As scrumpy spy files do not include constraints for models, the following options are probably required to get
+a working model</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>--media a json file for growth media
+
+--atpase_reaction
+
+--atpase_flux
+
+--objective_reaction Objective to maximise (multiple objectives currently not set)
+
+--objective_direction
+</pre></div>
+</div>
+<p>Alternatively, use the python interface to load a model and set the constraints with the cobrapy interface</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils.scrumpy</span> <span class="kn">import</span> <span class="n">load_scrumpy_model</span>
+<span class="n">cobra_mdl</span> <span class="o">=</span> <span class="n">load_scrumpy_model</span><span class="p">(</span><span class="s1">&#39;model.spy&#39;</span><span class="p">)</span>
+<span class="n">cobra_mdl</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">cobra_mdl</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">Biomass</span>
+<span class="n">cobra</span><span class="o">.</span><span class="n">mdl</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">ATPase</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">8.0</span>
+<span class="n">cobra</span><span class="o">.</span><span class="n">mdl</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">ATPase</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">8.0</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="module-gsmodutils.scrumpy">
 <span id="code-docs"></span><h2>Code docs<a class="headerlink" href="#module-gsmodutils.scrumpy" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -96,14 +127,15 @@ This hasn’t be thoroughly tested so expect there to be bugs</p>
 <li class="toctree-l1"><a class="reference internal" href="project.html">Projects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="designs.html">Creating Designs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="designs.html#exporting-and-importing-designs-and-conditions">Exporting and importing designs and conditions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html">Command line interface utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Running model tests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">Sharing projects with docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="metacyc.html">MetaCyc Utilities</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ScrumPy Utilities</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ScrumPy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-usage">Example usage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.scrumpy">Code docs</a></li>
 </ul>
 </li>

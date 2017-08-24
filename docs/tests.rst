@@ -1,5 +1,5 @@
-Running model tests
-===================
+Testing
+=======
 A genome scale model is almost never finished.
 Thousands of hours of manual curation can go in to models and, as a result,
 changes can break things.

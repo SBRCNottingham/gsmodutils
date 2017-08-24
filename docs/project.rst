@@ -1,5 +1,5 @@
 Projects
-======================================
+========
 Projects are at the heart of gsmodutils.
 Essentially, a project is a directory that contains all the models, designs, conditions and other gsmodutils tools
 such as Docker files.

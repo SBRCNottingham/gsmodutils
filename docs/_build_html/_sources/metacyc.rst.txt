@@ -1,5 +1,5 @@
-MetaCyc Utilities
-=================
+MetaCyc
+=======
 
 This module provides a set of utilities for handling metacyc databases.
 This code does not provide access to the metacyc/biocyc databases and is simply a parser.

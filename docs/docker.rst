@@ -1,6 +1,5 @@
-Sharing projects with docker
-============================
-
+Docker
+======
 This section describes how to share a gsmodutils project inside a docker container.
 
 The objective is to have code for testing models, data for their validation and the framework for running models written  in a "write once run anywhere" fashion.

@@ -1,4 +1,4 @@
-Creating Designs
+Designs
 ================
 gsmodutils aims to create convenient interaction with strain designs through use of ``designs``.
 A design is any complex set of constrains that adds or removes reactions or changes the constraints of a model in any
