@@ -1,0 +1,11 @@
+Designs
+=======
+
+StrainDesign class
+----------------
+
+.. automodule:: gsmodutils.StrainDesign
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

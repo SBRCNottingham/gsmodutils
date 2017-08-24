@@ -1,0 +1,539 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Creating Designs &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="creating-designs">
+<h1>Creating Designs<a class="headerlink" href="#creating-designs" title="Permalink to this headline">¶</a></h1>
+<p>gsmodutils aims to create convenient interaction with strain designs through use of <code class="docutils literal"><span class="pre">designs</span></code>.
+A design is any complex set of constrains that adds or removes reactions or changes the constraints of a model in any
+way.</p>
+<p>The storage of designs within a project is a collection of flat json objects in the designs folder.</p>
+<p>The reason for flat files over a database is to allow easy interoperability with revision control software.</p>
+<p>Designs can inherit from one another and should, essentially, be considered as the difference between two models.</p>
+<p>Where differences are large it may be desirable to have a separate model in the project.</p>
+<p>However, for many cases a single model with different strain designs matching real strains stored in a culture collection is enough.</p>
+<p>For example, this can be for the addition of hetrologous pathways, or kockouts that are commonly used to improve the
+productions of desired chemicals.</p>
+<div class="section" id="adding-designs">
+<h2>Adding designs<a class="headerlink" href="#adding-designs" title="Permalink to this headline">¶</a></h2>
+<p>There are many cases in which an organism maybe modified in complex
+ways. In this example we apply some of the work from [1] and add the
+reactions for the Calvin-Benson (CBB) cycle to the ecoli model. This
+allows the fixation of CO2 as an inorganic carbon source.</p>
+<p>To do this, we need to add two enzymatic reactions to the model
+Phosphoribulokinase and Rubisco.</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="k">import</span> <span class="n">GSMProject</span>
+<span class="kn">import</span> <span class="nn">cobra</span>
+
+<span class="c1"># Load existing project</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
+<span class="c1"># Load the default model we want to add</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
+
+<span class="c1"># Phosphoribulokinase reaction</span>
+<span class="n">stoich</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">atp_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ru5p__D_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">adp_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">h_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">rb15bp_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">rb15bp</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;rb15bp_c&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;D-Ribulose 1,5-bisphosphate&#39;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s1">&#39;C5H8O11P2&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">rb15bp</span><span class="p">)</span>
+
+<span class="n">pruk</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;PRUK&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Phosphoribulokinase reaction&quot;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=-</span><span class="mi">1000</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">pruk</span><span class="p">)</span>
+<span class="n">pruk</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">stoich</span><span class="p">)</span>
+
+
+<span class="c1"># Rubisco reaction (Ribulose-bisphosphate carboxylase)</span>
+<span class="n">stoich</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;3pg_c&quot;</span><span class="p">:</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="s2">&quot;rb15bp_c&quot;</span><span class="p">:</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">&quot;co2_c&quot;</span><span class="p">:</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">&quot;h2o_c&quot;</span><span class="p">:</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">&quot;h_c&quot;</span><span class="p">:</span><span class="mf">2.0</span>
+<span class="p">}</span>
+
+
+<span class="n">rubisco</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;RBPC&quot;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ribulose-bisphosphate carboxylase&quot;</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">rubisco</span><span class="p">)</span>
+<span class="n">rubisco</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">stoich</span><span class="p">)</span>
+
+<span class="c1">#show the reactions</span>
+<span class="n">pruk</span>
+</pre></div>
+</div>
+<table>
+    <tr>
+        <td><strong>Reaction identifier</strong></td><td>PRUK</td>
+    </tr><tr>
+        <td><strong>Name</strong></td><td>Phosphoribulokinase reaction</td>
+    </tr><tr>
+        <td><strong>Memory address</strong></td>
+        <td>0x07f2b1b81cad0</td>
+    </tr><tr>
+        <td><strong>Stoichiometry</strong></td>
+        <td>
+            <p style='text-align:right'>atp_c + ru5p__D_c <=> adp_c + h_c + rb15bp_c</p>
+            <p style='text-align:right'>ATP + D-Ribulose 5-phosphate <=> ADP + H+ + D-Ribulose 1,5-bisphosphate</p>
+        </td>
+    </tr><tr>
+        <td><strong>GPR</strong></td><td></td>
+    </tr><tr>
+        <td><strong>Lower bound</strong></td><td>-1000</td>
+    </tr><tr>
+        <td><strong>Upper bound</strong></td><td>1000</td>
+    </tr>
+</table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="c1"># now rubisco</span>
+<span class="n">rubisco</span>
+</pre></div>
+</div>
+<table>
+    <tr>
+        <td><strong>Reaction identifier</strong></td><td>RBPC</td>
+    </tr><tr>
+        <td><strong>Name</strong></td><td>Ribulose-bisphosphate carboxylase</td>
+    </tr><tr>
+        <td><strong>Memory address</strong></td>
+        <td>0x07f2b1b49fa50</td>
+    </tr><tr>
+        <td><strong>Stoichiometry</strong></td>
+        <td>
+            <p style='text-align:right'>co2_c + h2o_c + rb15bp_c --> 2.0 3pg_c + 2.0 h_c</p>
+            <p style='text-align:right'>CO2 + H2O + D-Ribulose 1,5-bisphosphate --> 2.0 3-Phospho-D-glycerate + 2.0 H+</p>
+        </td>
+    </tr><tr>
+        <td><strong>GPR</strong></td><td></td>
+    </tr><tr>
+        <td><strong>Lower bound</strong></td><td>0</td>
+    </tr><tr>
+        <td><strong>Upper bound</strong></td><td>1000.0</td>
+    </tr>
+</table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Removed pfkA, pfkB and zwf</span>
+<span class="n">model</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s2">&quot;b3916&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">knock_out</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s2">&quot;b1723&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">knock_out</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s2">&quot;b1852&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">knock_out</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now we have added the reactions, we would probably want to make sure
+they work. To do this we need to change the medium.</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cameo.core.utils</span> <span class="k">import</span> <span class="n">medium</span><span class="p">,</span> <span class="n">load_medium</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">EX_glc__D_e</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.0</span>
+<span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">EX_nh4_e</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1000.0</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span><span class="o">.</span><span class="n">f</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">0.9686322977222491</span>
+</pre></div>
+</div>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">save_design</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;cbb_cycle&#39;</span><span class="p">,</span> <span class="s1">&#39;calvin cycle&#39;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Reactions necissary for the calvin cycle in ecoli&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="inherited-designs">
+<h3>Inherited designs<a class="headerlink" href="#inherited-designs" title="Permalink to this headline">¶</a></h3>
+<p>Now we would like to use the design for production of xylose To do this
+we will create a child design so we can reuse the calvin cycle without
+making it part of the wild type ecoli core model.</p>
+<p>First, we want to start from the parent calvin cycle design as a base.</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
+<span class="c1"># Start from the design as a base model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_design</span><span class="p">(</span><span class="s1">&#39;cbb_cycle&#39;</span><span class="p">)</span>
+<span class="n">reaction</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;HMGCOASi&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hydroxymethylglutaryl CoA synthase&quot;</span><span class="p">)</span>
+
+<span class="n">aacoa</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;aacoa_c&quot;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=-</span><span class="mi">4</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C25H36N7O18P3S&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Acetoacetyl-CoA&quot;</span><span class="p">)</span>
+<span class="n">hmgcoa</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;hmgcoa_c&quot;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=-</span><span class="mi">5</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C27H40N7O20P3S&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hydroxymethylglutaryl CoA&quot;</span><span class="p">)</span>
+
+
+<span class="n">model</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">([</span><span class="n">aacoa</span><span class="p">,</span> <span class="n">hmgcoa</span><span class="p">])</span>
+
+<span class="n">stoich</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">aacoa_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">accoa_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">coa_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">h_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">h2o_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">hmgcoa_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+<span class="n">reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">stoich</span><span class="p">)</span>
+<span class="n">reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1000.0</span>
+<span class="n">reaction</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="mf">1000.0</span>
+
+<span class="n">reaction</span>
+</pre></div>
+</div>
+<table>
+    <tr>
+        <td><strong>Reaction identifier</strong></td><td>HMGCOASi</td>
+    </tr><tr>
+        <td><strong>Name</strong></td><td>Hydroxymethylglutaryl CoA synthase</td>
+    </tr><tr>
+        <td><strong>Memory address</strong></td>
+        <td>0x07f2b18b7d790</td>
+    </tr><tr>
+        <td><strong>Stoichiometry</strong></td>
+        <td>
+            <p style='text-align:right'>aacoa_c + accoa_c + h2o_c <=> coa_c + h_c + hmgcoa_c</p>
+            <p style='text-align:right'>Acetoacetyl-CoA + Acetyl-CoA + H2O <=> Coenzyme A + H+ + Hydroxymethylglutaryl CoA</p>
+        </td>
+    </tr><tr>
+        <td><strong>GPR</strong></td><td></td>
+    </tr><tr>
+        <td><strong>Lower bound</strong></td><td>-1000.0</td>
+    </tr><tr>
+        <td><strong>Upper bound</strong></td><td>1000.0</td>
+    </tr>
+</table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">mev__R</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;mev__R_c&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;R Mevalonate&quot;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C6H11O4&quot;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">([</span><span class="n">mev__R</span><span class="p">])</span>
+
+<span class="n">reaction</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;HMGCOAR&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hydroxymethylglutaryl CoA reductase&quot;</span><span class="p">)</span>
+<span class="n">reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1000.0</span>
+<span class="n">reaction</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="mf">1000.0</span>
+
+<span class="n">stoich</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">coa_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">h_c</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">nadp_c</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">nadph_c</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">hmgcoa_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">mev__R_c</span><span class="o">=-</span><span class="mf">1.0</span>
+<span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+
+<span class="n">reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">stoich</span><span class="p">)</span>
+<span class="n">reaction</span>
+</pre></div>
+</div>
+<table>
+    <tr>
+        <td><strong>Reaction identifier</strong></td><td>HMGCOAR</td>
+    </tr><tr>
+        <td><strong>Name</strong></td><td>Hydroxymethylglutaryl CoA reductase</td>
+    </tr><tr>
+        <td><strong>Memory address</strong></td>
+        <td>0x07f2b19fc3290</td>
+    </tr><tr>
+        <td><strong>Stoichiometry</strong></td>
+        <td>
+            <p style='text-align:right'>coa_c + mev__R_c + 2.0 nadp_c <=> 2.0 h_c + hmgcoa_c + 2.0 nadph_c</p>
+            <p style='text-align:right'>Coenzyme A + R Mevalonate + 2.0 Nicotinamide adenine dinucleotide phosphate <=> 2.0 H+ + Hydroxymethylglutaryl CoA + 2.0 Nicotinamide adenine dinucleotide phosphate - reduced</p>
+        </td>
+    </tr><tr>
+        <td><strong>GPR</strong></td><td></td>
+    </tr><tr>
+        <td><strong>Lower bound</strong></td><td>-1000.0</td>
+    </tr><tr>
+        <td><strong>Upper bound</strong></td><td>1000.0</td>
+    </tr>
+</table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">add_boundary</span><span class="p">(</span><span class="n">mev__R</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;sink&#39;</span><span class="p">)</span> <span class="c1"># add somewhere for mevalonate to go</span>
+
+<span class="n">design</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">save_design</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;mevalonate_cbb&#39;</span><span class="p">,</span> <span class="s1">&#39;mevalonate production&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="s1">&#39;cbb_cycle&#39;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Reactions for the production of mevalonate&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">des</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_design</span><span class="p">(</span><span class="s1">&#39;mevalonate_cbb&#39;</span><span class="p">)</span>
+<span class="n">des</span>
+</pre></div>
+</div>
+<table>
+    <tr>
+        <td><strong>Name</strong></td>
+        <td>iJO1366:ds_cbb_cycle:ds_cbb_cycle:ds_mevalonate_cbb</td>
+    </tr><tr>
+        <td><strong>Memory address</strong></td>
+        <td>0x07f2b1856a490</td>
+    </tr><tr>
+        <td><strong>Number of metabolites</strong></td>
+        <td>1808</td>
+    </tr><tr>
+        <td><strong>Number of reactions</strong></td>
+        <td>2588</td>
+    </tr><tr>
+        <td><strong>Objective expression</strong></td>
+        <td>-1.0*BIOMASS_Ec_iJO1366_core_53p95M_reverse_5c8b1 + 1.0*BIOMASS_Ec_iJO1366_core_53p95M</td>
+    </tr><tr>
+        <td><strong>Compartments</strong></td>
+        <td>periplasm, cytosol, extracellular space</td>
+    </tr>
+  </table></div>
+</div>
+<div class="section" id="accessing-designs-as-models">
+<h2>Accessing designs as models<a class="headerlink" href="#accessing-designs-as-models" title="Permalink to this headline">¶</a></h2>
+<p>By default a design can be accessed as a model with</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">project</span><span class="o">.</span><span class="n">load_design</span><span class="p">(</span><span class="o">&lt;</span><span class="n">design_id</span><span class="o">&gt;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This loads the design as a cobra model object.</p>
+<p>Using the get_design method allows access to the strain design object.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">project</span><span class="o">.</span><span class="n">get_design</span><span class="p">(</span><span class="o">&lt;</span><span class="n">design_id</span><span class="o">&gt;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This can also be loaded as an isolated pathway cobra model (though FBA
+cannot be performed on this object).</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="k">import</span> <span class="n">GSMProject</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
+<span class="n">des</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_design</span><span class="p">(</span><span class="s1">&#39;mevalonate_cbb&#39;</span><span class="p">)</span>
+<span class="n">des</span><span class="o">.</span><span class="n">as_pathway_model</span><span class="p">()</span>
+</pre></div>
+</div>
+<table>
+    <tr>
+        <td><strong>Name</strong></td>
+        <td>:ds_cbb_cycle:ds_mevalonate_cbb</td>
+    </tr><tr>
+        <td><strong>Memory address</strong></td>
+        <td>0x07fddd6c806d0</td>
+    </tr><tr>
+        <td><strong>Number of metabolites</strong></td>
+        <td>23</td>
+    </tr><tr>
+        <td><strong>Number of reactions</strong></td>
+        <td>9</td>
+    </tr><tr>
+        <td><strong>Objective expression</strong></td>
+        <td>0</td>
+    </tr><tr>
+        <td><strong>Compartments</strong></td>
+        <td></td>
+    </tr>
+  </table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">des</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_design</span><span class="p">(</span><span class="s1">&#39;cbb_cycle&#39;</span><span class="p">)</span>
+<span class="n">des</span><span class="o">.</span><span class="n">as_pathway_model</span><span class="p">()</span>
+</pre></div>
+</div>
+<table>
+    <tr>
+        <td><strong>Name</strong></td>
+        <td>:ds_cbb_cycle</td>
+    </tr><tr>
+        <td><strong>Memory address</strong></td>
+        <td>0x07fde0f3c0790</td>
+    </tr><tr>
+        <td><strong>Number of metabolites</strong></td>
+        <td>18</td>
+    </tr><tr>
+        <td><strong>Number of reactions</strong></td>
+        <td>6</td>
+    </tr><tr>
+        <td><strong>Objective expression</strong></td>
+        <td>0</td>
+    </tr><tr>
+        <td><strong>Compartments</strong></td>
+        <td></td>
+    </tr>
+  </table></div>
+</div>
+<div class="section" id="exporting-and-importing-designs-and-conditions">
+<h1>Exporting and importing designs and conditions<a class="headerlink" href="#exporting-and-importing-designs-and-conditions" title="Permalink to this headline">¶</a></h1>
+<p>There are many cases where a particular external piece of software
+outside the cobrapy stack will be needed for strain design. For this
+reason the gsmodutils import and export commands aim to allow
+interoperability with other tool sets.</p>
+<p>The objective is to allow users to add or update designs to the project
+through the command line alone as well as exporting models with the
+additional constraints that are applied for import in to other tools.
+Cobrapy makes it easy to work with matlab, sbml, json and yaml
+constraints based models.</p>
+<p>To view the designs and conditions stored in a project use the <code class="docutils literal"><span class="pre">info</span></code>
+command. For the example project it should look something like:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">--------------------------------------------------------------------------------------------------</span>
+<span class="n">Project</span> <span class="n">description</span> <span class="o">-</span> <span class="n">Example</span> <span class="n">ecoli</span> <span class="n">core</span> <span class="n">model</span>
+<span class="n">Author</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="o">-</span> <span class="n">A</span> <span class="n">user</span>
+<span class="n">Author</span> <span class="n">email</span> <span class="o">-</span> <span class="n">A</span><span class="o">.</span><span class="n">user</span><span class="nd">@example</span><span class="o">.</span><span class="n">com</span>
+<span class="n">Designs</span> <span class="n">directory</span> <span class="o">-</span> <span class="n">designs</span>
+<span class="n">Tests</span> <span class="n">directory</span> <span class="o">-</span> <span class="n">tests</span>
+
+<span class="n">Models</span><span class="p">:</span>
+        <span class="o">*</span> <span class="n">iJO1366</span><span class="o">.</span><span class="n">json</span>
+                 <span class="n">iJO1366</span>
+
+<span class="n">Designs</span><span class="p">:</span>
+        <span class="o">*</span> <span class="n">mevalonate_cbb</span>
+                 <span class="n">mevalonate</span> <span class="n">production</span>
+                 <span class="n">Reactions</span> <span class="k">for</span> <span class="n">the</span> <span class="n">production</span> <span class="n">of</span> <span class="n">mevalonate</span>
+                 <span class="n">Parent</span><span class="p">:</span> <span class="n">cbb_cycle</span>
+        <span class="o">*</span> <span class="n">cbb_cycle</span>
+                 <span class="n">calvin</span> <span class="n">cycle</span>
+                 <span class="n">Reactions</span> <span class="n">necissary</span> <span class="k">for</span> <span class="n">the</span> <span class="n">calvin</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">ecoli</span>
+<span class="n">Conditions</span><span class="p">:</span>
+        <span class="o">*</span> <span class="n">fructose_growth</span>
+<span class="o">--------------------------------------------------------------------------------------------------</span>
+</pre></div>
+</div>
+<p>To export to matlab, sbml, json or yaml formats use
+<code class="docutils literal"><span class="pre">gsmodutils</span> <span class="pre">export</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">export</span> <span class="o">&lt;</span><span class="n">output</span> <span class="nb">format</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">output</span> <span class="n">filepath</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">model_id</span> <span class="o">&lt;</span><span class="n">model</span> <span class="nb">id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">conditions</span> <span class="o">&lt;</span><span class="n">conditions_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">design</span> <span class="o">&lt;</span><span class="n">design_id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>For example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">export</span> <span class="n">mat</span> <span class="n">mevalonate_analysis</span><span class="o">.</span><span class="n">mat</span> <span class="o">--</span><span class="n">design</span> <span class="n">mevalonate_cbb</span>
+</pre></div>
+</div>
+<p>When flags for models, designs and conditions are all set the load order
+of constrains is as follows: * Load model * Set conditions * Load
+design</p>
+<p>This means that if there is a conflict betweeen the constraints set in a
+conditions file and the design file (i.e. the same transporter may be
+switched on an off at the same time) the constraint added in the design
+file takes precidence and is applied to the model.</p>
+<p>To import a new design use the <code class="docutils literal"><span class="pre">dimport</span></code> command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">dimport</span> <span class="o">&lt;</span><span class="n">path_to_model</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">new_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">base_model</span> <span class="o">&lt;</span><span class="n">base_model_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">parent</span> <span class="o">&lt;</span><span class="n">parent_design_id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The base_model flag is optional, if it is unset the default project
+modell will be used for the diff.</p>
+<p>Before adding a new design it may be desirable to check the diff summary
+using:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">diff</span> <span class="o">&lt;</span><span class="n">path_to_model</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">base_model</span> <span class="o">&lt;</span><span class="n">base_model_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">parent</span> <span class="o">&lt;</span><span class="n">parent_design_id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>This command shows a summary of the changes the design makes. Using the
+flag <code class="docutils literal"><span class="pre">--no-names</span></code> will create a summary that only lists the number of
+reactions and metabolites modified or added. By default, all changed
+reactions will be listed by name (though the exact changes are not
+visible).</p>
+<p>Using <code class="docutils literal"><span class="pre">--output</span></code> allows the diff to be saved as a json file. This can
+then be imported directly as a design with <code class="docutils literal"><span class="pre">dimport</span></code> using the
+<code class="docutils literal"><span class="pre">--from-diff</span></code> flag.</p>
+<p>Rather than saving a new design, we would like to simply overwrite the
+existing design. This can be done easily. <strong>However, it is strongly
+reccommended that you use version control software (such as git or
+mercurial) to ensure that changes to existing designs are tracked.</strong></p>
+<p>Do this with the command</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">dimport</span> <span class="o">&lt;</span><span class="n">path_to_updated_model</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">design_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+<div class="section" id="module-gsmodutils.design">
+<span id="straindesign-class"></span><h2>StrainDesign class<a class="headerlink" href="#module-gsmodutils.design" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">inherited-members:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gsmodutils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, James Gilbert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/designs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

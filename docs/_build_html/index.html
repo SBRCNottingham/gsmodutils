@@ -1,0 +1,223 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>gsmodutils - genome scale model management utilities &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <p>sphinx-quickstart on Thu Aug 24 10:33:30 2017.
+You can adapt this file completely to your liking, but it should at least
+contain the root <cite>toctree</cite> directive.</p>
+<div class="section" id="gsmodutils-genome-scale-model-management-utilities">
+<h1>gsmodutils - genome scale model management utilities<a class="headerlink" href="#gsmodutils-genome-scale-model-management-utilities" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal"><span class="pre">gsmodutils</span></code> is a set of utilities that aim to improve the management of large constraints based models geared
+towards strain design and analysis.
+Think of it as a friendly framework for developing genome scale models.</p>
+<p>The core aim of this software is to make genome scale models, and their applications, reusable in future projects.
+This is inspired by the notion of <em>test driven development</em>.</p>
+<p>Changes to models are tracked and pre-written test cases ensure that changes don’t break already working components.
+In addition, by following good practices, well documented genome scale models can be an accompaniment to papers,
+a core goal of <code class="docutils literal"><span class="pre">gsmodutils</span></code> is to allow users to share their projects in self contained <code class="docutils literal"><span class="pre">docker</span></code> images.</p>
+<p><strong>Note that this software is under heavy development and much of this may change. Please check back here</strong>
+<strong>or at the git hub repository for updates.</strong></p>
+<p><strong>It is currently recommended that you install gsmodutils in a</strong> <code class="docutils literal"><span class="pre">virtualenv</span></code> <strong>environment</strong>.</p>
+<p>The most important thing, though, is to not have a model file for every small set of constraints that are added to a
+model.</p>
+<p>E.g. having a directory structure such as this isn’t good for anyone. You might add new curation to the base model,
+or a knockout might exist in one model but not another.</p>
+<p>Instead <code class="docutils literal"><span class="pre">gsmodutils</span></code> takes the philopsophy that we should be storing the changes (ie. <em>diffs</em> or <em>deltas</em>) between
+different versions of models.
+For this reason, gsmodutils uses simple utilities that let you load model <code class="docutils literal"><span class="pre">conditions</span></code> and <code class="docutils literal"><span class="pre">designs</span></code> in python:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">()</span>
+<span class="c1"># Just load a model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
+<span class="c1"># Just load some conditions</span>
+<span class="n">xylose_growth</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_conditions</span><span class="p">(</span><span class="s1">&#39;xylose_growth&#39;</span><span class="p">)</span>
+<span class="c1"># Load a strain design</span>
+<span class="n">succ_prod</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_design</span><span class="p">(</span><span class="s1">&#39;succinate_production&#39;</span><span class="p">)</span>
+<span class="c1"># or load it growing on a different substrate</span>
+<span class="n">succ_prod_xyl</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_design</span><span class="p">(</span><span class="s1">&#39;succinate_production&#39;</span><span class="p">,</span> <span class="n">conditions</span><span class="o">=</span><span class="s1">&#39;xylose_growth&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or you can export them through the convenient command line utility to export models for use in other tools outside the
+cobrapy world.</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ gsmodutils <span class="nb">export</span> matlab succ_production.m --design succinate_production --conditions xylose_growth
+</pre></div>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>To install, the simplest method is to use pip</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ pip install gsmodutils
+</pre></div>
+</div>
+<p>Alternatively, from sources use</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ pip install -r requirements.txt
+$ python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="user-guides">
+<h2>User guides<a class="headerlink" href="#user-guides" title="Permalink to this headline">¶</a></h2>
+<p>Project creation is the first step. This can be done as simply</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ gsmodutils create_project PROJECT_PATH MODEL_PATH
+</pre></div>
+</div>
+<p>This will give a step by step guide.</p>
+<div class="toctree-wrapper compound">
+</div>
+<dl class="docutils">
+<dt>project</dt>
+<dd><p class="first">designs
+cli
+tests
+docker
+:maxdepth: 2</p>
+<blockquote class="last">
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">caption:</th><td class="field-body">User Guide:</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd>
+</dl>
+</div>
+<div class="section" id="other-utilities">
+<h2>Other utilities<a class="headerlink" href="#other-utilities" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<dl class="docutils">
+<dt>metacyc</dt>
+<dd><p class="first">scrumpy
+:maxdepth: 2</p>
+<blockquote class="last">
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">caption:</th><td class="field-body">Utilities:</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd>
+</dl>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
+<p>[1] Antonovsky, N., Gleizer, S., Noor, E., Zohar, Y., Herz, E.,
+Barenholz, U., Zelcbuch, L., Amram, S., Wides, A., Tepper, N. and
+Davidi, D., 2016. Sugar synthesis from CO 2 in Escherichia coli. Cell,
+166(1), pp.115-125.</p>
+<p>[2] Ebrahim, Ali, Joshua A. Lerman, Bernhard O. Palsson, and Daniel R.
+Hyduke. “COBRApy: COnstraints-based reconstruction and analysis for
+python.” BMC systems biology 7, no. 1 (2013): 74.</p>
+<p>[3] Cardoso, Joao, Kristian Jensen, Christian Lieven, Anne Sofie Laerke
+Hansen, Svetlana Galkina, Moritz Emanuel Beber, Emre Ozdemir, Markus
+Herrgard, Henning Redestig, and Nikolaus Sonnenschein. “Cameo: A Python
+Library for Computer Aided Metabolic Engineering and Optimization of
+Cell Factories.” bioRxiv (2017): 147199.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">gsmodutils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, James Gilbert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

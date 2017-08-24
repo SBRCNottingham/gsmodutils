@@ -1,0 +1,9 @@
+.. Creating projects
+
+Grwoth conditions
+======================================
+
+A common problem with many genome scale models is the numerous growth conditions that a
+
+.. code-block:: guess
+

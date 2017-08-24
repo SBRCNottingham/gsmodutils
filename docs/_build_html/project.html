@@ -1,0 +1,219 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Projects &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="projects">
+<h1>Projects<a class="headerlink" href="#projects" title="Permalink to this headline">¶</a></h1>
+<p>Projects are at the heart of gsmodutils.
+Essentially, a project is a directory that contains all the models, designs, conditions and other gsmodutils tools
+such as Docker files.</p>
+<div class="section" id="creating-projects">
+<h2>Creating projects<a class="headerlink" href="#creating-projects" title="Permalink to this headline">¶</a></h2>
+<p>Project creation is best done with the command line utility.
+This provides a step by step guide for project creation.</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ gsmodutils create_project PROJECT_PATH MODEL_PATH
+</pre></div>
+</div>
+<p>Alternatively, this can be done in python using the GSMProject class.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="kn">from</span> <span class="nn">cameo</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">bigg</span><span class="o">.</span><span class="n">e_coli_core</span>
+
+<span class="c1"># Note, running more than once will throw an error.</span>
+<span class="c1"># Projects can&#39;t be created in the folder more than once.</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="o">.</span><span class="n">create_project</span><span class="p">(</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="p">],</span>
+    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Example ecoli core model&#39;</span><span class="p">,</span>
+    <span class="n">author</span><span class="o">=</span><span class="s1">&#39;A user&#39;</span><span class="p">,</span>
+    <span class="n">author_email</span><span class="o">=</span><span class="s1">&#39;A.user@example.com&#39;</span><span class="p">,</span>
+    <span class="n">project_path</span><span class="o">=</span><span class="s1">&#39;example_project&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Using the cli lets have a look inside the newly created project:</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ gsmodutils create_project ./example_project e_coli_core.json
+...
+$ <span class="nb">cd</span> example_project
+$ gsmodutils info
+--------------------------------------------------------------------------------------------------
+Project description - Example ecoli core model
+Author<span class="o">(</span>s<span class="o">)</span>: - A user
+Author email - A.user@example.com
+Designs directory - designs
+Tests directory - tests
+
+Models:
+        * e_coli_core.json
+                 e_coli_core
+--------------------------------------------------------------------------------------------------
+</pre></div>
+</div>
+<p>This will also allow access to a project object that can be used to access gsmodutils features, such as accessing models</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
+<span class="c1"># load the default model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It is now recomended that you use source control, such as <code class="docutils literal"><span class="pre">git</span></code> or <code class="docutils literal"><span class="pre">mercurial</span></code>, create a repository and add the
+project to it to track all changes to models that are made over the course of the project.</p>
+</div>
+<div class="section" id="adding-conditions">
+<h2>Adding conditions<a class="headerlink" href="#adding-conditions" title="Permalink to this headline">¶</a></h2>
+<p>In many cases it is desirable to compare models configured with different growth conditions.
+In this simplistic example we show how conditions can be adjusted by switching the growth media from glucose to
+fructose.
+This setting can then be saved and reloaded at a later time.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="c1"># Load existing project</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">model</span>
+
+<span class="c1"># Switching off glucose uptake</span>
+<span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">EX_glc__D_e</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="c1"># switching on Xylose uptake</span>
+<span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">EX_fru_e</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span>
+<span class="c1"># Check it works</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+<span class="n">project</span><span class="o">.</span><span class="n">save_conditions</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;fructose_growth&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Loading them back should now be straightforward:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># loading the conditions back into a different model</span>
+<span class="n">fructose_m</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_conditions</span><span class="p">(</span><span class="s1">&#39;fructose_growth&#39;</span><span class="p">)</span>
+
+<span class="c1"># These will raise assertion errors if this hasn&#39;t worked</span>
+<span class="c1"># fructose should be in the medium</span>
+<span class="c1"># Glucose should not be present</span>
+<span class="k">assert</span> <span class="s2">&quot;EX_fru_e&quot;</span> <span class="ow">in</span> <span class="n">fructose_m</span><span class="o">.</span><span class="n">medium</span>
+<span class="k">assert</span> <span class="s2">&quot;EX_glc__D_e&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fructose_m</span><span class="o">.</span><span class="n">medium</span>
+<span class="k">assert</span> <span class="n">fructose_m</span><span class="o">.</span><span class="n">medium</span><span class="p">[</span><span class="s2">&quot;EX_fru_e&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">10</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="module-gsmodutils.project">
+<span id="gsmproject-class"></span><h2>GSMProject class<a class="headerlink" href="#module-gsmodutils.project" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">inherited-members:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gsmodutils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, James Gilbert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/project.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
