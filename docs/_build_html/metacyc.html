@@ -46,7 +46,24 @@
 <p>This module provides a set of utilities for handling metacyc databases.
 This code does not provide access to the metacyc/biocyc databases and is simply a parser.
 For access to data consult metacyc for the acquisition of a valid licence.</p>
-<span class="target" id="module-gsmodutils.metacyc"></span><dl class="function">
+<div class="section" id="example-usage">
+<h2>Example usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<p>The intended uscase for this code is to allow the addition of pathways to models that use metacyc identifiers.
+The example bellow adds an enzyme to a model using EC identifiers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">metacyc</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">metacyc</span><span class="o">.</span><span class="n">parse_db</span><span class="p">(</span><span class="s1">&#39;/path/to/metacyc/dat/files&#39;</span><span class="p">)</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">()</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
+
+<span class="n">metacyc</span><span class="o">.</span><span class="n">add_pathway</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;EC-1.2.1.10&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="module-gsmodutils.metacyc">
+<span id="code-docs"></span><h2>Code docs<a class="headerlink" href="#module-gsmodutils.metacyc" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
 <dt id="gsmodutils.metacyc.add_pathway">
 <code class="descclassname">gsmodutils.metacyc.</code><code class="descname">add_pathway</code><span class="sig-paren">(</span><em>model</em>, <em>enzyme_ids=None</em>, <em>reaction_ids=None</em>, <em>db_path=None</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/metacyc.html#add_pathway"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.metacyc.add_pathway" title="Permalink to this definition">¶</a></dt>
 <dd><p>For a given model add enzymes</p>
@@ -73,6 +90,7 @@ For access to data consult metacyc for the acquisition of a valid licence.</p>
 <code class="descclassname">gsmodutils.metacyc.</code><code class="descname">parse_metacyc_file</code><span class="sig-paren">(</span><em>fpath</em>, <em>unique_fields</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/metacyc.html#parse_metacyc_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.metacyc.parse_metacyc_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</div>
 </div>
 
 
@@ -102,7 +120,11 @@ For access to data consult metacyc for the acquisition of a valid licence.</p>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">MetaCyc Utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MetaCyc Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-usage">Example usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.metacyc">Code docs</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="scrumpy.html">ScrumPy Utilities</a></li>
 </ul>
 

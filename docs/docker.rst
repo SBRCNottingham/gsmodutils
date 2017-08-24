@@ -111,4 +111,5 @@ This saves the sharable docker container. When this tarball is transferred to an
 
     $ docker load -i example_project.tar
 
-The imported image will then allow the above commands to run with the same environmental settings. This should allow you to share your models in a way that allows results to be replicated without worrying about the software.
+The imported image will then allow the above commands to run with the same environmental settings.
+This should allow you to share your models in a way that allows results to be replicated without worrying about the software.
