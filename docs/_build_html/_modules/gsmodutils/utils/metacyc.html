@@ -5,12 +5,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>gsmodutils.metacyc &#8212; gsmodutils 0.0.1 documentation</title>
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <title>gsmodutils.utils.metacyc &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
+        URL_ROOT:    '../../../',
         VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -18,14 +18,14 @@
         SOURCELINK_SUFFIX: '.txt'
       };
     </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
    
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -39,13 +39,15 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1>Source code for gsmodutils.metacyc</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">cobra</span> <span class="k">import</span> <span class="n">Reaction</span><span class="p">,</span> <span class="n">Metabolite</span>
-<span class="kn">import</span> <span class="nn">os</span>
+  <h1>Source code for gsmodutils.utils.metacyc</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">Counter</span>
 
+<span class="kn">from</span> <span class="nn">cobra</span> <span class="k">import</span> <span class="n">Reaction</span><span class="p">,</span> <span class="n">Metabolite</span>
 
-<div class="viewcode-block" id="parse_db"><a class="viewcode-back" href="../../metacyc.html#gsmodutils.metacyc.parse_db">[docs]</a><span class="k">def</span> <span class="nf">parse_db</span><span class="p">(</span><span class="n">db_path</span><span class="p">):</span>
+
+<div class="viewcode-block" id="parse_db"><a class="viewcode-back" href="../../../metacyc.html#gsmodutils.utils.metacyc.parse_db">[docs]</a><span class="k">def</span> <span class="nf">parse_db</span><span class="p">(</span><span class="n">db_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Parse metacyc dat files to build dict containing entries &quot;&quot;&quot;</span>
     <span class="n">compounds_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="s1">&#39;compounds.dat&#39;</span><span class="p">)</span>
     <span class="n">enzymes_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="s1">&#39;enzrxns.dat&#39;</span><span class="p">)</span>
     <span class="n">reactions_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="s1">&#39;reactions.dat&#39;</span><span class="p">)</span>
@@ -58,7 +60,13 @@
     <span class="k">return</span> <span class="n">database</span></div>
 
 
-<div class="viewcode-block" id="parse_metacyc_file"><a class="viewcode-back" href="../../metacyc.html#gsmodutils.metacyc.parse_metacyc_file">[docs]</a><span class="k">def</span> <span class="nf">parse_metacyc_file</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">unique_fields</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_metacyc_file"><a class="viewcode-back" href="../../../metacyc.html#gsmodutils.utils.metacyc.parse_metacyc_file">[docs]</a><span class="k">def</span> <span class="nf">parse_metacyc_file</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">unique_fields</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses a dat file</span>
+<span class="sd">    :str fpath: path to dat file</span>
+<span class="sd">    :list unique_fields: list of fields that there should only be a single item of in each entry</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">db</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span> <span class="k">as</span> <span class="n">datfile</span><span class="p">:</span>
@@ -102,9 +110,16 @@
     <span class="k">return</span> <span class="n">db</span></div>
 
 
-<div class="viewcode-block" id="add_pathway"><a class="viewcode-back" href="../../metacyc.html#gsmodutils.metacyc.add_pathway">[docs]</a><span class="k">def</span> <span class="nf">add_pathway</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">enzyme_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reaction_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;For a given model add enzymes&quot;&quot;&quot;</span>
-
+<div class="viewcode-block" id="add_pathway"><a class="viewcode-back" href="../../../metacyc.html#gsmodutils.utils.metacyc.add_pathway">[docs]</a><span class="k">def</span> <span class="nf">add_pathway</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">enzyme_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reaction_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">db_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For a given model add enzymes from metacyc database</span>
+<span class="sd">    :param model: cobra model object</span>
+<span class="sd">    :param enzyme_ids: list of EC entires in format [&quot;EC-x.x.x.x&quot;, ...]</span>
+<span class="sd">    :param reaction_ids: set of reaction ids to add to model</span>
+<span class="sd">    :param db_path: path to the metacyc dat files on disk</span>
+<span class="sd">    :param copy:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -147,8 +162,13 @@
     <span class="k">return</span> <span class="n">rdict</span></div>
 
 
-<div class="viewcode-block" id="get_enzyme_reactions"><a class="viewcode-back" href="../../metacyc.html#gsmodutils.metacyc.get_enzyme_reactions">[docs]</a><span class="k">def</span> <span class="nf">get_enzyme_reactions</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;For a given ec number return associated reaction ids&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="get_enzyme_reactions"><a class="viewcode-back" href="../../../metacyc.html#gsmodutils.utils.metacyc.get_enzyme_reactions">[docs]</a><span class="k">def</span> <span class="nf">get_enzyme_reactions</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For a given ec number return associated reaction ids</span>
+<span class="sd">    :param eid: enzyme id format &quot;EC-x.x.x.x&quot;</span>
+<span class="sd">    :param db: database dict</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">erids</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">rid</span><span class="p">,</span> <span class="n">react</span> <span class="ow">in</span> <span class="n">db</span><span class="p">[</span><span class="s1">&#39;reactions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -158,8 +178,14 @@
     <span class="k">return</span> <span class="n">erids</span></div>
 
 
-<div class="viewcode-block" id="add_reaction"><a class="viewcode-back" href="../../metacyc.html#gsmodutils.metacyc.add_reaction">[docs]</a><span class="k">def</span> <span class="nf">add_reaction</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">reaction_id</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
-
+<div class="viewcode-block" id="add_reaction"><a class="viewcode-back" href="../../../metacyc.html#gsmodutils.utils.metacyc.add_reaction">[docs]</a><span class="k">def</span> <span class="nf">add_reaction</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">reaction_id</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a metacyc reaction id to a cobrapy model</span>
+<span class="sd">    :param model: cobrapy model instance</span>
+<span class="sd">    :param reaction_id: reaction identifier in metacyc</span>
+<span class="sd">    :param db: dictionary db object</span>
+<span class="sd">    :return: tuple(reaction, added_metabolites) cobrapy Reaction and Metabolite instances</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">metabolites</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">reaction</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="n">reaction_id</span><span class="p">)</span>
 
@@ -201,7 +227,7 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../index.html">gsmodutils</a></h1>
+<h1 class="logo"><a href="../../../index.html">gsmodutils</a></h1>
 
 
 
@@ -213,30 +239,30 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">User Guide:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../project.html">Projects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../designs.html">Designs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../cli.html">cli</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tests.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../docker.html">Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../project.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../designs.html">Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tests.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../metacyc.html">MetaCyc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../scrumpy.html">ScrumPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../metacyc.html">MetaCyc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scrumpy.html">ScrumPy</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
   </ul></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
-    <form class="search" action="../../search.html" method="get">
+    <form class="search" action="../../../search.html" method="get">
       <div><input type="text" name="q" /></div>
       <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />

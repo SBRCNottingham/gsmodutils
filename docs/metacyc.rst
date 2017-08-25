@@ -24,7 +24,7 @@ The example bellow adds an enzyme to a model using EC identifiers.
 
 Code docs
 ----------
-.. automodule:: gsmodutils.metacyc
+.. automodule:: gsmodutils.utils.metacyc
     :members:
     :undoc-members:
     :inherited-members:

@@ -33,7 +33,7 @@ Alternatively, use the python interface to load a model and set the constraints 
 
 .. code-block:: python
 
-    from gsmodutils.scrumpy import load_scrumpy_model
+    from gsmodutils.utils.scrumpy import load_scrumpy_model
     cobra_mdl = load_scrumpy_model('model.spy')
     cobra_mdl.objective = cobra_mdl.reactions.Biomass
     cobra.mdl.reactions.ATPase.lower_bound = -8.0
@@ -42,7 +42,7 @@ Alternatively, use the python interface to load a model and set the constraints 
 
 Code docs
 ---------
-.. automodule:: gsmodutils.scrumpy
+.. automodule:: gsmodutils.utils.scrumpy
     :members:
     :undoc-members:
     :inherited-members:

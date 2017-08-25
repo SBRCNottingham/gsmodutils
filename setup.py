@@ -13,7 +13,7 @@ setup(
     entry_points={
         'console_scripts': [
             'scrumpy_to_cobra=gsmodutils.utils.scrumpy:scrumpy_to_cobra',
-            'gsmodutils=gsmodutils.cliutils:cli',
+            'gsmodutils=gsmodutils.cli:cli',
         ],
     },
     setup_requires=['pytest-runner'],

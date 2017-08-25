@@ -24,7 +24,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="CLI" href="cli.html" />
+    <link rel="next" title="StrainDesign class" href="strain_design.html" />
     <link rel="prev" title="Projects" href="project.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -369,10 +369,8 @@ cannot be performed on this object).</p>
         <td><strong>Compartments</strong></td>
         <td></td>
     </tr>
-  </table></div>
-</div>
-<div class="section" id="exporting-and-importing-designs-and-conditions">
-<h1>Exporting and importing designs and conditions<a class="headerlink" href="#exporting-and-importing-designs-and-conditions" title="Permalink to this headline">¶</a></h1>
+  </table><div class="section" id="exporting-and-importing-designs-and-conditions">
+<h3>Exporting and importing designs and conditions<a class="headerlink" href="#exporting-and-importing-designs-and-conditions" title="Permalink to this headline">¶</a></h3>
 <p>There are many cases where a particular external piece of software
 outside the cobrapy stack will be needed for strain design. For this
 reason the gsmodutils import and export commands aim to allow
@@ -382,6 +380,9 @@ through the command line alone as well as exporting models with the
 additional constraints that are applied for import in to other tools.
 Cobrapy makes it easy to work with matlab, sbml, json and yaml
 constraints based models.</p>
+</div>
+<div class="section" id="viewing-a-project-s-designs">
+<h3>Viewing a project’s designs<a class="headerlink" href="#viewing-a-project-s-designs" title="Permalink to this headline">¶</a></h3>
 <p>To view the designs and conditions stored in a project use the <code class="docutils literal"><span class="pre">info</span></code>
 command. For the example project it should look something like:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">--------------------------------------------------------------------------------------------------</span>
@@ -408,6 +409,9 @@ command. For the example project it should look something like:</p>
 <span class="o">--------------------------------------------------------------------------------------------------</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="exporting-a-design">
+<h3>Exporting a design<a class="headerlink" href="#exporting-a-design" title="Permalink to this headline">¶</a></h3>
 <p>To export to matlab, sbml, json or yaml formats use
 <code class="docutils literal"><span class="pre">gsmodutils</span> <span class="pre">export</span></code>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">export</span> <span class="o">&lt;</span><span class="n">output</span> <span class="nb">format</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">output</span> <span class="n">filepath</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">model_id</span> <span class="o">&lt;</span><span class="n">model</span> <span class="nb">id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">conditions</span> <span class="o">&lt;</span><span class="n">conditions_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">design</span> <span class="o">&lt;</span><span class="n">design_id</span><span class="o">&gt;</span>
@@ -417,6 +421,8 @@ command. For the example project it should look something like:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">export</span> <span class="n">mat</span> <span class="n">mevalonate_analysis</span><span class="o">.</span><span class="n">mat</span> <span class="o">--</span><span class="n">design</span> <span class="n">mevalonate_cbb</span>
 </pre></div>
 </div>
+<div class="section" id="a-note-on-conflicting-constraints">
+<h4>A note on conflicting constraints<a class="headerlink" href="#a-note-on-conflicting-constraints" title="Permalink to this headline">¶</a></h4>
 <p>When flags for models, designs and conditions are all set the load order
 of constrains is as follows: * Load model * Set conditions * Load
 design</p>
@@ -424,6 +430,10 @@ design</p>
 conditions file and the design file (i.e. the same transporter may be
 switched on an off at the same time) the constraint added in the design
 file takes precidence and is applied to the model.</p>
+</div>
+</div>
+<div class="section" id="importing-a-new-design">
+<h3>Importing a new design<a class="headerlink" href="#importing-a-new-design" title="Permalink to this headline">¶</a></h3>
 <p>To import a new design use the <code class="docutils literal"><span class="pre">dimport</span></code> command:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">dimport</span> <span class="o">&lt;</span><span class="n">path_to_model</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">new_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">base_model</span> <span class="o">&lt;</span><span class="n">base_model_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">parent</span> <span class="o">&lt;</span><span class="n">parent_design_id</span><span class="o">&gt;</span>
 </pre></div>
@@ -443,6 +453,9 @@ visible).</p>
 <p>Using <code class="docutils literal"><span class="pre">--output</span></code> allows the diff to be saved as a json file. This can
 then be imported directly as a design with <code class="docutils literal"><span class="pre">dimport</span></code> using the
 <code class="docutils literal"><span class="pre">--from-diff</span></code> flag.</p>
+</div>
+<div class="section" id="modifying-an-existing-design-with-another-tool">
+<h3>Modifying an existing design with another tool<a class="headerlink" href="#modifying-an-existing-design-with-another-tool" title="Permalink to this headline">¶</a></h3>
 <p>Rather than saving a new design, we would like to simply overwrite the
 existing design. This can be done easily. <strong>However, it is strongly
 reccommended that you use version control software (such as git or
@@ -451,156 +464,15 @@ mercurial) to ensure that changes to existing designs are tracked.</strong></p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gsmodutils</span> <span class="n">dimport</span> <span class="o">&lt;</span><span class="n">path_to_updated_model</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">design_id</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">overwrite</span>
 </pre></div>
 </div>
-<div class="section" id="module-gsmodutils.design">
-<span id="straindesign-class"></span><h2>StrainDesign class<a class="headerlink" href="#module-gsmodutils.design" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="gsmodutils.design.StrainDesign">
-<em class="property">class </em><code class="descclassname">gsmodutils.design.</code><code class="descname">StrainDesign</code><span class="sig-paren">(</span><em>did</em>, <em>name</em>, <em>description</em>, <em>project</em>, <em>parent=None</em>, <em>reactions=None</em>, <em>metabolites=None</em>, <em>genes=None</em>, <em>removed_metabolites=None</em>, <em>removed_reactions=None</em>, <em>removed_genes=None</em>, <em>base_model=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.add_to_model">
-<code class="descname">add_to_model</code><span class="sig-paren">(</span><em>model</em>, <em>copy=False</em>, <em>add_missing=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.add_to_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.add_to_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add this design to a given cobra model
-:param model:
-:param copy:
-:param add_missing: add missing metabolites to the model
-:return:</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.as_pathway_model">
-<code class="descname">as_pathway_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.as_pathway_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.as_pathway_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads a cobra model with just the reactions present in this design
-Can be useful for the cobra.Model methods</p>
-<p># TODO: add full metabolite info from parent model (optional, as it will be slower)
-:return: mdl instance of cobra.Model</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.check_parents">
-<code class="descname">check_parents</code><span class="sig-paren">(</span><em>p_stack=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.check_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.check_parents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests to see if their is a loop in parental inheritance</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="gsmodutils.design.StrainDesign.from_dict">
-<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>did</em>, <em>design</em>, <em>project</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.from_dict" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>did</strong> – unique design identifier</li>
-<li><strong>design</strong> – design dict</li>
-<li><strong>project</strong> – GSMProject instance</li>
+</div>
+<div class="section" id="further-reading">
+<h3>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="strain_design.html">StrainDesign class</a></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="gsmodutils.design.StrainDesign.from_json">
-<em class="property">classmethod </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>did</em>, <em>file_path</em>, <em>project</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load from a json file
-:param did unique design identifier
-:param file_path: file location of design
-:param project: GSMProject project instance
-:return:</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gsmodutils.design.StrainDesign.genes">
-<code class="descname">genes</code><a class="headerlink" href="#gsmodutils.design.StrainDesign.genes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Recursively builds set of genes inherited from parents</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.genes_dataframe">
-<code class="descname">genes_dataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.genes_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.genes_dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dataframe of the reactions involved in the design
-:return:</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.load">
-<code class="descname">load</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a cobra model containing the parent model with the design applied
-:return:</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gsmodutils.design.StrainDesign.metabolites">
-<code class="descname">metabolites</code><a class="headerlink" href="#gsmodutils.design.StrainDesign.metabolites" title="Permalink to this definition">¶</a></dt>
-<dd><p>Recursively builds set of metabolites inherited from parents</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.metabolites_dataframe">
-<code class="descname">metabolites_dataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.metabolites_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.metabolites_dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dataframe of the reactions involved in the design
-:return:</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gsmodutils.design.StrainDesign.reactions">
-<code class="descname">reactions</code><a class="headerlink" href="#gsmodutils.design.StrainDesign.reactions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Recursively builds set of reactions inherited from parents</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.reactions_dataframe">
-<code class="descname">reactions_dataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.reactions_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.reactions_dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dataframe of the reactions involved in the design
-:return:</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gsmodutils.design.StrainDesign.removed_genes">
-<code class="descname">removed_genes</code><a class="headerlink" href="#gsmodutils.design.StrainDesign.removed_genes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Recursively builds set of removed genes inherited from parents</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gsmodutils.design.StrainDesign.removed_metabolites">
-<code class="descname">removed_metabolites</code><a class="headerlink" href="#gsmodutils.design.StrainDesign.removed_metabolites" title="Permalink to this definition">¶</a></dt>
-<dd><p>Recursively builds set of removed metabolites inherited from parents</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="gsmodutils.design.StrainDesign.removed_reactions">
-<code class="descname">removed_reactions</code><a class="headerlink" href="#gsmodutils.design.StrainDesign.removed_reactions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Recursively builds set of removed reactions inherited from parents</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.to_dict">
-<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts to design dict (compatible with model diffs)
-:return:</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.design.StrainDesign.to_json">
-<code class="descname">to_json</code><span class="sig-paren">(</span><em>file_path</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.to_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write to a given file</p>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="gsmodutils.design.StrainDesign.validate_dict">
-<em class="property">static </em><code class="descname">validate_dict</code><span class="sig-paren">(</span><em>design_dict</em>, <em>throw_exceptions=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/design.html#StrainDesign.validate_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.design.StrainDesign.validate_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check required fields are present
-:param design_dict:
-:param throw_exceptions:
-:return:</p>
-</dd></dl>
-
-</dd></dl>
-
+</div>
+</div>
 </div>
 </div>
 
@@ -628,17 +500,13 @@ Can be useful for the cobra.Model methods</p>
 <li class="toctree-l2"><a class="reference internal" href="#accessing-designs-as-models">Accessing designs as models</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#exporting-and-importing-designs-and-conditions">Exporting and importing designs and conditions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.design">StrainDesign class</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Running model tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="metacyc.html">MetaCyc Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metacyc.html">MetaCyc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scrumpy.html">ScrumPy</a></li>
 </ul>
 
@@ -647,7 +515,7 @@ Can be useful for the cobra.Model methods</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="project.html" title="previous chapter">Projects</a></li>
-      <li>Next: <a href="cli.html" title="next chapter">CLI</a></li>
+      <li>Next: <a href="strain_design.html" title="next chapter">StrainDesign class</a></li>
   </ul></li>
 </ul>
 </div>

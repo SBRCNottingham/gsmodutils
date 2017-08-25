@@ -438,7 +438,7 @@ cannot be performed on this object).
 
 
 Exporting and importing designs and conditions
-==============================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are many cases where a particular external piece of software
 outside the cobrapy stack will be needed for strain design. For this
@@ -553,12 +553,8 @@ Do this with the command
 
     gsmodutils dimport <path_to_updated_model> <design_id> --overwrite
 
+Further reading
+~~~~~~~~~~~~~~~
 
-StrainDesign class
-------------------
-
-.. automodule:: gsmodutils.design
-    :members:
-    :undoc-members:
-    :inherited-members:
-    :show-inheritance:
+.. toctree::
+    strain_design

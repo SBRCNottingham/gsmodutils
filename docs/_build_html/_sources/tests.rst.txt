@@ -90,32 +90,24 @@ and then add the code:
         log.assertion(solution.f > 0.0, "Model grows", "Model does not grow")
 
 
-When creating tests the class ``gsmodutils.testutils.ModelTestSelector``
+When creating tests the class ``gsmodutils.test.utils.ModelTestSelector``
 can be used as a helper decorator to load models and designs of specific names.
 The same test function will be called repeatedly with all combinations of
 models, designs and conditions specified.
 
 .. code-block:: python
 
-    from gsmodutils.testutils import ModelTestSelector
+    from gsmodutils.test.utils import ModelTestSelector
 
     @ModelTestSelector(models=[], conditions=[], designs=[])
     def test_func(model, project, log):
         log.assertion(True, "Works", "Does not work", "Test")
 
 
-GSMtester class
-----------------
-.. automodule:: gsmodutils.tester
-    :members:
-    :undoc-members:
-    :inherited-members:
-    :show-inheritance:
+Further reading
+~~~~~~~~~~~~~~~
 
-testutils module
----------
-.. automodule:: gsmodutils.testutils
-    :members:
-    :undoc-members:
-    :inherited-members:
-    :show-inheritance:
+.. toctree::
+    test_utilities
+    tester_class
+

@@ -109,7 +109,7 @@ Loading them back should now be straightforward:
 GSMProject class
 ----------------
 
-.. automodule:: gsmodutils.project
+.. automodule:: gsmodutils.project.interface
     :members:
     :undoc-members:
     :inherited-members:

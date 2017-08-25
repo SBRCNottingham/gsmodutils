@@ -5,12 +5,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>gsmodutils.scrumpy &#8212; gsmodutils 0.0.1 documentation</title>
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <title>gsmodutils.utils.scrumpy &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
+        URL_ROOT:    '../../../',
         VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -18,14 +18,14 @@
         SOURCELINK_SUFFIX: '.txt'
       };
     </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
    
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -39,22 +39,32 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1>Source code for gsmodutils.scrumpy</h1><div class="highlight"><pre>
+  <h1>Source code for gsmodutils.utils.scrumpy</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
-<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">import</span> <span class="nn">cobra</span>
 <span class="kn">from</span> <span class="nn">cameo.core.utils</span> <span class="k">import</span> <span class="n">load_medium</span>
 
 
-<div class="viewcode-block" id="load_scrumpy_model"><a class="viewcode-back" href="../../scrumpy.html#gsmodutils.scrumpy.load_scrumpy_model">[docs]</a><span class="k">def</span> <span class="nf">load_scrumpy_model</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">atpase_reaction</span><span class="o">=</span><span class="s2">&quot;ATPase&quot;</span><span class="p">,</span> <span class="n">atpase_flux</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+<div class="viewcode-block" id="load_scrumpy_model"><a class="viewcode-back" href="../../../scrumpy.html#gsmodutils.utils.scrumpy.load_scrumpy_model">[docs]</a><span class="k">def</span> <span class="nf">load_scrumpy_model</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">atpase_reaction</span><span class="o">=</span><span class="s2">&quot;ATPase&quot;</span><span class="p">,</span> <span class="n">atpase_flux</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
                        <span class="n">media</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">objective_reactions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obj_dir</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Specify a base scrumpy structural model file and returns a cameo model.</span>
 <span class="sd">    This hasn&#39;t be thoroughly tested so expect there to be bugs</span>
-<span class="sd">    </span>
+
 <span class="sd">    To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media</span>
+
+<span class="sd">    :param filepath:</span>
+<span class="sd">    :param atpase_reaction:</span>
+<span class="sd">    :param atpase_flux:</span>
+<span class="sd">    :param media:</span>
+<span class="sd">    :param objective_reactions:</span>
+<span class="sd">    :param obj_dir:</span>
+<span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">objective_reactions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -124,13 +134,16 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="get_tokens"><a class="viewcode-back" href="../../scrumpy.html#gsmodutils.scrumpy.get_tokens">[docs]</a><span class="k">def</span> <span class="nf">get_tokens</span><span class="p">(</span><span class="n">line_dt</span><span class="p">):</span>
+<div class="viewcode-block" id="get_tokens"><a class="viewcode-back" href="../../../scrumpy.html#gsmodutils.utils.scrumpy.get_tokens">[docs]</a><span class="k">def</span> <span class="nf">get_tokens</span><span class="p">(</span><span class="n">line_dt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Goes through each charachter in scrumpy file attempting to find tokens</span>
-<span class="sd">    </span>
-<span class="sd">    BUG: if there is a numeric after a direction token this fails</span>
+
+<span class="sd">    FIXME: if there is a numeric after a direction token this fails</span>
 <span class="sd">    e.g. &#39;-&gt;2 &quot;PROTON&quot;&#39; fails but &#39;-&gt; 2 &quot;PROTON&quot;&#39; works</span>
+<span class="sd">    :param line_dt:</span>
+<span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
     
     <span class="n">quoted</span> <span class="o">=</span> <span class="kc">False</span>
@@ -169,11 +182,15 @@
     <span class="k">return</span> <span class="n">tokens</span></div>
 
     
-<div class="viewcode-block" id="parse_file"><a class="viewcode-back" href="../../scrumpy.html#gsmodutils.scrumpy.parse_file">[docs]</a><span class="k">def</span> <span class="nf">parse_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">fp_stack</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rel_path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_file"><a class="viewcode-back" href="../../../scrumpy.html#gsmodutils.utils.scrumpy.parse_file">[docs]</a><span class="k">def</span> <span class="nf">parse_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">fp_stack</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rel_path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions</span>
-<span class="sd">    </span>
-<span class="sd">    This code is not that stable. Expect bugs.</span>
+<span class="sd">     Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions</span>
+
+<span class="sd">    Note this code is not fully tested. Expect some bugs.</span>
+<span class="sd">    :param filepath:</span>
+<span class="sd">    :param fp_stack:</span>
+<span class="sd">    :param rel_path:</span>
+<span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fp_stack</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fp_stack</span> <span class="o">=</span> <span class="p">[]</span>
@@ -286,8 +303,13 @@
     <span class="k">return</span> <span class="n">reactions</span><span class="p">,</span> <span class="n">metabolites</span></div>
 
 
-<div class="viewcode-block" id="scrumpy_to_cobra"><a class="viewcode-back" href="../../scrumpy.html#gsmodutils.scrumpy.scrumpy_to_cobra">[docs]</a><span class="k">def</span> <span class="nf">scrumpy_to_cobra</span><span class="p">():</span>
-    
+<div class="viewcode-block" id="scrumpy_to_cobra"><a class="viewcode-back" href="../../../scrumpy.html#gsmodutils.utils.scrumpy.scrumpy_to_cobra">[docs]</a><span class="k">def</span> <span class="nf">scrumpy_to_cobra</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Command line utility for parsing scrumpy files and creating cobrapy models</span>
+<span class="sd">    TODO: update to use click rather than argparse</span>
+<span class="sd">    TODO: update for better handling of import constraints</span>
+<span class="sd">    TODO: setting minimisation of sum of fluxes as an objective rather than biomass maximisation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Parser argument</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;parse a scrumpy file and output a json cobra compatable model&#39;</span><span class="p">)</span>
    
@@ -330,7 +352,7 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../index.html">gsmodutils</a></h1>
+<h1 class="logo"><a href="../../../index.html">gsmodutils</a></h1>
 
 
 
@@ -342,30 +364,30 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">User Guide:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../project.html">Projects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../designs.html">Designs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../cli.html">cli</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tests.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../docker.html">Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../project.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../designs.html">Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tests.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../metacyc.html">MetaCyc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../scrumpy.html">ScrumPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../metacyc.html">MetaCyc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scrumpy.html">ScrumPy</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
   </ul></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
-    <form class="search" action="../../search.html" method="get">
+    <form class="search" action="../../../search.html" method="get">
       <div><input type="text" name="q" /></div>
       <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />

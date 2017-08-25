@@ -24,7 +24,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="MetaCyc Utilities" href="metacyc.html" />
+    <link rel="prev" title="MetaCyc" href="metacyc.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -65,7 +65,7 @@ a working model</p>
 </pre></div>
 </div>
 <p>Alternatively, use the python interface to load a model and set the constraints with the cobrapy interface</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils.scrumpy</span> <span class="kn">import</span> <span class="n">load_scrumpy_model</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils.utils.scrumpy</span> <span class="kn">import</span> <span class="n">load_scrumpy_model</span>
 <span class="n">cobra_mdl</span> <span class="o">=</span> <span class="n">load_scrumpy_model</span><span class="p">(</span><span class="s1">&#39;model.spy&#39;</span><span class="p">)</span>
 <span class="n">cobra_mdl</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">cobra_mdl</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">Biomass</span>
 <span class="n">cobra</span><span class="o">.</span><span class="n">mdl</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">ATPase</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">8.0</span>
@@ -73,35 +73,65 @@ a working model</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="module-gsmodutils.scrumpy">
-<span id="code-docs"></span><h2>Code docs<a class="headerlink" href="#module-gsmodutils.scrumpy" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-gsmodutils.utils.scrumpy">
+<span id="code-docs"></span><h2>Code docs<a class="headerlink" href="#module-gsmodutils.utils.scrumpy" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="gsmodutils.scrumpy.get_tokens">
-<code class="descclassname">gsmodutils.scrumpy.</code><code class="descname">get_tokens</code><span class="sig-paren">(</span><em>line_dt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/scrumpy.html#get_tokens"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.scrumpy.get_tokens" title="Permalink to this definition">¶</a></dt>
+<dt id="gsmodutils.utils.scrumpy.get_tokens">
+<code class="descclassname">gsmodutils.utils.scrumpy.</code><code class="descname">get_tokens</code><span class="sig-paren">(</span><em>line_dt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/scrumpy.html#get_tokens"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.scrumpy.get_tokens" title="Permalink to this definition">¶</a></dt>
 <dd><p>Goes through each charachter in scrumpy file attempting to find tokens</p>
-<p>BUG: if there is a numeric after a direction token this fails
-e.g. ‘-&gt;2 “PROTON”’ fails but ‘-&gt; 2 “PROTON”’ works</p>
+<p>FIXME: if there is a numeric after a direction token this fails
+e.g. ‘-&gt;2 “PROTON”’ fails but ‘-&gt; 2 “PROTON”’ works
+:param line_dt:
+:return:</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="gsmodutils.scrumpy.load_scrumpy_model">
-<code class="descclassname">gsmodutils.scrumpy.</code><code class="descname">load_scrumpy_model</code><span class="sig-paren">(</span><em>filepath</em>, <em>atpase_reaction='ATPase'</em>, <em>atpase_flux=3.0</em>, <em>media=None</em>, <em>objective_reactions=None</em>, <em>obj_dir='max'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/scrumpy.html#load_scrumpy_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.scrumpy.load_scrumpy_model" title="Permalink to this definition">¶</a></dt>
+<dt id="gsmodutils.utils.scrumpy.load_scrumpy_model">
+<code class="descclassname">gsmodutils.utils.scrumpy.</code><code class="descname">load_scrumpy_model</code><span class="sig-paren">(</span><em>filepath</em>, <em>atpase_reaction='ATPase'</em>, <em>atpase_flux=3.0</em>, <em>media=None</em>, <em>objective_reactions=None</em>, <em>obj_dir='max'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/scrumpy.html#load_scrumpy_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.scrumpy.load_scrumpy_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specify a base scrumpy structural model file and returns a cameo model.
 This hasn’t be thoroughly tested so expect there to be bugs</p>
 <p>To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filepath</strong> – </li>
+<li><strong>atpase_reaction</strong> – </li>
+<li><strong>atpase_flux</strong> – </li>
+<li><strong>media</strong> – </li>
+<li><strong>objective_reactions</strong> – </li>
+<li><strong>obj_dir</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
-<dt id="gsmodutils.scrumpy.parse_file">
-<code class="descclassname">gsmodutils.scrumpy.</code><code class="descname">parse_file</code><span class="sig-paren">(</span><em>filepath</em>, <em>fp_stack=None</em>, <em>rel_path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/scrumpy.html#parse_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.scrumpy.parse_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions</p>
-<p>This code is not that stable. Expect bugs.</p>
+<dt id="gsmodutils.utils.scrumpy.parse_file">
+<code class="descclassname">gsmodutils.utils.scrumpy.</code><code class="descname">parse_file</code><span class="sig-paren">(</span><em>filepath</em>, <em>fp_stack=None</em>, <em>rel_path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/scrumpy.html#parse_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.scrumpy.parse_file" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions</div></blockquote>
+<p>Note this code is not fully tested. Expect some bugs.
+:param filepath:
+:param fp_stack:
+:param rel_path:
+:return:</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="gsmodutils.scrumpy.scrumpy_to_cobra">
-<code class="descclassname">gsmodutils.scrumpy.</code><code class="descname">scrumpy_to_cobra</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/scrumpy.html#scrumpy_to_cobra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.scrumpy.scrumpy_to_cobra" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="gsmodutils.utils.scrumpy.scrumpy_to_cobra">
+<code class="descclassname">gsmodutils.utils.scrumpy.</code><code class="descname">scrumpy_to_cobra</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/scrumpy.html#scrumpy_to_cobra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.scrumpy.scrumpy_to_cobra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Command line utility for parsing scrumpy files and creating cobrapy models
+TODO: update to use click rather than argparse
+TODO: update for better handling of import constraints
+TODO: setting minimisation of sum of fluxes as an objective rather than biomass maximisation</p>
+</dd></dl>
 
 </div>
 </div>
@@ -125,18 +155,17 @@ This hasn’t be thoroughly tested so expect there to be bugs</p>
 <p class="caption"><span class="caption-text">User Guide:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="project.html">Projects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="designs.html">Creating Designs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="designs.html#exporting-and-importing-designs-and-conditions">Exporting and importing designs and conditions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Running model tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="designs.html">Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="metacyc.html">MetaCyc Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metacyc.html">MetaCyc</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ScrumPy</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#example-usage">Example usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.scrumpy">Code docs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.utils.scrumpy">Code docs</a></li>
 </ul>
 </li>
 </ul>
@@ -145,7 +174,7 @@ This hasn’t be thoroughly tested so expect there to be bugs</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="metacyc.html" title="previous chapter">MetaCyc Utilities</a></li>
+      <li>Previous: <a href="metacyc.html" title="previous chapter">MetaCyc</a></li>
   </ul></li>
 </ul>
 </div>
