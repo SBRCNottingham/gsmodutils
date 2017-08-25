@@ -14,7 +14,7 @@ from gsmodutils.model_diff import model_diff
 
 
 def load_project(project_path):
-    from gsmodutils.project import GSMProject
+    from gsmodutils import GSMProject
     project = None
     try:
         project = GSMProject(project_path)
@@ -206,7 +206,7 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
 @click.argument('model_path', type=str, default=None)
 def create_project(project_path, model_path):
     """Create a new gsmodutils project"""
-    from gsmodutils.project_config import ProjectConfig
+    from gsmodutils.project.project_config import ProjectConfig
     click.echo('Project creation {}'.format(project_path))
 
     click.echo('Using mode {}'.format(project_path))

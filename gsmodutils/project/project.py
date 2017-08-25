@@ -9,11 +9,11 @@ from cobra.exceptions import Infeasible
 from lockfile import LockFile
 from six import string_types
 
-from gsmodutils.design import StrainDesign
 from gsmodutils.exceptions import ProjectNotFound, DesignError
 from gsmodutils.model_diff import model_diff
-from gsmodutils.project_config import ProjectConfig, default_project_file
-from gsmodutils.tester import GSMTester
+from gsmodutils.project.design import StrainDesign
+from gsmodutils.project.project_config import ProjectConfig, default_project_file
+from gsmodutils.test.tester import GSMTester
 
 
 class GSMProject(object):

@@ -8,10 +8,10 @@ from io import StringIO
 
 from cobra.core import get_solution
 from cobra.exceptions import Infeasible
+from six import exec_
 
 import gsmodutils
-from gsmodutils.testutils import TestRecord
-from six import  exec_
+from gsmodutils.test.utils import TestRecord
 
 
 @contextlib.contextmanager
@@ -35,7 +35,7 @@ class GSMTester(object):
     def __init__(self, project):
         """Creates the storage locations for logs"""
         
-        if not isinstance(project, gsmodutils.project.GSMProject):
+        if not isinstance(project, gsmodutils.GSMProject):
             raise TypeError('Requires valid gsmodutils project')
             
         self.project = project

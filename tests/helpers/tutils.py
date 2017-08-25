@@ -1,11 +1,12 @@
-import cameo
-import cobra
-import tempfile
-from gsmodutils.project_config import ProjectConfig
-from gsmodutils.project_config import default_model_conditionsfp
-from gsmodutils.project import GSMProject
 import os
 import shutil
+import tempfile
+
+import cameo
+import cobra
+
+from gsmodutils import GSMProject
+from gsmodutils.project.project_config import ProjectConfig, default_model_conditionsfp
 
 
 class FakeProjectContext(object):

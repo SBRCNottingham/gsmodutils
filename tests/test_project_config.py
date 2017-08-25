@@ -4,17 +4,19 @@ Tests for GSMProject class
 TODO: tests for command line interface
 TODO: update use the fake project (written after these tests)
 """
-import pytest
-from gsmodutils.exceptions import ProjectConfigurationError
-from gsmodutils.project import GSMProject
-from gsmodutils.project_config import ProjectConfig
-from gsmodutils.project_config import default_model_conditionsfp, default_project_file
-import cameo
-import cobra
 import os
 import shutil
 import tempfile
+
+import cameo
+import cobra
+import pytest
 from tutils import FakeProjectContext
+
+from gsmodutils.exceptions import ProjectConfigurationError
+from gsmodutils import GSMProject
+from gsmodutils.project.project_config import ProjectConfig
+from gsmodutils.project.project_config import default_model_conditionsfp, default_project_file
 
 
 def project_creator(test_path, model=True, model_path=None):

@@ -3,7 +3,7 @@ Test cases for the GSMTests class and associated files
 """
 
 from __future__ import print_function, absolute_import, division
-from gsmodutils.project import GSMProject
+from gsmodutils import GSMProject
 import json
 from tutils import FakeProjectContext
 import os
@@ -50,7 +50,7 @@ def test_py_tests():
     """
     
     code_str = """
-from gsmodutils.testutils import ModelTestSelector
+from gsmodutils.test.testutils import ModelTestSelector
 
 @ModelTestSelector(models=[], conditions=[], designs=[])
 def test_func(model, project, log):

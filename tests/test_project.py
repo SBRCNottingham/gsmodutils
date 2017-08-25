@@ -13,7 +13,7 @@ import cobra
 import pytest
 from tutils import FakeProjectContext
 
-from gsmodutils.project import GSMProject
+from gsmodutils import GSMProject
 
 
 def test_load_project():

@@ -8,7 +8,7 @@ import cobra
 
 import gsmodutils
 from gsmodutils.exceptions import ProjectConfigurationError
-from gsmodutils.validator import validate_model_file
+from gsmodutils.utils.validator import validate_model_file
 
 default_project_file = '.gsmod_project.json'
 default_model_conditionsfp = 'model_conditions.json'

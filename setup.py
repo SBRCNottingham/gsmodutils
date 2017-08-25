@@ -12,8 +12,7 @@ setup(
     packages=["gsmodutils"],
     entry_points={
         'console_scripts': [
-            'gsm_new_project=gsmodutils.gsm_project:main',
-            'scrumpy_to_cobra=gsmodutils.scrumpy:scrumpy_to_cobra',
+            'scrumpy_to_cobra=gsmodutils.utils.scrumpy:scrumpy_to_cobra',
             'gsmodutils=gsmodutils.cliutils:cli',
         ],
     },
