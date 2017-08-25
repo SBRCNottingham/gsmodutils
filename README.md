@@ -2,6 +2,7 @@
 Initially developed by the Nottingham SBRC for use with their genome scale models.
 
 Design goals:
+
 * **Portability and interoperability**:
 models come in different formats - cobra JSON, matlab, SBML, ScrumPy etc. The tool needs to be able to export and
 import models in these formats. This allows users to leverage tools not just in the python development stack, such
