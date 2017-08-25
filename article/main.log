@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.6.8)  13 JUN 2017 11:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.6.8)  25 AUG 2017 14:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -306,10 +306,7 @@ Type  H <return>  for immediate help.
                                                   
 l.34 \maketitle
                
-Using draft setting for this image.
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
+? 
 LaTeX Font Info:    Try loading font information for LY1+pcr on input line 34.
 (/usr/share/texlive/texmf-dist/tex/latex/ly1/ly1pcr.fd
 File: ly1pcr.fd 2001/02/01 font definitions for LY1/pcr using Berry names.
@@ -385,32 +382,37 @@ Underfull \hbox (badness 10000) detected at line 34
  []
 
 LaTeX Font Info:    Font shape `LY1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `LY1/ptm/b/n' tried instead on input line 37.
+(Font)              Font shape `LY1/ptm/b/n' tried instead on input line 41.
 
-Package natbib Warning: Citation `Palson' on page 1 undefined on input line 37.
+Package natbib Warning: Citation `Palson' on page 1 undefined on input line 41.
 
 
 
 Package natbib Warning: Citation `ModelSEED' on page 1 undefined on input line 
-38.
+42.
 
 
-Package natbib Warning: Citation `ScrumPy' on page 1 undefined on input line 38
+Package natbib Warning: Citation `ScrumPy' on page 1 undefined on input line 42
 .
-
-
-Package natbib Warning: Citation `BiGG' on page 1 undefined on input line 42.
-
-
-Package natbib Warning: Citation `MetaNetX' on page 1 undefined on input line 4
-4.
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
-LaTeX Warning: Reference `' on page 1 undefined on input line 61.
+Package natbib Warning: Citation `BiGG' on page 1 undefined on input line 46.
+
+
+Package natbib Warning: Citation `MetaNetX' on page 1 undefined on input line 4
+8.
+
+
+Package natbib Warning: Citation `ScrumPy' on page 1 undefined on input line 53
+.
+
+
+Package natbib Warning: Citation `cobrapy' on page 1 undefined on input line 53
+.
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -424,58 +426,26 @@ Overfull \hbox (1.12001pt too wide) has occurred while \output is active
 
 
 
-] (./main.bbl
+]
+
+LaTeX Warning: Reference `' on page 2 undefined on input line 70.
+
+(./main.bbl
 
 Package natbib Warning: Empty `thebibliography' environment on input line 3.
 
 )
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 348.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 349.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 350.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 351.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 352.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 353.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 354.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 355.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:15.0pt when 356.368pt
-Extra height:0.0pt when 357.368pt
-(2)Left:357.368pt Right:315.736pt Output:357.368pt
+Extra height:15.0pt when 499.868pt
+Extra height:15.0pt when 500.868pt
+Extra height:0.0pt when 501.868pt
+(2)Left:501.868pt Right:497.736pt Output:501.868pt
 - LAST -
 Extra skip:0.0pt
-Left:357.368pt
-Right:315.736pt
-Output:357.368pt
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
+Left:501.868pt
+Right:497.736pt
+Output:501.868pt
 LaTeX Font Info:    Font shape `LY1/phv/m/it' in size <8> not available
-(Font)              Font shape `LY1/phv/m/sl' tried instead on input line 138.
+(Font)              Font shape `LY1/phv/m/sl' tried instead on input line 157.
 
 Overfull \hbox (252.0pt too wide) has occurred while \output is active
 [][] 
@@ -495,13 +465,13 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 3683 strings out of 493013
- 45438 string characters out of 6135683
- 119107 words of memory out of 5000000
- 7128 multiletter control sequences out of 15000+600000
+ 3684 strings out of 493013
+ 45447 string characters out of 6135683
+ 124107 words of memory out of 5000000
+ 7129 multiletter control sequences out of 15000+600000
  51564 words of font info for 93 fonts, out of 8000000 for 9000
  1145 hyphenation exceptions out of 8191
- 39i,10n,28p,265b,288s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 39i,11n,28p,265b,288s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/ly1/texnansi.enc}</usr/share/t
 exlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmbsy9.pfb></usr/share/te
 xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/t
@@ -514,7 +484,7 @@ are/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvro8ac.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fo
 nts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/t
 imes/utmri8a.pfb>
-Output written on main.pdf (2 pages, 111922 bytes).
+Output written on main.pdf (2 pages, 114912 bytes).
 PDF statistics:
  60 PDF objects out of 1000 (max. 8388607)
  43 compressed objects within 1 object stream

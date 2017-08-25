@@ -10,7 +10,7 @@
 \subtitle{Applications note}
 
 \title[test driven genome scale model development]{An integrated framework for test driven genome scale model development}
-\author[Sample \textit{et~al}.]{James P Gilbert\,$^{\text{\sfb 1,}}$, Nicole Pearcy\,$^{\text{\sfb 2}}$ and Jamie Twycross\,$^{\text{\sfb 2,}*}$, ...}
+\author[Sample \textit{et~al}.]{James P Gilbert\,$^{\text{\sfb 1,}}$, Nicole Pearcy\,$^{\text{\sfb 1}}$ and Jamie Twycross\,$^{\text{\sfb 2,}*}$}
 \address{$^{\text{\sf 1}}$Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom and \\
 $^{\text{\sf 2}}$Intelligent Modelling and Analysis group, School of Computer Science, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
 
@@ -20,22 +20,26 @@ $^{\text{\sf 2}}$Intelligent Modelling and Analysis group, School of Computer Sc
 
 \editor{Associate Editor: XXXXXXX}
 
-\abstract{\textbf{Motivation:} Genome scale metabolic models (GSMM) are increasingly important for systems biology and metabolic engineering research, capable of simulating complex steady state phenotopic behaviour.
+\abstract{\textbf{Motivation:} Genome scale metabolic models are increasingly important for systems biology and metabolic engineering research, capable of simulating complex steady state phenotopic behaviour.
 Models of this scale can include thousands of rections and metabolites, with many crucial pathways that only become activated in specific simulation settings.
 Despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for the management of continually curated large scale models.\\
-\textbf{Results:} Using tools widely available in the software engineering community, we have developed the \textit{gsmodutils} framework.
-This system places an emphasis on test driven design of models in which a user makes small changes tracked in Distributed Version Control Systems (DVCS).
+\textbf{Results:} Based on python and cobrapy integration, we have developed the \textit{gsmodutils} modelling framework.
+This system places an emphasis on test driven design of models through easy to write unit testing.
 Crucially, different substrate conditions are configurable allowing users to examine how different designs or curations impact a wide range of system behaviours, hopefully, minimising error between model verions.
-We demonstrate a test of this framework on a standard \textit{E. coli} GSMM. \\
+A core feature of the software is to allow users to easily create sharable, self contained, docker images that can be run in cross platform envrionments.
 \textbf{Availability:} The software framework described within this paper is open source and freely available from http://github.com/<repolocation> \\
-\textbf{Contact:} \href{jamie.twycross@nottingham.ac.uk}{james.gilbert@nottingham.ac.uk}\\
+\textbf{Contact:} \href{jamie.twycross@nottingham.ac.uk}\\
 \textbf{Supplementary information:} Supplementary data are available at \textit{Bioinformatics} online.}
 
 \maketitle
 
 \section{Introduction}
-The reconstruction of genome scale metabolic models (GSMM) is an arduous process that follows a complex protocol to ensure model validity \cite{Palson}.
-Whilst autmated methods exists to construct GSMMs from reference genomes \cite{ModelSEED, ScrumPy}, .
+Constraints based modelling for biological systems has become a mainstay of systems biology for several decades.
+More recently, the structural approach has become a popular method for modelling steady state behaviour of large, metabolic networks.
+Such large scale reconstructions are often reffered to as genome scale models (GSMs), as the processes is significantly aided throught the advent of genome sequencing.
+
+The reconstruction of GSMs is an arduous process that follows a complex protocol to ensure model validity \cite{Palson}.
+Whilst many popular autmated methods exists to construct GSMs from reference genomes \cite{ModelSEED, ScrumPy}, there is a still a significant amount of manual curation.
 However, treating the creation of models as an isolated ``one-off'' event ignores the significant ammount of curation that is required for applications such as biotechnology.
 
 As a consequence, a significant amount of work has gone into the managament of genome scale models.
@@ -44,11 +48,16 @@ However, little focus is placed upon the colaborative design aspect of such mode
 Similiarly, the MetaNetX \cite{MetaNetX} system exists to provide a standardised namespace and toolchain for GSMM analysis.
 However, such tools often make it difficult to understand the design decisions made by the intial model authors.
 
+Furthermore, the proliferation of tools available to users is significant.
+This covers huge variety of software platforms including the COBRA toolbox in Matlab \cite{},
+ScrumPy and CobraPy in Python \cite{ScrumPy, cobrapy} with additional tools and libraries such as cameo \cite{}, OptFlux in Java \cite{}, SurreyFBA \cite{}.
+Whilst most of these tools are Open Source and follow standards, such as SBML \cite{}, there are often few options to make analysis easy to replicate.
+
+
 In this paper we present a software framework geared toward \textit{test driven} genome scale model development, a concept that is taken directly from good software development practices.
 By this we mean the notion that, as a model is curated to represent biological phenomena, much of the validation can be turned into specific test cases that can be repeated between model versions.
 Example test cases include the notion that flux must be carried through specific pathways, growth and uptake rates should match experimental evidence and different nutrient sources should be included.
-This paper details the features of the software, which is under continuous development.
-The reader is referred to the software user guide for a more detailed expoloration of software features.
+This article aims to summarise the main objectives of the gsmodutils software and we refer the reader to the software user guide for a more detailed expoloration features.
 
 
 %\enlargethispage{12pt}
@@ -57,7 +66,7 @@ The reader is referred to the software user guide for a more detailed expolorati
 Test driven development is driven by the idea of clearly defined test cases writen before significant changes are made to any underlying architecture.
 In the case of genome scale models, errors occur as a product of human curation to better represent newly discovered aspects of metabolism.
 For simplicity, gsmodelutils uses the \textit{py.test}, which has a simple and intuitive interface.
-By automatically integrating the COBRAPy \cite{} and Cameo \cite{} users can easily write convenient test cases following examples given in the user guide.
+By automatically integrating the COBRAPy \cite{} users can easily write convenient test cases following examples given in the user guide.
 A standard test case, ensuring that a given model grows on media is given in Box \ref{}.
 When a new model repository is created with the gsmodelutils tool, a number of pre-written test cases are automatically added to a file.
 However, we stress that the vast majority of indiviudal use cases for a model must be specific to a given biological problem.
@@ -71,17 +80,15 @@ def test_growth(model, media, l_bound, u_bound):
 \end{verbatim*}
 
 
-
-
 \begin{itemize}
  \item Easy command line tool to integrate new models
  \item Unit testing with pytest
  \item Integration with CobraPy and Cameo toolsets
- \item Integration with DVCS system (mercurial, git in a future release)
-  \item Optiopnally Integrate framework in a Docker container to stop ``runs on my machine'' issues with models
+ \item Use of flat files for ease of integration with DVCS systems such as git and mercurial
+ \item Easilly, integrate framework in a Docker container to stop ``runs on my machine'' issues with models
  \item Automated pre-commit tests upon model changes
  \item Convenient method for setting model media conditions to switch to growth on different substrates
- \item Ability to ``diff'' models by mapping to a common MetaNetX namespace
+ \item Ability to ``diff'' model versions to review what reactions have changed
  \item Storing model design differences to keep track of changes between, for example, production and wild type strains
 \end{itemize}
 
@@ -116,6 +123,18 @@ def test_growth(model, media, l_bound, u_bound):
 % %%\centerline{\includegraphics{fig02.eps}}
 % %\caption{Caption, caption.}\label{fig:02}
 % %\end{figure}
+
+\section{Related work}
+
+\textbf{cameo:} Cameo \cite{} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
+strategies, as well as other flux balanace analysis utilities. Written in python and part of the cobrapy suite of applications,
+gsmodutils integrates easily with cameo.
+Indeed, making a set of design changes can easily be integrated into gsmoduitls through the python API.
+
+\textbf{KBase:} Designed to be a fully integrated utility for designing and applying genome scale models, KBase is
+a web based utility.
+The aims of this software are distinct from gsmodutils
+
 \section{Discussion}
 When research projects end it all to is common for important large models to be published and become relics lost within the literature forgotten to all but the most dedicated of individuals.
 Furthermore, as GSMMs grow in terms of the metabolism the contain as well as the biological problems they are used to solve, problems with annotation and curation naturally accumulate as a product of human error.
