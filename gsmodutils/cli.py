@@ -11,6 +11,7 @@ import cobra
 
 from gsmodutils.exceptions import ProjectNotFound
 from gsmodutils.model_diff import model_diff
+from sys import exit
 
 
 def load_project(project_path):
@@ -20,7 +21,7 @@ def load_project(project_path):
         project = GSMProject(project_path)
     except ProjectNotFound:
         click.echo('Error project not found in path'.format(project_path))
-        exit()
+        exit(-1)
 
     return project
 
@@ -323,8 +324,8 @@ def add_model(path, project_path, diff, validate):
     try:
         project.add_model(path, validate=validate)
     except KeyError:
-        click.echo(click.style('Model of the same naem already included in project', fg='red'))
-        exit()
+        click.echo(click.style('Model of the same name already included in project', fg='red'))
+        exit(-1)
 
     click.echo('Model successfully added to project')
 
@@ -355,13 +356,13 @@ def dimport(model_path, identifier, name, description, project_path, parent, bas
     new = True
     if identifier in project.list_designs and not overwrite:
         click.echo('Error: Design {} already exists. Use --overwrite to replace'.format(identifier))
-        exit()
+        exit(-1)
     elif identifier in project.list_designs:
         new = False
 
     if parent is not None and parent not in project.list_designs:
         click.echo('Error: Parent design {} does not exist'.format(parent))
-        exit()
+        exit(-1)
 
     if name is None and new:
         name = click.prompt('Please enter a name for this design', type=str)
@@ -404,7 +405,7 @@ def export(file_format, filepath, project_path, model_id, design, conditions, ov
     """ Export a given model with a specific design and conditions applied """
     if os.path.exists(filepath) and not overwrite:
         click.echo('error - {} already exists. Must use overwrite option'.format(filepath))
-        exit()
+        exit(-1)
 
     project = load_project(project_path)
     model = project.load_model(model_id)
@@ -419,7 +420,7 @@ def export(file_format, filepath, project_path, model_id, design, conditions, ov
         cobra.io.save_json_model(model, filepath, pretty=True)
     elif file_format in ['spy', 'scrumpy']:
         click.echo('Scrumpy exports are currently not implemented.')
-        exit()
+        exit(-1)
     elif file_format in ['matlab', 'm', 'mat']:
         cobra.io.save_matlab_model(model, filepath)
     elif file_format == 'yaml':
