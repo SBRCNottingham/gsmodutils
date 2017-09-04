@@ -1,5 +1,7 @@
 import cameo
 import gsmodutils.model_diff
+import pytest
+import cobra
 
 
 def test_model_ident():
@@ -52,3 +54,28 @@ def test_metabolite_formula_change():
     assert len(diff['metabolites']) == 1
     assert diff['metabolites'][0]['id'] == model_a.metabolites.h2o_c.id
     assert diff['metabolites'][0]['formula'] == model_b.metabolites.h2o_c.formula
+
+
+def test_gene_removal():
+    model_a = cameo.models.bigg.e_coli_core
+    model_b = cameo.models.bigg.e_coli_core
+
+    cobra.manipulation.remove_genes(model_b, ['b0008'], remove_reactions=False)
+    diff = gsmodutils.model_diff.model_diff(model_a, model_b)
+
+    assert len(diff['removed_genes']) == 1
+
+    model_a = cameo.models.bigg.e_coli_core
+    model_b = cameo.models.bigg.e_coli_core
+
+    cobra.manipulation.remove_genes(model_a, ['b0008'], remove_reactions=False)
+    diff = gsmodutils.model_diff.model_diff(model_a, model_b)
+    assert len(diff['genes']) == 1
+
+
+def test_model_error():
+    model_a = cameo.models.bigg.e_coli_core
+    model_b = None
+
+    with pytest.raises(TypeError):
+       gsmodutils.model_diff.model_diff(model_a, model_b)
