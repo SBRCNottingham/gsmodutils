@@ -27,6 +27,7 @@ E.g. having a directory structure such as this isn't good for anyone. You might 
 or a knockout might exist in one model but not another.
 
 .. code-block:: guess
+
     $ ls my_project
     ecoli_base_model.sbml
     ecoli_model_with_xylose_growth.sbml
@@ -118,7 +119,7 @@ Indices and tables
 
 
 References
-~~~~~~~~~
+~~~~~~~~~~
 [1] Antonovsky, N., Gleizer, S., Noor, E., Zohar, Y., Herz, E.,
 Barenholz, U., Zelcbuch, L., Amram, S., Wides, A., Tepper, N. and
 Davidi, D., 2016. Sugar synthesis from CO 2 in Escherichia coli. Cell,
