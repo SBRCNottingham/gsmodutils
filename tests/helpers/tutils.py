@@ -3,7 +3,6 @@ import shutil
 import tempfile
 
 import cameo
-import cobra
 
 from gsmodutils import GSMProject
 from gsmodutils.project.project_config import ProjectConfig, default_model_conditionsfp
@@ -11,20 +10,21 @@ from gsmodutils.project.project_config import ProjectConfig, default_model_condi
 
 class FakeProjectContext(object):
     
-    def __init__(self):
+    def __init__(self, model=None):
         """
         Assumes projectConfig class works correctly
         """
         self.path = tempfile.mkdtemp()
         self.mdl_path = tempfile.mkstemp()
+        self.model = model
+        if self.model is None:
+            self.model = cameo.models.bigg.iAF1260
 
     def __enter__(self):
         """
         Create a temporary gsmodutils project folder
         """
-        self.model = cameo.models.bigg.iAF1260
-        cobra.io.save_json_model(self.model, self.mdl_path[1])
-        add_models = [self.mdl_path[1]]
+        add_models = [self.model]
 
         configuration = dict(
                 description='TEST PROJECT ONLY',

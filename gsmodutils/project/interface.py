@@ -312,10 +312,9 @@ class GSMProject(object):
         diff['base_model'] = base_model
         diff['parent'] = parent
 
-        with open(design_save_path, 'w+') as dsp:
-            json.dump(diff, dsp, indent=4)
+        des = StrainDesign.from_dict(did, diff, self)
+        des.to_json(design_save_path, overwrite=overwrite)
 
-        des = self.get_design(did)
         return des
 
     def load_diff(self, diff, base_model=None):

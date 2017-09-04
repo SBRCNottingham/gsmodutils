@@ -404,7 +404,7 @@ class StrainDesign(object):
         return True
 
     @property
-    def __info__(self):
+    def info(self):
         pid = None
         if self.parent is not None:
             pid = self.parent.id
@@ -422,13 +422,13 @@ class StrainDesign(object):
     def _repr_html_(self):
         """Method intended for jupyter notebooks"""
         info_str = "<table>"
-        for k, v in self.__info__.items():
+        for k, v in self.info.items():
             info_str += "<tr> <td> <strong> {0} </strong> </td> <td> {1} </td> </tr>".format(k, v)
         info_str += "</table>"
         return info_str
 
     def __repr__(self):
         repr_s = "< StraignDesign {id} with {reactions} reactions, {genes} genes and {metabolites} metabolites>".format(
-            **self.__info__
+            **self.info
         )
         return repr_s
