@@ -308,16 +308,10 @@ def diff(model_path, base_model, project_path, parent, output, names):
 @click.command()
 @click.argument('path')
 @click.option('--project_path', default='.', help='gsmodutils project path')
-@click.option('--diff', default=True, help='Make sure model is unique to this project')
 @click.option('--validate/--no-validate', default=True, help='Chose to validate the model before it is added.')
-def add_model(path, project_path, diff, validate):
+def add_model(path, project_path, validate):
     """Add a model to a specified gsm project"""
-    load_project(project_path)
-    # Check the diff between other models
-    if diff:
-        pass
-
-    project = None
+    project = load_project(project_path)
     try:
         project.add_model(path, validate=validate)
     except KeyError:
@@ -336,12 +330,12 @@ def add_model(path, project_path, diff, validate):
 @click.option('--parent', default=None, help='A parent design that was applied first to avoid replication.')
 @click.option('--base_model', default=None, help='Model that design is based on')
 @click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing design')
-@click.option('--from-diff/--not-from-diff', default=False, help='load a diff file instead of compatible model')
-def dimport(model_path, identifier, name, description, project_path, parent, base_model, overwrite, diff):
+@click.option('--from_diff/--not_from_diff', default=False, help='load a diff file instead of compatible model')
+def dimport(model_path, identifier, name, description, project_path, parent, base_model, overwrite, from_diff):
     """ Import a design into a model. This can be new or overwrite an existing design. """
 
     project = load_project(project_path)
-    if diff:
+    if from_diff:
         with open(model_path) as diff_file:
             df = json.load(diff_file)
             # model_path is a json diff file
