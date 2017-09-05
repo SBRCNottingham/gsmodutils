@@ -8,6 +8,21 @@ from gsmodutils import GSMProject
 from gsmodutils.project.project_config import ProjectConfig, default_model_conditionsfp
 
 
+class CleanUpFile(object):
+    """
+    Context utility for ensuring that a given file is always removed after a test is run
+    """
+    def __init__(self, fpath):
+        self._fpath = fpath
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *args):
+        if os.path.exists(self._fpath):
+            os.remove(self._fpath)
+
+
 class FakeProjectContext(object):
     
     def __init__(self, model=None):
@@ -18,7 +33,7 @@ class FakeProjectContext(object):
         self.mdl_path = tempfile.mkstemp()
         self.model = model
         if self.model is None:
-            self.model = cameo.models.bigg.iAF1260
+            self.model = cameo.load_model('iAF1260.json')
 
     def __enter__(self):
         """
