@@ -1,11 +1,12 @@
 import os
 import shutil
 import tempfile
-
-import cameo
-
-from gsmodutils import GSMProject
+from gsmodutils import GSMProject, load_model
 from gsmodutils.project.project_config import ProjectConfig, default_model_conditionsfp
+
+
+_IAF_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'iAF1260.json')
+_CORE_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'e_coli_core.json')
 
 
 class CleanUpFile(object):
@@ -33,7 +34,7 @@ class FakeProjectContext(object):
         self.mdl_path = tempfile.mkstemp()
         self.model = model
         if self.model is None:
-            self.model = cameo.load_model('iAF1260.json')
+            self.model = load_model(_IAF_MODEL_PATH)
 
     def __enter__(self):
         """

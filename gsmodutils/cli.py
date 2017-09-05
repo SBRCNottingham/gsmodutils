@@ -11,11 +11,11 @@ import cobra
 
 from gsmodutils.exceptions import ProjectNotFound
 from gsmodutils.model_diff import model_diff
+from gsmodutils import GSMProject, load_model
 from sys import exit
 
 
 def load_project(project_path):
-    from gsmodutils import GSMProject
     project = None
     try:
         project = GSMProject(project_path)
@@ -259,15 +259,12 @@ def create_project(project_path, model_path):
 @click.option('--names/--no-names', default=True, help='Output names of added or changed metabolites and reactions')
 def diff(model_path, base_model, project_path, parent, output, names):
     """ View the changed reactions between a model and a base model """
-
-    import cameo
-
     project = load_project(project_path)
     base_model = project.load_model(base_model)
     if parent is not None:
         base_model = project.load_design(parent, base_model)
 
-    nmdl = cameo.load_model(model_path)
+    nmdl = load_model(model_path)
 
     click.echo('Comparing models...')
     mdiff = model_diff(base_model, nmdl)
@@ -350,8 +347,7 @@ def dimport(model_path, identifier, name, description, project_path, parent, bas
             # model_path is a json diff file
             model = project.load_diff(df, base_model=base_model)
     else:
-        import cameo
-        model = cameo.load_model(model_path)
+        model = load_model(model_path)
     # Check if the design already exists
     new = True
     if identifier in project.list_designs and not overwrite:
@@ -384,8 +380,7 @@ def dimport(model_path, identifier, name, description, project_path, parent, bas
 @click.option('--growth/--no_growth', default=True, help='Should these conditions allow growth or not')
 def iconditions(path, ident, project_path, apply_to, growth):
     """ Add a given set of media condtions from a model (this ignores any added or removed reactions or metabolites)"""
-    import cameo
-    model = cameo.load_model(path)
+    model = load_model(path)
     project = load_project(project_path)
     project.save_conditions(model, ident, apply_to=apply_to, observe_growth=growth)
 
@@ -492,6 +487,3 @@ cli.add_command(info)
 cli.add_command(diff)
 cli.add_command(iconditions)
 cli.add_command(docker)
-
-if __name__ == "__main__":
-    cli()
