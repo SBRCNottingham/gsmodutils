@@ -15,7 +15,7 @@ from gsmodutils import GSMProject, load_model
 from sys import exit
 
 
-def load_project(project_path):
+def _load_project(project_path):
     project = None
     try:
         project = GSMProject(project_path)
@@ -75,7 +75,7 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
 @click.option('--log_path', default=None, type=click.Path(writable=True), help='path to output json test log')
 def test(project_path, test_id, display_only, skip_default, verbose, log_path):
     """Run tests for a project"""
-    project = load_project(project_path)
+    project = _load_project(project_path)
     tester = project.project_tester()
     # Collect list of tests
     click.echo('Collecting tests...')
@@ -259,7 +259,7 @@ def create_project(project_path, model_path):
 @click.option('--names/--no-names', default=True, help='Output names of added or changed metabolites and reactions')
 def diff(model_path, base_model, project_path, parent, output, names):
     """ View the changed reactions between a model and a base model """
-    project = load_project(project_path)
+    project = _load_project(project_path)
     base_model = project.load_model(base_model)
     if parent is not None:
         base_model = project.load_design(parent, base_model)
@@ -311,7 +311,7 @@ def diff(model_path, base_model, project_path, parent, output, names):
 @click.option('--validate/--no-validate', default=True, help='Chose to validate the model before it is added.')
 def add_model(path, project_path, validate):
     """Add a model to a specified gsm project"""
-    project = load_project(project_path)
+    project = _load_project(project_path)
     try:
         project.add_model(path, validate=validate)
     except KeyError:
@@ -334,7 +334,7 @@ def add_model(path, project_path, validate):
 def dimport(model_path, identifier, name, description, project_path, parent, base_model, overwrite, from_diff):
     """ Import a design into a model. This can be new or overwrite an existing design. """
 
-    project = load_project(project_path)
+    project = _load_project(project_path)
     if from_diff:
         with open(model_path) as diff_file:
             df = json.load(diff_file)
@@ -375,7 +375,7 @@ def dimport(model_path, identifier, name, description, project_path, parent, bas
 def iconditions(path, ident, project_path, apply_to, growth):
     """ Add a given set of media condtions from a model (this ignores any added or removed reactions or metabolites)"""
     model = load_model(path)
-    project = load_project(project_path)
+    project = _load_project(project_path)
     project.save_conditions(model, ident, apply_to=apply_to, observe_growth=growth)
 
 
@@ -396,7 +396,7 @@ def export(file_format, filepath, project_path, model_id, design, conditions, ov
         click.echo('error - {} already exists. Must use overwrite option'.format(filepath))
         exit(-1)
 
-    project = load_project(project_path)
+    project = _load_project(project_path)
     model = project.load_model(model_id)
 
     if conditions is not None:
@@ -424,7 +424,7 @@ def export(file_format, filepath, project_path, model_id, design, conditions, ov
 @click.option('--project_path', default='.', help='gsmodutils project path')
 def info(project_path):
     """ Display all the information about a gsmodutils project (list models, paths, designs etc. """
-    project = load_project(project_path)
+    project = _load_project(project_path)
     click.echo('''--------------------------------------------------------------------------------------------------
 Project description - {description}
 Author(s): - {author}
@@ -460,7 +460,7 @@ Tests directory - {tests_dir}
 @click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing dockerfile')
 def docker(project_path, overwrite):
     """ Create a dockerfile for the project """
-    project = load_project(project_path)
+    project = _load_project(project_path)
     if os.path.exists(os.path.join(project_path, 'Dockerfile')) and not overwrite:
         click.echo('**** A Dockerfile already exists, use --overwrite to replace **** \n')
     else:
