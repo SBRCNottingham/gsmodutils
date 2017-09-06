@@ -150,7 +150,6 @@ def test_import_designs():
         opts = [
             save_path, did,
             '--project_path', ctx.path,
-            '--parent', did,
             '--name', name,
             '--description', description,
         ]
@@ -194,12 +193,10 @@ def test_import_designs():
         opts = [
             save_path, cdid,
             '--project_path', ctx.path,
-            '--parent', did,
-            '--name', name,
-            '--description', description,
+            '--parent', did
         ]
 
-        result = runner.invoke(gsmodutils.cli.dimport, opts)
+        result = runner.invoke(gsmodutils.cli.dimport, opts, input='{}\n{}\n'.format(name, description))
 
         assert result.exit_code == 0
 
@@ -207,7 +204,7 @@ def test_import_designs():
         cdes = project.get_design(cdid)
 
         # Test parent loads
-        assert cdes.parent == did
+        assert cdes.parent.id == did
         assert tmdl.reactions.EX_xyl__D_e.lower_bound == -8.00
         assert "EX_glc__D_e" not in tmdl.reactions
 
@@ -216,9 +213,21 @@ def test_import_designs():
         assert cdes.name == name
         assert cdes.description == description
 
-        # Test non existent parent
-
         # Test overwrite existing
+        result = runner.invoke(gsmodutils.cli.dimport, opts)
+        assert result.exit_code == -1
+
+        # Test non-existent parent
+        opts = [
+            save_path, 'should_fail',
+            '--project_path', ctx.path,
+            '--parent', 'notarealparentanyway'
+        ]
+
+        result = runner.invoke(gsmodutils.cli.dimport, opts)
+        assert result.exit_code == -1
+        assert 'should_fail' not in project.list_designs
+
 
 
 def test_add_model():
@@ -269,14 +278,19 @@ def test_diff():
         cobra.io.save_json_model(mdl, save_path)
 
         output_path = os.path.join(ctx.path, 'differ.json')
-        result = runner.invoke(gsmodutils.cli.diff, [save_path, '--project_path', ctx.path, '--ouput', output_path,
+        result = runner.invoke(gsmodutils.cli.diff, [save_path, '--project_path', ctx.path, '--output', output_path,
                                                      '--names'])
+
+        assert result.exit_code == 0
         assert os.path.exists(output_path)
 
         with open(output_path) as dff_file:
             diff = json.load(dff_file)
-        assert 'RBPC' in diff['added_metabolites']
-        assert 'rb15bp_c' in diff['added_reactions']
+
+        dmdl = project.load_diff(diff)
+
+        assert 'RBPC' in dmdl.reactions
+        assert 'rb15bp_c' in dmdl.metabolites
 
         # add a design from a diff
         did = 'test'
@@ -286,17 +300,15 @@ def test_diff():
         opts = [
             output_path, did,
             '--project_path', ctx.path,
-            '--parent', did,
             '--from_diff',
             '--name', name,
             '--description', description,
         ]
 
         result = runner.invoke(gsmodutils.cli.dimport, opts)
-        assert did in project.designs
+        assert result.exit_code == 0
+        assert did in project.list_designs
 
-
-        # TODO diff the design against the diff file
 
 def test_create_project():
     pass
