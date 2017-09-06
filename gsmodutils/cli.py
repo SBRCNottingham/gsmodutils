@@ -12,6 +12,7 @@ import cobra
 from gsmodutils.exceptions import ProjectNotFound
 from gsmodutils.model_diff import model_diff
 from gsmodutils import GSMProject, load_model
+from gsmodutils.project.project_config import ProjectConfig
 from sys import exit
 
 
@@ -67,13 +68,12 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
 
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
-@click.option('--display_only/--run_tests', default=False, help='Just show found tests, does not run')
 @click.option('--test_id', default=None, help='specify a given test identifier to run - pyton filename, function or' +
                                               'json_filename entry')
 @click.option('--skip_default/--no_skip_default', default=False, help='skip default tests')
 @click.option('--verbose/--no_verbose', default=False, help='Dispalty succesfully run test assertions')
 @click.option('--log_path', default=None, type=click.Path(writable=True), help='path to output json test log')
-def test(project_path, test_id, display_only, skip_default, verbose, log_path):
+def test(project_path, test_id, skip_default, verbose, log_path):
     """Run tests for a project"""
     project = _load_project(project_path)
     tester = project.project_tester()
@@ -121,85 +121,68 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
         exit()
     
     barstr = "-"*25
-    if not display_only:
-        # TODO Progress bar as tests are run
-        click.echo(
-            click.style(barstr + ' gsmodutils test results ' + barstr, bg='green', bold=True)
-        )
+    # TODO Progress bar as tests are run
+    click.echo(
+        click.style(barstr + ' gsmodutils test results ' + barstr, bg='green', bold=True)
+    )
 
-        if verbose:
-            click.echo("verbose mode, showing successes and failures")
-            click.echo()
-
-        print('Running tests: ', end='')
-        for _ in tester.iter_tests(skip_default=skip_default):
-            print('.', end='')
+    if verbose:
+        click.echo("verbose mode, showing successes and failures")
         click.echo()
-        ts = 0
-        te = 0
-        for tf, log in tester.log.items():
 
-            if tf == 'default_tests':
-                click.echo('Default project file tests (models, designs, conditions):')
-                indicator = "Project file"
-            else:
-                click.echo("Test file {}:".format(tf))
-                indicator = "Test file"
-            lc = log.log_count
-            ts += lc[0]
-            te += lc[1]
-            click.echo("Counted {} test assertions with {} failures".format(*lc))
-            # Output base test file
-            if not log.is_success:
-                click.echo(click.style('{} has errors'.format(indicator), fg='red'))
-            else:
-                click.echo(click.style('{} completed all tests without error'.format(indicator), fg='green'))
-            
-            # Count total tests, count total assertions
-            _output_child_logs(log, verbose=verbose)
-            
-            if log.std_out is not None:
-                click.echo(
-                    click.style(barstr + ' Captured standard output ' + barstr, fg='black', bg='white')
-                )
-                click.echo(log.std_out)
-                click.echo(
-                    click.style(barstr + ' End standard output ' + barstr, fg='black', bg='white')
-                )         
-        click.echo(
-            'Ran {} test assertions with a total of {} errors ({}% success)'.format(ts, te, ((ts-te)/ts) * 100)
-        )
-        
-        # Save report to json log file
-        if log_path is not None:
-            try:
-                with open(log_path, 'w+') as lf:
-                    json.dump(tester.to_dict(), lf, indent=4)
-            except IOError:
-                click.echo(
-                    click.style('Error writing log file'.format(log_path), fg='red')
-                )
-            except TypeError:
-                click.echo(
-                    click.style('Error writing log file, tests appear to be in nonstandard' +
-                                'format. Check executable python test files', fg='red')
-                )
-                
-    else:
-        click.echo(
-            click.style(barstr + ' TESTS FOUND ' + barstr, fg='green')
-        )
-        # display tests with indentations for test files/casesand
-        json_tests, py_tests = tester.tests
-        for id_key in json_tests:
-            click.echo('JSON test file - {}'.format(id_key))
-            for entry_key in json_tests[id_key]:
-                click.echo('\t{}'.format(entry_key))
-    
-        for id_key in py_tests:
-            click.echo('Executable test file - {}'.format(id_key))
-            for entry_key in py_tests[id_key]:
-                click.echo('\t{}'.format(entry_key))
+    print('Running tests: ', end='')
+    for _ in tester.iter_tests(skip_default=skip_default):
+        print('.', end='')
+    click.echo()
+    ts = 0
+    te = 0
+    for tf, log in tester.log.items():
+
+        if tf == 'default_tests':
+            click.echo('Default project file tests (models, designs, conditions):')
+            indicator = "Project file"
+        else:
+            click.echo("Test file {}:".format(tf))
+            indicator = "Test file"
+        lc = log.log_count
+        ts += lc[0]
+        te += lc[1]
+        click.echo("Counted {} test assertions with {} failures".format(*lc))
+        # Output base test file
+        if not log.is_success:
+            click.echo(click.style('{} has errors'.format(indicator), fg='red'))
+        else:
+            click.echo(click.style('{} completed all tests without error'.format(indicator), fg='green'))
+
+        # Count total tests, count total assertions
+        _output_child_logs(log, verbose=verbose)
+
+        if log.std_out is not None:
+            click.echo(
+                click.style(barstr + ' Captured standard output ' + barstr, fg='black', bg='white')
+            )
+            click.echo(log.std_out)
+            click.echo(
+                click.style(barstr + ' End standard output ' + barstr, fg='black', bg='white')
+            )
+    click.echo(
+        'Ran {} test assertions with a total of {} errors ({}% success)'.format(ts, te, ((ts-te)/ts) * 100)
+    )
+
+    # Save report to json log file
+    if log_path is not None:
+        try:
+            with open(log_path, 'w+') as lf:
+                json.dump(tester.to_dict(), lf, indent=4)
+        except IOError:
+            click.echo(
+                click.style('Error writing log file'.format(log_path), fg='red')
+            )
+        except TypeError:
+            click.echo(
+                click.style('Error writing log file, tests appear to be in nonstandard' +
+                            'format. Check executable python test files', fg='red')
+            )
 
 
 @click.command()
@@ -207,10 +190,9 @@ def test(project_path, test_id, display_only, skip_default, verbose, log_path):
 @click.argument('model_path', type=str, default=None)
 def create_project(project_path, model_path):
     """Create a new gsmodutils project"""
-    from gsmodutils.project.project_config import ProjectConfig
     click.echo('Project creation {}'.format(project_path))
 
-    click.echo('Using mode {}'.format(project_path))
+    click.echo('Using model {}'.format(model_path))
 
     description = click.prompt('Please enter a project description', type=str)
     author = click.prompt('Author name', type=str)
@@ -224,14 +206,6 @@ def create_project(project_path, model_path):
     
     # TODO: find out how to add multiple paths with click
     add_models = [model_path]
-    if model_path is None:
-        # Create a new model
-        click.confirm('No model specified, create new model?', abort=True)
-        click.echo(
-            click.style('Empty model file model.json will be created', fg='green')
-        )
-        add_models = []
-    
     # Actually create the project
     try:
         click.echo('creating project in {}'.format(os.path.abspath(project_path)))
@@ -248,6 +222,7 @@ def create_project(project_path, model_path):
         click.echo(
             click.style('{}'.format(ex), fg='red')
         )
+        exit(-1)
 
 
 @click.command()

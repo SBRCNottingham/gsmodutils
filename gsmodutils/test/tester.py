@@ -373,7 +373,7 @@ class GSMTester(object):
             for t in self.python_tests[k]:
                 kptests.append((k, t))
                 
-        return list(self.json_tests.items()) + kptests
+        return self.json_tests.items(), kptests
         
     def run_by_id(self, tid):
         """ Returns result of individual test function """
