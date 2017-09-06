@@ -1,17 +1,18 @@
-'''
+"""
 Tests for command line interface
-'''
+"""
 import pytest
 from click.testing import CliRunner
 import gsmodutils.cli
 from gsmodutils import GSMProject, load_model
-from tutils import FakeProjectContext, CleanUpFile, _CORE_MODEL_PATH
+from tutils import FakeProjectContext, CleanUpFile, CleanUpDir, _CORE_MODEL_PATH
 import os
 import json
 import cobra
 
 
 def test_docker_info():
+
     with FakeProjectContext() as ctx:
         # Add some conditions and a design with a parent
         project = GSMProject(ctx.path)
@@ -39,6 +40,8 @@ def test_docker_info():
         # Test bad project path fail
         result = runner.invoke(gsmodutils.cli.info, [])
         assert result.exit_code == -1
+        # Pointless test for code coverage
+        runner.invoke(gsmodutils.cli.cli)
 
 
 @pytest.mark.parametrize("fmt,excode", [
@@ -213,9 +216,25 @@ def test_import_designs():
         assert cdes.name == name
         assert cdes.description == description
 
-        # Test overwrite existing
+        opts = [
+            save_path, cdid,
+            '--project_path', ctx.path,
+            '--parent', did
+        ]
+
+        # Test overwrite existing fail and pass
         result = runner.invoke(gsmodutils.cli.dimport, opts)
         assert result.exit_code == -1
+
+        opts = [
+            save_path, cdid,
+            '--project_path', ctx.path,
+            '--parent', did,
+            '--overwrite'
+        ]
+
+        result = runner.invoke(gsmodutils.cli.dimport, opts)
+        assert result.exit_code == 0
 
         # Test non-existent parent
         opts = [
@@ -227,7 +246,6 @@ def test_import_designs():
         result = runner.invoke(gsmodutils.cli.dimport, opts)
         assert result.exit_code == -1
         assert 'should_fail' not in project.list_designs
-
 
 
 def test_add_model():
@@ -269,8 +287,9 @@ def test_diff():
 
         rubisco.add_metabolites(stoich)
 
-        # Remove a metabolite
+        # Remove a metabolite and reaction
         mdl.metabolites.h2o_c.remove_from_model()
+        mdl.reactions.TRE6PH.remove_from_model()
 
         mdl.reactions.EX_glc__D_e.lower_bound = -1000
 
@@ -279,7 +298,7 @@ def test_diff():
 
         output_path = os.path.join(ctx.path, 'differ.json')
         result = runner.invoke(gsmodutils.cli.diff, [save_path, '--project_path', ctx.path, '--output', output_path,
-                                                     '--names'])
+                                                     '--names', '--base_model', 'iAF1260.json'])
 
         assert result.exit_code == 0
         assert os.path.exists(output_path)
@@ -309,11 +328,30 @@ def test_diff():
         assert result.exit_code == 0
         assert did in project.list_designs
 
+        result = runner.invoke(gsmodutils.cli.diff, [save_path, '--project_path', ctx.path, '--output', output_path,
+                                                     '--names', '--base_model', 'iAF1260.json', '--parent', did])
+        assert result.exit_code == 0
+
 
 def test_create_project():
-    pass
+    runner = CliRunner()
+    with CleanUpDir() as ctx:
+        description = 'test desc'
+        author = 'test author'
+        email = 'test@email.com'
 
+        inpt = '{}\n{}\n{}\n'.format(description, author, email)
+        result = runner.invoke(gsmodutils.cli.create_project, [ctx.path, _CORE_MODEL_PATH], input=inpt)
+        assert result.exit_code == 0
 
-def test_test_runner():
-    pass
+        # shouldn't raise an exception
+        project = GSMProject(ctx.path)
+        assert project.config.description == description
+        assert project.config.author == author
+        assert project.config.author_email == email
 
+        assert 'e_coli_core.json' in project.config.models
+
+        # attempting rerun will raise exception
+        result = runner.invoke(gsmodutils.cli.create_project, [ctx.path, _CORE_MODEL_PATH], input=inpt)
+        assert result.exit_code == -1

@@ -2,29 +2,9 @@ import os
 import shutil
 import tempfile
 from gsmodutils import GSMProject, load_model
-from gsmodutils.project.project_config import ProjectConfig, default_model_conditionsfp
-
 
 _IAF_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'iAF1260.json')
 _CORE_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'e_coli_core.json')
-
-
-def project_creator(path, add_models):
-    configuration = dict(
-        description='TEST PROJECT ONLY',
-        author='test',
-        author_email='123@abc.com',
-        default_model=None,
-        models=[],
-        repository_type='hg',
-        conditions_file=default_model_conditionsfp,
-        tests_dir='tests',
-        design_dir='designs'
-    )
-
-    cfg = ProjectConfig(**configuration)
-    cfg.create_project(path, addmodels=add_models)
-    return cfg
 
 
 class CleanUpFile(object):
@@ -82,8 +62,7 @@ class FakeProjectContext(object):
         """
         add_models = [self.model]
 
-        self.cfg = project_creator(self.path, add_models)
-        self.project = GSMProject(self.path)
+        self.project = GSMProject.create_project(add_models, 'TEST PROJECT ONLY', 'test', '123@abc.com', self.path)
         return self
     
     def __exit__(self, *args):

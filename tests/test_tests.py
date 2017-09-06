@@ -1,15 +1,16 @@
 """
 Test cases for the GSMTests class and associated files
 """
-
-from __future__ import print_function, absolute_import, division
 from gsmodutils import GSMProject
+
 import json
 from tutils import FakeProjectContext
 import os
 import pytest
 from cobra.exceptions import Infeasible
 from cameo.core.utils import load_medium
+from click.testing import CliRunner
+import gsmodutils.cli
 
 
 def test_json_tests():
@@ -40,6 +41,9 @@ def test_json_tests():
         assert len(tester.json_tests) == 1
         tester.run_all()
         assert len(tester.load_errors) == 0
+        runner = CliRunner()
+        result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose'])
+        assert result.exit_code == 0
 
 
 def test_py_tests():
@@ -50,7 +54,10 @@ def test_py_tests():
     """
     
     code_str = """
-from gsmodutils.test.testutils import ModelTestSelector
+# Look our tests are python 2 compatible!
+# p.s. if you're reading this you're such a nerd
+from __future__ import print_function 
+from gsmodutils.test.utils import ModelTestSelector
 
 @ModelTestSelector(models=[], conditions=[], designs=[])
 def test_func(model, project, log):
@@ -58,6 +65,7 @@ def test_func(model, project, log):
     
 def test_model(model, project, log):
     solution = model.solver.optimize()
+    print('This is the end')
     log.assertion(solution.f > 0.0, "Model grows", "Model does not grow")
     
     """
@@ -73,6 +81,10 @@ def test_model(model, project, log):
         tester.run_all()
         
         assert len(tester.syntax_errors) == 0
+
+        runner = CliRunner()
+        result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose'])
+        assert result.exit_code == 0
 
 
 def test_conditions():
@@ -122,7 +134,7 @@ def test_conditions():
 
         tester.run_all()
 
-
-def test_design():
-    with FakeProjectContext() as fp:
-        pass
+        # Test the cli interface
+        runner = CliRunner()
+        result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose'])
+        assert result.exit_code == 0

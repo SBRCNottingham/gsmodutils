@@ -8,14 +8,17 @@ import os
 import shutil
 import tempfile
 
-import cobra
 import pytest
-from tutils import FakeProjectContext, CleanUpDir, project_creator
+from tutils import FakeProjectContext, CleanUpDir
 
 from gsmodutils.exceptions import ProjectConfigurationError
 from gsmodutils import GSMProject
 from gsmodutils.project.project_config import ProjectConfig
 from gsmodutils.project.project_config import default_model_conditionsfp, default_project_file
+
+
+def project_creator(path, add_models):
+    GSMProject.create_project(add_models, 'TEST PROJECT ONLY', 'test', '123@abc.com', path)
 
 
 def test_create_project():
