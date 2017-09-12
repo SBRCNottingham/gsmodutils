@@ -165,24 +165,14 @@ def test(project_path, test_id, skip_default, verbose, log_path):
             click.echo(
                 click.style(barstr + ' End standard output ' + barstr, fg='black', bg='white')
             )
-    click.echo(
-        'Ran {} test assertions with a total of {} errors ({}% success)'.format(ts, te, ((ts-te)/ts) * 100)
-    )
+    percent = round( ((ts - te) / ts) * 100, 3)
+    click.echo('Ran {} test assertions with a total of {} errors ({}% success)'.format(ts, te, percent))
 
     # Save report to json log file
     if log_path is not None:
-        try:
-            with open(log_path, 'w+') as lf:
-                json.dump(tester.to_dict(), lf, indent=4)
-        except IOError:
-            click.echo(
-                click.style('Error writing log file'.format(log_path), fg='red')
-            )
-        except TypeError:
-            click.echo(
-                click.style('Error writing log file, tests appear to be in nonstandard' +
-                            'format. Check executable python test files', fg='red')
-            )
+        with open(log_path, 'w+') as lf:
+            json.dump(tester.to_dict(), lf, indent=4)
+            click.echo('log file written to {}'.format(log_path))
 
 
 @click.command()

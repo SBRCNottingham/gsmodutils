@@ -59,19 +59,60 @@ def test_py_tests():
 from __future__ import print_function 
 from gsmodutils.test.utils import ModelTestSelector
 
-@ModelTestSelector(models=[], conditions=[], designs=[])
+@ModelTestSelector(models=["not_there"], conditions=["xyl_src", "bad", "not_there"], designs=["not_there"])
 def test_func(model, project, log):
     log.assertion(True, "Works", "Does not work", "Test")
-    
+
+# For code coverage
+@ModelTestSelector()
+def test_func_cove(model, project, log):
+    log.assertion(True, "Works", "Does not work", "Test")
+
 def test_model(model, project, log):
     solution = model.solver.optimize()
-    print('This is the end')
-    log.assertion(solution.f > 0.0, "Model grows", "Model does not grow")
-    
+    print('This is the end {}'.format(solution))
+    log.assertion(True, "Model grows", "Model does not grow")
+    log.assertion(False, "Model grows", "Model does not grow")
     """
     
     with FakeProjectContext() as fp:
         project = GSMProject(fp.path)
+
+        # TODO: add second model
+
+        # add some growth conditions
+        conditions = dict(
+            EX_xyl__D_e=-8.0,
+            EX_ca2_e=-99999.0,
+            EX_cbl1_e=-0.01,
+            EX_cl_e=-99999.0,
+            EX_co2_e=-99999.0,
+            EX_cobalt2_e=-99999.0,
+            EX_cu2_e=-99999.0,
+            EX_fe2_e=-99999.0,
+            EX_fe3_e=-99999.0,
+            EX_h2o_e=-99999.0,
+            EX_h_e=-99999.0,
+            EX_k_e=-99999.0,
+            EX_mg2_e=-99999.0,
+            EX_mn2_e=-99999.0,
+            EX_mobd_e=-99999.0,
+            EX_na1_e=-99999.0,
+            EX_nh4_e=-99999.0,
+            EX_o2_e=-18.5,
+            EX_pi_e=-99999.0,
+            EX_so4_e=-99999.0,
+            EX_tungs_e=-99999.0,
+            EX_zn2_e=-99999.0
+        )
+        mdl = fp.project.model
+        load_medium(mdl, conditions)
+        fp.project.save_conditions(mdl, "xyl_src", apply_to=fp.project.config.default_model)
+
+        load_medium(mdl, dict())
+        fp.project.save_conditions(mdl, "bad", apply_to=fp.project.config.default_model, observe_growth=False)
+
+        # TODO: add design
         tfp = os.path.join(project.tests_dir, 'test_x.py')
         
         with open(tfp, 'w+') as testf:
@@ -83,7 +124,8 @@ def test_model(model, project, log):
         assert len(tester.syntax_errors) == 0
 
         runner = CliRunner()
-        result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose'])
+        lpath = os.path.join(fp.path, 'lp.json')
+        result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose', '--log_path', lpath])
         assert result.exit_code == 0
 
 

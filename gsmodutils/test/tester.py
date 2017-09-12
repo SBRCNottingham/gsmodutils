@@ -258,7 +258,6 @@ class GSMTester(object):
             try:
                 # Call the function
                 # Uses standardised prototypes
-                # TODO: fix lint warning
                 global_namespace[test_func](self.project.load_model(), self.project, log)
             except Exception as ex:
                 # the specific test case has an erro
