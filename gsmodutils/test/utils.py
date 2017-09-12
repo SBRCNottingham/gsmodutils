@@ -202,10 +202,10 @@ class TestRecord(object):
         children = {}
         for child in self.children.values():
             if child.id not in stk:
-                children[child.id] = child.to_dict(stk=stk + [self.id])
+                children[str(child.id)] = child.to_dict(stk=stk + [self.id])
             
         result = dict(
-            id=self.id,
+            id=str(self.id),
             children=children,
             error=self.error,
             success=self.success,

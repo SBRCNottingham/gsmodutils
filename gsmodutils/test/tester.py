@@ -55,6 +55,8 @@ class GSMTester(object):
         self._tests_collected = False
         
         self.sub_tests = defaultdict(list)
+
+        self._task_id_map = dict()  # Map an id to task to execute
     
     def _load_json_tests(self):
         """
@@ -87,6 +89,7 @@ class GSMTester(object):
                             self.json_tests[id_key][entry_key] = entry
                             self.log[id_key].create_child(entry_key)
                             self._task_execs[t_args] = self._dict_test
+                            self._task_id_map[id_key] = t_args
                         else:
                             self.log[id_key].add_error(entry_key, missing_fields)
                             self.invalid_tests.append((id_key, entry_key, missing_fields))
@@ -96,12 +99,7 @@ class GSMTester(object):
                     self.load_errors.append((id_key, e))
                 
                 self._task_execs[tf] = self.iter_basetf
-                
-    def _run_d_tests(self):
-        """Run entry tests"""
-        for id_key in self.json_tests:
-            for entry_key in self.json_tests[id_key]:
-                yield self._dict_test(id_key, entry_key)
+                self._task_id_map[tf] = tf
 
     @staticmethod
     def _entry_test(log, mdl, entry):
@@ -233,9 +231,14 @@ class GSMTester(object):
                         self.python_tests[tf_name].append(func)
                         
                         args = (tf_name, func)
+                        task_id = "{}_{}".format(tf_name, func)
                         self._task_execs[args] = self._exec_test
+                        self._task_id_map[task_id] = args
                         self._child_tests[tf_name].append(args)
-                        
+
+            self._task_execs[tf_name] = self.iter_basetf
+            self._task_id_map[tf_name] = tf_name
+
     def _exec_test(self, tf_name, test_func):
         """
         encapsulate a test function and run it storing the report
@@ -331,6 +334,7 @@ class GSMTester(object):
             kwargs = dict(log=log, model_path=model_path)
             self.default_tests[tf_name] = (self._df_model_test, kwargs)
             self._task_execs[tf_name] = self._exec_default
+            self._task_id_map[tf_name] = tf_name
 
         for ckey, cdf in self.project.conditions['growth_conditions'].items():
             # Load model that conditions applies to (default is all models in project)
@@ -344,6 +348,7 @@ class GSMTester(object):
                 kwargs = dict(log=log, model_path=model_path, conditions=ckey)
                 self.default_tests[tf_name] = (self._df_model_test, kwargs)
                 self._task_execs[tf_name] = self._exec_default
+                self._task_id_map[tf_name] = tf_name
 
         for design in self.project.list_designs:
             # Load model design with design applied
@@ -352,36 +357,24 @@ class GSMTester(object):
             kwargs = dict(log=log, design=design)
             self.default_tests[tf_name] = (self._df_design_test, kwargs)
             self._task_execs[tf_name] = self._exec_default
+            self._task_id_map[tf_name] = tf_name
 
     def _exec_default(self, tid):
         return self.default_tests[tid][0](**self.default_tests[tid][1])
 
-    def _run_default_tests(self):
-        """ Run tests for models, designs, conditions"""
-        for key, (func, kwargs) in self.default_tests.items():
-            yield func(**kwargs)
-    
     @property
-    def tests(self):
-        """Tuple of dict tests and executable tests"""
-        if not self._tests_collected:
-            self.collect_tests()
-            
-        kptests = []
-        for k in self.python_tests.keys():
-            for t in self.python_tests[k]:
-                kptests.append((k, t))
-                
-        return self.json_tests.items(), kptests
-        
+    def test_ids(self):
+        return list(self._task_id_map.keys())
+
     def run_by_id(self, tid):
         """ Returns result of individual test function """
-        func = self._task_execs[tid]
+        targs = self._task_id_map[tid]
+        func = self._task_execs[targs]
         
         if func == self.iter_basetf:
-            return list(func(tid))[0]
+            return list(func(targs))[0]
         
-        return func(*tid).next()
+        return func(*targs)
 
     def collect_tests(self):
         """

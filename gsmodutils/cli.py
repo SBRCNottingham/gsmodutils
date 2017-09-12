@@ -102,23 +102,20 @@ def test(project_path, test_id, skip_default, verbose, log_path):
             click.echo('\t{}'.format(field))
     
     if test_id is not None:
-        test_id = tuple(test_id.split(" "))
-        
-        if len(test_id) == 1:
-            test_id = test_id[0]
         # Only run specific test id
-        if test_id not in tester.tests:
+        if test_id not in tester.test_ids:
             click.echo(
                 click.style('Test {} not found'.format(test_id), fg='red')
             )
-            click.echo("Tests to select from: \n\t" + "\n\t".join(tester.tests))
+            click.echo("Tests to select from: \n\t" + "\n\t".join(tester.test_ids))
+            exit(-1)
         else:
             log = tester.run_by_id(test_id)
             click.echo("results for {}".format(log.id))
             # run test, get log
-            _output_child_logs(log)
+            _output_child_logs(log, verbose=verbose)
         
-        exit()
+        exit(0)
     
     barstr = "-"*25
     # TODO Progress bar as tests are run
@@ -436,6 +433,7 @@ def docker(project_path, overwrite):
     and use "docker save container_name -o container_name" to create a shareable image''')
 
     click.echo('\n\nIf docker is not configured on your system please consult the documentation at docs.docker.com')
+
 
 cli.add_command(test)
 cli.add_command(add_model)

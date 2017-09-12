@@ -354,6 +354,82 @@ class GSMProject(object):
 
         return mdl
 
+    def add_essential_pathway(self, tid, reactions, description='', reaction_fluxes=None,
+                              models=None, designs=None, conditions=None, overwrite=False):
+        """
+        Add a pathway to automated testing to confirm reactions are always present in model and the pathway always
+        carries flux.
+
+        This is just a simpler way of adding essential pathways than manually adding a json file with the same
+        information.
+
+        :param tid:
+        :param reactions:
+        :param description:
+        :param reaction_fluxes:
+        :param models:  If None, only the default model is checked unless at least one design is specified
+        :param designs:  By default designs are never checked. specifying all tests the pathway on all designs (current
+        and future)
+        :param conditions:  None, by default. Specifies the conditions which a pathway is present in.
+        :param overwrite:
+        :return:
+        """
+
+        if not isinstance(tid, str):
+            raise TypeError('Identifier must be a string')
+
+        if isinstance(models, str) and models != "all":
+            raise TypeError('Models must specify \'all\', be a list of valid models or None (default model only)')
+
+        if designs is None:
+            designs = []
+
+        if conditions is None:
+            conditions = []
+
+        if models is None and len(self.designs) == 0:
+            models = [self.default_model]
+        elif models is None:
+            models = []
+
+        if reaction_fluxes is None:
+            reaction_fluxes = dict()
+
+        test_file = os.path.join(os.path.abspath(self.tests_dir), 'test_{}.json'.format(tid))
+        # Check if the test identifier exists or not
+        if os.path.exists(test_file) and not overwrite:
+            raise IOError('Test of the same id already exists. Must specify unique id.')
+
+        test = dict(
+            conditions=conditions,
+            models=models,
+            designs=designs,
+            reaction_fluxes=reaction_fluxes,
+            required_reactions=reactions,
+            description=description,
+        )
+
+        # Validate models, designs, conditions actually exist
+
+        if designs != 'all':
+            for did in designs:
+                if did not in self.list_designs:
+                    raise KeyError('Design {} not found'.format(did))
+
+        if models != 'all':
+            for mid in models:
+                if mid not in self.config.models:
+                    raise KeyError('Model {} not found'.format(mid))
+
+        if conditions != 'all':
+            for cid in models:
+                if cid not in self.conditions:
+                    raise KeyError('Model {} not found'.format(mid))
+
+        # Save the json test file to disk.
+        with open(test_file, 'w+') as tf:
+            json.dump(test, tf)
+
     def growth_condition(self, conditions_id):
         conditions_store = self.get_conditions(update=True)
         return conditions_store['growth_conditions'][conditions_id]['observe_growth']

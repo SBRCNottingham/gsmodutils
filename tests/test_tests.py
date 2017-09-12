@@ -2,6 +2,7 @@
 Test cases for the GSMTests class and associated files
 """
 from gsmodutils import GSMProject
+from gsmodutils.test.tester import GSMTester
 
 import json
 from tutils import FakeProjectContext
@@ -34,15 +35,46 @@ def test_json_tests():
         
         tpath = os.path.join(project.tests_dir, 'test_x.json')
         # write to project path
-        json.dump(jtest, open(tpath, "w+"))
+        with open(tpath, "w+") as ff:
+            json.dump(jtest, ff)
+
+        jtest = dict(
+            test_1=dict(
+                conditions=[],
+                designs=[],
+                reaction_fluxes=dict(
+                    BIOMASS_Ec_iAF1260_core_59p81M=[0.72, 0.74]
+                ),
+                required_reactions=["DHQS"],
+                description='TEST JSON TEST'
+            )
+        )
+
+        project = GSMProject(fp.path)
+
+        tpath = os.path.join(project.tests_dir, 'test_invalid.json')
+        # write to project path
+        with open(tpath, "w+") as ff:
+            json.dump(jtest, ff)
+
+        tpath = os.path.join(project.tests_dir, 'test_load_error.json')
+        with open(tpath, 'w+') as tt:
+            tt.write('not json\n')
+
         # run test functions
         tester = project.project_tester()
         tester.collect_tests()
         assert len(tester.json_tests) == 1
         tester.run_all()
-        assert len(tester.load_errors) == 0
+        assert len(tester.load_errors) == 1
+        assert len(tester.invalid_tests) == 1
+
         runner = CliRunner()
         result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose'])
+        assert result.exit_code == 0
+
+        result = runner.invoke(gsmodutils.cli.test,
+                               ['--project_path', fp.path, '--verbose', '--test_id', 'test_x.json'])
         assert result.exit_code == 0
 
 
@@ -63,104 +95,78 @@ from gsmodutils.test.utils import ModelTestSelector
 def test_func(model, project, log):
     log.assertion(True, "Works", "Does not work", "Test")
 
+
 # For code coverage
 @ModelTestSelector()
 def test_func_cove(model, project, log):
     log.assertion(True, "Works", "Does not work", "Test")
+
 
 def test_model(model, project, log):
     solution = model.solver.optimize()
     print('This is the end {}'.format(solution))
     log.assertion(True, "Model grows", "Model does not grow")
     log.assertion(False, "Model grows", "Model does not grow")
-    """
     
+    
+def test_exception(model, project, log):
+    raise Exception('This is exceptional')
+    """
+
+    syntax_err = """
+def test_model(model, project, log):
+    print('This is the end {}'.format(solution)
+    """
+
     with FakeProjectContext() as fp:
         project = GSMProject(fp.path)
 
-        # TODO: add second model
-
-        # add some growth conditions
-        conditions = dict(
-            EX_xyl__D_e=-8.0,
-            EX_ca2_e=-99999.0,
-            EX_cbl1_e=-0.01,
-            EX_cl_e=-99999.0,
-            EX_co2_e=-99999.0,
-            EX_cobalt2_e=-99999.0,
-            EX_cu2_e=-99999.0,
-            EX_fe2_e=-99999.0,
-            EX_fe3_e=-99999.0,
-            EX_h2o_e=-99999.0,
-            EX_h_e=-99999.0,
-            EX_k_e=-99999.0,
-            EX_mg2_e=-99999.0,
-            EX_mn2_e=-99999.0,
-            EX_mobd_e=-99999.0,
-            EX_na1_e=-99999.0,
-            EX_nh4_e=-99999.0,
-            EX_o2_e=-18.5,
-            EX_pi_e=-99999.0,
-            EX_so4_e=-99999.0,
-            EX_tungs_e=-99999.0,
-            EX_zn2_e=-99999.0
-        )
+        fp.add_fake_conditions()
         mdl = fp.project.model
-        load_medium(mdl, conditions)
-        fp.project.save_conditions(mdl, "xyl_src", apply_to=fp.project.config.default_model)
-
         load_medium(mdl, dict())
         fp.project.save_conditions(mdl, "bad", apply_to=fp.project.config.default_model, observe_growth=False)
 
-        # TODO: add design
         tfp = os.path.join(project.tests_dir, 'test_x.py')
         
         with open(tfp, 'w+') as testf:
             testf.write(code_str)
-        
+
+        tfp = os.path.join(project.tests_dir, 'test_syn_err.py')
+
+        with open(tfp, 'w+') as testf:
+            testf.write(syntax_err)
+
         tester = project.project_tester()
         tester.run_all()
         
-        assert len(tester.syntax_errors) == 0
+        assert len(tester.syntax_errors) == 1
 
         runner = CliRunner()
         lpath = os.path.join(fp.path, 'lp.json')
         result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose', '--log_path', lpath])
         assert result.exit_code == 0
 
+        tester._run_py_tests()
+        result = runner.invoke(gsmodutils.cli.test,
+                               ['--project_path', fp.path, '--verbose', '--test_id', 'test_x.py'])
+
+        assert result.exit_code == 0
+        result = runner.invoke(gsmodutils.cli.test,
+                               ['--project_path', fp.path, '--verbose', '--test_id', 'test_x.py_test_func'])
+
+        assert result.exit_code == 0
+
+        result = runner.invoke(gsmodutils.cli.test,
+                               ['--project_path', fp.path, '--verbose', '--test_id', 'test_syn_err.py'])
+
+        assert result.exit_code == -1
+
 
 def test_conditions():
     with FakeProjectContext() as fp:
         # add some growth conditions
-        conditions = dict(
-            EX_xyl__D_e=-8.0,
-            EX_ca2_e=-99999.0,
-            EX_cbl1_e=-0.01,
-            EX_cl_e=-99999.0,
-            EX_co2_e=-99999.0,
-            EX_cobalt2_e=-99999.0,
-            EX_cu2_e=-99999.0,
-            EX_fe2_e=-99999.0,
-            EX_fe3_e=-99999.0,
-            EX_h2o_e=-99999.0,
-            EX_h_e=-99999.0,
-            EX_k_e=-99999.0,
-            EX_mg2_e=-99999.0,
-            EX_mn2_e=-99999.0,
-            EX_mobd_e=-99999.0,
-            EX_na1_e=-99999.0,
-            EX_nh4_e=-99999.0,
-            EX_o2_e=-18.5,
-            EX_pi_e=-99999.0,
-            EX_so4_e=-99999.0,
-            EX_tungs_e=-99999.0,
-            EX_zn2_e=-99999.0
-        )
+        fp.add_fake_conditions()
         mdl = fp.project.model
-        load_medium(mdl, conditions)
-        mdl.solver.optimize()
-        fp.project.save_conditions(mdl, "xyl_src", apply_to=fp.project.config.default_model)
-
         load_medium(mdl, dict())
         fp.project.save_conditions(mdl, "bad", apply_to=fp.project.config.default_model, observe_growth=False)
 
@@ -180,3 +186,41 @@ def test_conditions():
         runner = CliRunner()
         result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose'])
         assert result.exit_code == 0
+
+
+def test_tester():
+    """ Test the tester in test tests """
+    with pytest.raises(TypeError):
+        # Shouldn't load
+        GSMTester(None)
+
+
+def test_essential_pathways():
+    """
+    Test adding of json test utility
+    reactions, description = '', reaction_fluxes = None,
+    models = None, designs = None, conditions = None, overwrite = False
+    """
+    with FakeProjectContext() as fp:
+        fp.add_fake_conditions()
+        fp.add_fake_designs()
+
+        reactions = ['PYK']
+        # Test a model
+        fp.project.add_essential_pathway('model_test', reactions=reactions)
+
+        with pytest.raises(IOError):
+            fp.project.add_essential_pathway('model_test', reactions=reactions)
+
+        # Add an essential pathway test for a design only
+        fp.project.add_essential_pathway('design_test', reactions=reactions, designs=['mevalonate_cbb'])
+        # Test conditions
+        fp.project.add_essential_pathway('conditions_test', reactions=reactions, conditions=['xyl_src'])
+
+        assert os.path.exists(os.path.join(fp.project.tests_dir, 'test_model_test.json'))
+        assert os.path.exists(os.path.join(fp.project.tests_dir, 'test_design_test.json'))
+        assert os.path.exists(os.path.join(fp.project.tests_dir, 'test_conditions_test.json'))
+
+        # Test conditions designs and
+        tester = fp.project.project_tester()
+        tester.run_all()
