@@ -27,6 +27,7 @@ E.g. having a directory structure such as this isn't good for anyone. You might 
 or a knockout might exist in one model but not another.
 
 .. code-block:: guess
+
     $ ls my_project
     ecoli_base_model.sbml
     ecoli_model_with_xylose_growth.sbml
@@ -65,18 +66,59 @@ cobrapy world.
 
 Installation
 ------------
-To install, the simplest method is to use pip
+To install, the simplest method is to use pip (FUTURE VERSION)
 
 .. code-block:: guess
 
     $ pip install gsmodutils
 
-Alternatively, from sources use
+Alternatively, install a developement version using a virtual environment
 
 .. code-block:: guess
 
+    $ pip install virtualenv
+    $ virtualenv ~/gsmodenv
+    $ source ~/gsmodenv/bin/activate
+    $ git clone git@bitbucket.org:nottingham_sbrc/gsmodutils.git
+    $ cd gsmodutils
     $ pip install -r requirements.txt
-    $ python setup.py install
+    $ pip install -e .
+
+
+If installed in this manner, you must activate the virtualenv whenever you wish to use the tools. For example:
+
+.. code-block:: guess
+
+    $ gsmodutils info
+    gsmodutils: command not found
+    $ source ~/gsmodenv/bin/activate
+    $ gsmodutils info
+    ...
+
+gsmodutils has been developed for python 2.7 and python 3.5+.
+Older versions of python are not supported.
+
+Check your python version with:
+
+.. code-block:: guess
+
+    $ python --version
+
+If using MacOS and your version of python is outdated, it is recomended that you use hombrew
+( https://brew.sh ) and then install pip:
+
+.. code-block:: guess
+
+    $ brew install python
+
+If you have python, but not pip easy_install should work:
+
+.. code-block:: guess
+
+    $ sudo easy_install pip
+    $ sudo pip install virtualenv
+
+For windows users, follow the guides on installing python and pip from the python website.
 
 User guides
 ------------
@@ -94,6 +136,7 @@ This will give a step by step guide.
     cli
     tests
     docker
+    about
     :maxdepth: 2
     :caption: User Guide:
 
@@ -118,7 +161,7 @@ Indices and tables
 
 
 References
-~~~~~~~~~
+~~~~~~~~~~
 [1] Antonovsky, N., Gleizer, S., Noor, E., Zohar, Y., Herz, E.,
 Barenholz, U., Zelcbuch, L., Amram, S., Wides, A., Tepper, N. and
 Davidi, D., 2016. Sugar synthesis from CO 2 in Escherichia coli. Cell,

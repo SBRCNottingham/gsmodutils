@@ -368,8 +368,7 @@ class GSMProject(object):
         :param description:
         :param reaction_fluxes:
         :param models:  If None, only the default model is checked unless at least one design is specified
-        :param designs:  By default designs are never checked. specifying all tests the pathway on all designs (current
-        and future)
+        :param designs:  By default designs are never checked. specifying all tests the pathway on all designs (current and future)
         :param conditions:  None, by default. Specifies the conditions which a pathway is present in.
         :param overwrite:
         :return:
@@ -388,7 +387,8 @@ class GSMProject(object):
             conditions = []
 
         if models is None and len(self.designs) == 0:
-            models = [self.default_model]
+            models = [self.config.default_model]
+
         elif models is None:
             models = []
 
@@ -449,7 +449,6 @@ class GSMProject(object):
         :param model: cobrapy or cameo model
         :param conditions_id: identifier for the conditions should be unique
         :param carbon_source: name of carbon source in the media that has a fixed uptake rate
-        if None this just becomes a lower bound
         :param apply_to: iterable of models that this set of conditions applies to
         :param observe_growth: bool or list.
         :return:
@@ -514,14 +513,13 @@ class GSMProject(object):
     @classmethod
     def create_project(cls, models, description, author, author_email, project_path):
         """
+        Creates new projects
 
-        :param models: iterable of models can be strings to path locations or cobra model instances. If cobra models,
-        they must contain an id field that is non blank
+        :param models: iterable of models can be strings to path locations or cobra model instances.
         :param description: String description of project
         :param author: string author names, separate with &
         :param author_email: email of project owner. separate with ';'
         :param project_path: location on disk to place project. Must not contain existing gsmodutils project.
-        If new directory, it will be created.
         :return:
         """
         configuration = dict(

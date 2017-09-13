@@ -22,6 +22,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Test utilities" href="test_utilities.html" />
@@ -84,13 +85,46 @@ do not have the capability to match all design goals. These design goals
 will be based on a data driven approach to genome scale model
 development and often require a more fundamental understanding of how an
 organism functions.</p>
-<p>For this reason we give an example here of the TCA cycle in E coli. In
-our case this is a pathway that should be conserved and used in all FBA
-cases. If a modification were to break this (without being a specific
-engineering goal) the model’s validity comes in to question.</p>
-<div class="highlight-guess"><div class="highlight"><pre><span></span><span class="n">TODO</span><span class="o">:</span> <span class="n">Add</span> <span class="n">an</span> <span class="n">example</span> <span class="n">custom</span> <span class="n">test</span><span class="o">!</span>
+<p>The simplest way to do this is in python</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;./&#39;</span><span class="p">)</span> <span class="c1"># insert path to project</span>
+
+<span class="n">reactions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;RXID_1&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="c1"># List of essential reactions</span>
+
+<span class="n">flux</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">PYR</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span> <span class="c1"># Required flux for a given reaction id</span>
+
+<span class="n">project</span><span class="o">.</span><span class="n">add_essential_pathway</span><span class="p">(</span><span class="s1">&#39;pathway_x&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Example pathway&#39;</span><span class="p">,</span> <span class="n">reactions</span><span class="o">=</span><span class="n">reactions</span><span class="p">,</span> <span class="n">reaction_fluxes</span><span class="o">=</span><span class="n">flux</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>This will create a file <code class="docutils literal"><span class="pre">tests/test_pathway_x.json</span></code>.
+Alternatively, tests can be created by adding json files to the tests directory as long as they are of the form
+<code class="docutils literal"><span class="pre">test_NAME.json</span></code>.
+These json files have the following required fields:</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>conditions - JSON array (list of project conditions to be loaded and tested)
+models - JSON array (list of project models to be loaded and tested)
+designs - JSON array (list of project design ids to be loaded and tested)
+reaction_fluxes - JSON associative array
+required_reactions - JSON array
+description - JSON string
+</pre></div>
+</div>
+<p>For example the file <code class="docutils literal"><span class="pre">tests/test_example.json</span></code> might look like</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;conditions&#39;</span><span class="p">:[],</span>
+    <span class="s1">&#39;models&#39;</span><span class="p">:[],</span>
+    <span class="s1">&#39;designs&#39;</span><span class="p">:[</span><span class="s1">&#39;my_pathway_01&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;reaction_fluxes&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;Biomass&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.21</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
+    <span class="p">}</span>
+    <span class="s1">&#39;required_reactions&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;reaction_1&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Make sure reaction 1 is carrying flux. Make sure Biomass is above 0.21&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This will add a test to be run that ensures that a reaction with the id <code class="docutils literal"><span class="pre">reaction_1</span></code> carries flux and that the
+flux accross the biomass is above <code class="docutils literal"><span class="pre">0.21</span></code> with the design <code class="docutils literal"><span class="pre">my_pathway_01</span></code>.</p>
+<p>This will automatically be picked up by <code class="docutils literal"><span class="pre">gsmodutils</span> <span class="pre">test</span></code> and run accordingly.
+Note, if the files are badly formatted tests will not run and will throw an error.</p>
 </div>
 <div class="section" id="writing-python-test-cases">
 <h2>Writing python test cases<a class="headerlink" href="#writing-python-test-cases" title="Permalink to this headline">¶</a></h2>
@@ -126,6 +160,9 @@ models, designs and conditions specified.</p>
     <span class="n">log</span><span class="o">.</span><span class="n">assertion</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="s2">&quot;Works&quot;</span><span class="p">,</span> <span class="s2">&quot;Does not work&quot;</span><span class="p">,</span> <span class="s2">&quot;Test&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>As with json tests these will be picked up automatically by <code class="docutils literal"><span class="pre">gsmodutils</span> <span class="pre">test</span></code>.
+Any logs to standard out (e.g. using python print) can also be captured with this approach.
+Note that this should not be used in all environments as this will allow any code to be executed, malicious or not.</p>
 <div class="section" id="further-reading">
 <h3>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h3>
 <div class="toctree-wrapper compound">
@@ -166,6 +203,7 @@ models, designs and conditions specified.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About project</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
