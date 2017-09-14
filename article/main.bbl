@@ -1,3 +1,71 @@
-\begin{thebibliography}{}
+\begin{thebibliography}{10}
+
+\bibitem{cardoso2017cameo}
+Joao Cardoso, Kristian Jensen, Christian Lieven, Anne Sofie~Laerke Hansen,
+  Svetlana Galkina, Moritz~Emanuel Beber, Emre Ozdemir, Markus Herrgard,
+  Henning Redestig, and Nikolaus Sonnenschein.
+\newblock Cameo: A python library for computer aided metabolic engineering and
+  optimization of cell factories.
+\newblock {\em bioRxiv}, p. 147199, 2017.
+
+\bibitem{ebrahim2013cobrapy}
+Ali Ebrahim, Joshua~A Lerman, Bernhard~O Palsson, and Daniel~R Hyduke.
+\newblock Cobrapy: Constraints-based reconstruction and analysis for python.
+\newblock {\em BMC systems biology}, 7(1):74, 2013.
+
+\bibitem{finney2003systems}
+Andrew Finney and Michael Hucka.
+\newblock Systems biology markup language: Level 2 and beyond, 2003.
+
+\bibitem{gevorgyan2010surreyfba}
+Albert Gevorgyan, Michael~E Bushell, Claudio Avignone-Rossa, and Andrzej~M
+  Kierzek.
+\newblock Surreyfba: a command line tool and graphics user interface for
+  constraint-based modeling of genome-scale metabolic reaction networks.
+\newblock {\em Bioinformatics}, 27(3):433--434, 2010.
+
+\bibitem{henry2010high}
+Christopher~S Henry, Matthew DeJongh, Aaron~A Best, Paul~M Frybarger, Ben
+  Linsay, and Rick~L Stevens.
+\newblock High-throughput generation, optimization and analysis of genome-scale
+  metabolic models.
+\newblock {\em Nature biotechnology}, 28(9):977--982, 2010.
+
+\bibitem{king2015bigg}
+Zachary~A King, Justin Lu, Andreas Dr{\"a}ger, Philip Miller, Stephen
+  Federowicz, Joshua~A Lerman, Ali Ebrahim, Bernhard~O Palsson, and Nathan~E
+  Lewis.
+\newblock Bigg models: A platform for integrating, standardizing and sharing
+  genome-scale models.
+\newblock {\em Nucleic acids research}, 44(D1):D515--D522, 2015.
+
+\bibitem{moretti2016metanetx}
+S{\'e}bastien Moretti, Olivier Martin, T~Van Du~Tran, Alan Bridge, Anne Morgat,
+  and Marco Pagni.
+\newblock Metanetx/mnxref--reconciliation of metabolites and biochemical
+  reactions to bring together genome-scale metabolic networks.
+\newblock {\em Nucleic acids research}, 44(D1):D523--D526, 2016.
+
+\bibitem{rocha2010optflux}
+Isabel Rocha, Paulo Maia, Pedro Evangelista, Paulo Vila{\c{c}}a, Sim{\~a}o
+  Soares, Jos{\'e}~P Pinto, Jens Nielsen, Kiran~R Patil, Eug{\'e}nio~C
+  Ferreira, and Miguel Rocha.
+\newblock Optflux: an open-source software platform for in silico metabolic
+  engineering.
+\newblock {\em BMC systems biology}, 4(1):45, 2010.
+
+\bibitem{schellenberger2011quantitative}
+Jan Schellenberger, Richard Que, Ronan~MT Fleming, Ines Thiele, Jeffrey~D Orth,
+  Adam~M Feist, Daniel~C Zielinski, Aarash Bordbar, Nathan~E Lewis, Sorena
+  Rahmanian, et~al.
+\newblock Quantitative prediction of cellular metabolism with constraint-based
+  models: the cobra toolbox v2. 0.
+\newblock {\em Nature protocols}, 6(9):1290, 2011.
+
+\bibitem{thiele2010protocol}
+Ines Thiele and Bernhard~{\O} Palsson.
+\newblock A protocol for generating a high-quality genome-scale metabolic
+  reconstruction.
+\newblock {\em Nature protocols}, 5(1):93, 2010.
 
 \end{thebibliography}
