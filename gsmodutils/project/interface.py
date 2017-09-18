@@ -424,7 +424,7 @@ class GSMProject(object):
         if conditions != 'all':
             for cid in models:
                 if cid not in self.conditions:
-                    raise KeyError('Model {} not found'.format(mid))
+                    raise KeyError('Conditions {} not found'.format(cid))
 
         # Save the json test file to disk.
         with open(test_file, 'w+') as tf:
