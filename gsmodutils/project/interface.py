@@ -368,7 +368,7 @@ class GSMProject(object):
         :param description:
         :param reaction_fluxes:
         :param models:  If None, only the default model is checked unless at least one design is specified
-        :param designs:  By default designs are never checked. specifying all tests the pathway on all designs (current and future)
+        :param designs:  By default designs are never checked. specifying all tests the pathway on all designs
         :param conditions:  None, by default. Specifies the conditions which a pathway is present in.
         :param overwrite:
         :return:
