@@ -27,16 +27,6 @@ def match_reaction_by_stoich(stoichiometry, model, preserve_direction=False):
     return None, False
 
 
-def match_reaction_by_stoich_partial(stoichiometry, model):
-    """
-    Find the closest matching reactions to a given stoichiometry
-    :param stoichiometry:
-    :param model:
-    :return:
-    """
-    pass
-
-
 def universal_mapper(model, metabolite_map, reaction_map, universal_model):
     """
     Given a genome scale model and a set of mappings for ids return model from a universal namespace (e.g. metanetx)
@@ -110,7 +100,7 @@ def universal_mapper(model, metabolite_map, reaction_map, universal_model):
         # Universal model will never contain genes etc
         new_reaction.gene_name_reaction_rule = reaction.gene_reaction_rule
         new_reaction.subsystem = reaction.subsystem
-
+        new_reaction.annotation = reaction.annotation
         new_reaction.variable_kind = reaction.variable_kind
 
         new_model.add_reactions([new_reaction])
