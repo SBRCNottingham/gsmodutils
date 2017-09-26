@@ -46,6 +46,331 @@
 <h1>cli<a class="headerlink" href="#cli" title="Permalink to this headline">¶</a></h1>
 <p>Much of the interaction a user will want to do with gsmodutils will be through the command line tools.
 This section gives a brief overview of these tools, with simple examples that should be applicable to most users.</p>
+<div class="section" id="gsmodutils">
+<h2>gsmodutils<a class="headerlink" href="#gsmodutils" title="Permalink to this headline">¶</a></h2>
+<p>Command line tools for management of gsmodutils genome scale model projects</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils <span class="o">[</span>OPTIONS<span class="o">]</span> COMMAND <span class="o">[</span>ARGS<span class="o">]</span>...
+</pre></div>
+</div>
+<div class="section" id="gsmodutils-add-model">
+<h3>add_model<a class="headerlink" href="#gsmodutils-add-model" title="Permalink to this headline">¶</a></h3>
+<p>Add a model to a specified gsm project</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils add_model <span class="o">[</span>OPTIONS<span class="o">]</span> PATH
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-add-model-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-add-model-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>gsmodutils project path</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-add-model-validate">
+<code class="descname">--validate</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-validate</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-add-model-validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chose to validate the model before it is added.</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-add-model-arg-path">
+<code class="descname">PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-add-model-arg-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gsmodutils-create-project">
+<h3>create_project<a class="headerlink" href="#gsmodutils-create-project" title="Permalink to this headline">¶</a></h3>
+<p>Create a new gsmodutils project</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils create_project <span class="o">[</span>OPTIONS<span class="o">]</span> PROJECT_PATH
+                          MODEL_PATH
+</pre></div>
+</div>
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-create-project-arg-project-path">
+<code class="descname">PROJECT_PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-create-project-arg-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-create-project-arg-model-path">
+<code class="descname">MODEL_PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-create-project-arg-model-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gsmodutils-diff">
+<h3>diff<a class="headerlink" href="#gsmodutils-diff" title="Permalink to this headline">¶</a></h3>
+<p>View the changed reactions between a model and a base model</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils diff <span class="o">[</span>OPTIONS<span class="o">]</span> MODEL_PATH
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-diff-base-model">
+<code class="descname">--base_model</code><code class="descclassname"> &lt;base_model&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-diff-base-model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project model to compare with</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-diff-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-diff-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>gsmodutils project path</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-diff-parent">
+<code class="descname">--parent</code><code class="descclassname"> &lt;parent&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-diff-parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>A parent design</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-diff-output">
+<code class="descname">--output</code><code class="descclassname"> &lt;output&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-diff-output" title="Permalink to this definition">¶</a></dt>
+<dd><p>A location to output the diff as a sjon file</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-diff-names">
+<code class="descname">--names</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-names</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-diff-names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output names of added or changed metabolites and reactions</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-diff-arg-model-path">
+<code class="descname">MODEL_PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-diff-arg-model-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gsmodutils-dimport">
+<h3>dimport<a class="headerlink" href="#gsmodutils-dimport" title="Permalink to this headline">¶</a></h3>
+<p>Import a design into a model. This can be new or overwrite an existing design.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils dimport <span class="o">[</span>OPTIONS<span class="o">]</span> MODEL_PATH IDENTIFIER
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-name">
+<code class="descname">--name</code><code class="descclassname"> &lt;name&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formal design name (longer than identifier)</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-description">
+<code class="descname">--description</code><code class="descclassname"> &lt;description&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of what the design does</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>gsmodutils project path</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-parent">
+<code class="descname">--parent</code><code class="descclassname"> &lt;parent&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>A parent design that was applied first to avoid replication.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-base-model">
+<code class="descname">--base_model</code><code class="descclassname"> &lt;base_model&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-base-model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model that design is based on</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-overwrite">
+<code class="descname">--overwrite</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-overwrite</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-overwrite" title="Permalink to this definition">¶</a></dt>
+<dd><p>overwrite existing design</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-from-diff">
+<code class="descname">--from_diff</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--not_from_diff</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-from-diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>load a diff file instead of compatible model</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-arg-model-path">
+<code class="descname">MODEL_PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-arg-model-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-dimport-arg-identifier">
+<code class="descname">IDENTIFIER</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-dimport-arg-identifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gsmodutils-docker">
+<h3>docker<a class="headerlink" href="#gsmodutils-docker" title="Permalink to this headline">¶</a></h3>
+<p>Create a dockerfile for the project</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils docker <span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-docker-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-docker-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>gsmodutils project path</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-docker-overwrite">
+<code class="descname">--overwrite</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-overwrite</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-docker-overwrite" title="Permalink to this definition">¶</a></dt>
+<dd><p>overwrite existing dockerfile</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gsmodutils-export">
+<h3>export<a class="headerlink" href="#gsmodutils-export" title="Permalink to this headline">¶</a></h3>
+<p>Export a given model with a specific design and conditions applied</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils <span class="nb">export</span> <span class="o">[</span>OPTIONS<span class="o">]</span> FILE_FORMAT FILEPATH
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-export-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-export-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>gsmodutils project path</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-export-model-id">
+<code class="descname">--model_id</code><code class="descclassname"> &lt;model_id&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-export-model-id" title="Permalink to this definition">¶</a></dt>
+<dd><p>model id</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-export-conditions">
+<code class="descname">--conditions</code><code class="descclassname"> &lt;conditions&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-export-conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>conditions to apply</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-export-design">
+<code class="descname">--design</code><code class="descclassname"> &lt;design&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-export-design" title="Permalink to this definition">¶</a></dt>
+<dd><p>design to apply</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-export-overwrite">
+<code class="descname">--overwrite</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-overwrite</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-export-overwrite" title="Permalink to this definition">¶</a></dt>
+<dd><p>model id</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-export-arg-file-format">
+<code class="descname">FILE_FORMAT</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-export-arg-file-format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-export-arg-filepath">
+<code class="descname">FILEPATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-export-arg-filepath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gsmodutils-iconditions">
+<h3>iconditions<a class="headerlink" href="#gsmodutils-iconditions" title="Permalink to this headline">¶</a></h3>
+<p>Add a given set of media condtions from a model (this ignores any added or removed reactions or metabolites)</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils iconditions <span class="o">[</span>OPTIONS<span class="o">]</span> PATH IDENT
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-iconditions-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-iconditions-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>gsmodutils project path</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-iconditions-apply-to">
+<code class="descname">--apply_to</code><code class="descclassname"> &lt;apply_to&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-iconditions-apply-to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of what the design does</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-iconditions-growth">
+<code class="descname">--growth</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no_growth</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-iconditions-growth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should these conditions allow growth or not</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-iconditions-arg-path">
+<code class="descname">PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-iconditions-arg-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-iconditions-arg-ident">
+<code class="descname">IDENT</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-iconditions-arg-ident" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gsmodutils-info">
+<h3>info<a class="headerlink" href="#gsmodutils-info" title="Permalink to this headline">¶</a></h3>
+<p>Display all the information about a gsmodutils project (list models, paths, designs etc.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils info <span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-info-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-info-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>gsmodutils project path</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gsmodutils-test">
+<h3>test<a class="headerlink" href="#gsmodutils-test" title="Permalink to this headline">¶</a></h3>
+<p>Run tests for a project</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils <span class="nb">test</span> <span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-test-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-test-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>gsmodutils project path</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-test-test-id">
+<code class="descname">--test_id</code><code class="descclassname"> &lt;test_id&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-test-test-id" title="Permalink to this definition">¶</a></dt>
+<dd><p>specify a given test identifier to run - pyton filename, function orjson_filename entry</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-test-skip-default">
+<code class="descname">--skip_default</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no_skip_default</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-test-skip-default" title="Permalink to this definition">¶</a></dt>
+<dd><p>skip default tests</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-test-verbose">
+<code class="descname">--verbose</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no_verbose</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-test-verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dispalty succesfully run test assertions</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-test-log-path">
+<code class="descname">--log_path</code><code class="descclassname"> &lt;log_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-test-log-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>path to output json test log</p>
+</dd></dl>
+
+</div>
+</div>
 </div>
 
 
@@ -68,7 +393,10 @@ This section gives a brief overview of these tools, with simple examples that sh
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="project.html">Projects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="designs.html">Designs</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">cli</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">cli</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gsmodutils">gsmodutils</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="about.html">About project</a></li>
@@ -106,7 +434,7 @@ This section gives a brief overview of these tools, with simple examples that sh
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

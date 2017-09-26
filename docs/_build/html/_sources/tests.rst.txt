@@ -49,14 +49,54 @@ will be based on a data driven approach to genome scale model
 development and often require a more fundamental understanding of how an
 organism functions.
 
-For this reason we give an example here of the TCA cycle in E coli. In
-our case this is a pathway that should be conserved and used in all FBA
-cases. If a modification were to break this (without being a specific
-engineering goal) the model's validity comes in to question.
+The simplest way to do this is in python
+
+.. code-block:: python
+
+    from gsmodutils import GSMProject
+    project = GSMProject('./') # insert path to project
+
+    reactions = ["RXID_1", ...] # List of essential reactions
+
+    flux = dict(PYR=[0.5, 1000]) # Required flux for a given reaction id
+
+    project.add_essential_pathway('pathway_x', description='Example pathway', reactions=reactions, reaction_fluxes=flux)
+
+This will create a file ``tests/test_pathway_x.json``.
+Alternatively, tests can be created by adding json files to the tests directory as long as they are of the form
+``test_NAME.json``.
+These json files have the following required fields:
 
 .. code-block:: guess
 
-    TODO: Add an example custom test!
+    conditions - JSON array (list of project conditions to be loaded and tested)
+    models - JSON array (list of project models to be loaded and tested)
+    designs - JSON array (list of project design ids to be loaded and tested)
+    reaction_fluxes - JSON associative array
+    required_reactions - JSON array
+    description - JSON string
+
+For example the file ``tests/test_example.json`` might look like
+
+.. code-block:: python
+
+    {
+        'conditions':[],
+        'models':[],
+        'designs':['my_pathway_01'],
+        'reaction_fluxes': {
+            'Biomass': [0.21, 1000]
+        }
+        'required_reactions': ['reaction_1'],
+        'description': 'Make sure reaction 1 is carrying flux. Make sure Biomass is above 0.21'
+    }
+
+This will add a test to be run that ensures that a reaction with the id ``reaction_1`` carries flux and that the
+flux accross the biomass is above ``0.21`` with the design ``my_pathway_01``.
+
+This will automatically be picked up by ``gsmodutils test`` and run accordingly.
+Note, if the files are badly formatted tests will not run and will throw an error.
+
 
 Writing python test cases
 -------------------------
@@ -103,6 +143,10 @@ models, designs and conditions specified.
     def test_func(model, project, log):
         log.assertion(True, "Works", "Does not work", "Test")
 
+
+As with json tests these will be picked up automatically by ``gsmodutils test``.
+Any logs to standard out (e.g. using python print) can also be captured with this approach.
+Note that this should not be used in all environments as this will allow any code to be executed, malicious or not.
 
 Further reading
 ~~~~~~~~~~~~~~~

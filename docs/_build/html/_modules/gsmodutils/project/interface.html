@@ -411,7 +411,7 @@
 <span class="sd">        :param description:</span>
 <span class="sd">        :param reaction_fluxes:</span>
 <span class="sd">        :param models:  If None, only the default model is checked unless at least one design is specified</span>
-<span class="sd">        :param designs:  By default designs are never checked. specifying all tests the pathway on all designs (current and future)</span>
+<span class="sd">        :param designs:  By default designs are never checked. specifying all tests the pathway on all designs</span>
 <span class="sd">        :param conditions:  None, by default. Specifies the conditions which a pathway is present in.</span>
 <span class="sd">        :param overwrite:</span>
 <span class="sd">        :return:</span>
@@ -467,7 +467,7 @@
         <span class="k">if</span> <span class="n">conditions</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">cid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Model </span><span class="si">{}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mid</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Conditions </span><span class="si">{}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cid</span><span class="p">))</span>
 
         <span class="c1"># Save the json test file to disk.</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">test_file</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf</span><span class="p">:</span>
@@ -661,7 +661,7 @@
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

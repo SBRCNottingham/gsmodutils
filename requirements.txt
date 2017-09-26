@@ -9,3 +9,4 @@ python-libsbml>=5.15.0
 pandas>=0.20.3
 six>=1.10.0
 plotly>=2.0.14
+sphinx-click>=1.0.3
