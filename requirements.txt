@@ -1,8 +1,6 @@
 cobra>=0.8.1
 cameo>=0.11.0
-mercurial>=4.2.1
 pytest>=3.0.7
-python-hglib
 click>=6.7
 lockfile>=0.12.2
 pytest-cov>=2.5.1
