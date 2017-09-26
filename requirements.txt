@@ -1,8 +1,6 @@
 cobra>=0.8.1
 cameo>=0.11.0
-mercurial>=4.2.1
 pytest>=3.0.7
-python-hglib
 click>=6.7
 lockfile>=0.12.2
 pytest-cov>=2.5.1
@@ -11,3 +9,4 @@ python-libsbml>=5.15.0
 pandas>=0.20.3
 six>=1.10.0
 plotly>=2.0.14
+sphinx-click>=1.0.3

@@ -62,51 +62,6 @@ reactions for the Calvin-Benson (CBB) cycle to the ecoli model. This
 allows the fixation of CO2 as an inorganic carbon source.</p>
 <p>To do this, we need to add two enzymatic reactions to the model
 Phosphoribulokinase and Rubisco.</p>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="k">import</span> <span class="n">GSMProject</span>
-<span class="kn">import</span> <span class="nn">cobra</span>
-
-<span class="c1"># Load existing project</span>
-<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
-<span class="c1"># Load the default model we want to add</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
-
-<span class="c1"># Phosphoribulokinase reaction</span>
-<span class="n">stoich</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-    <span class="n">atp_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">ru5p__D_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">adp_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">h_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">rb15bp_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<span class="p">)</span>
-
-
-<span class="n">rb15bp</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;rb15bp_c&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;D-Ribulose 1,5-bisphosphate&#39;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s1">&#39;C5H8O11P2&#39;</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">rb15bp</span><span class="p">)</span>
-
-<span class="n">pruk</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;PRUK&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Phosphoribulokinase reaction&quot;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=-</span><span class="mi">1000</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">pruk</span><span class="p">)</span>
-<span class="n">pruk</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">stoich</span><span class="p">)</span>
-
-
-<span class="c1"># Rubisco reaction (Ribulose-bisphosphate carboxylase)</span>
-<span class="n">stoich</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;3pg_c&quot;</span><span class="p">:</span><span class="mf">2.0</span><span class="p">,</span>
-    <span class="s2">&quot;rb15bp_c&quot;</span><span class="p">:</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="s2">&quot;co2_c&quot;</span><span class="p">:</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="s2">&quot;h2o_c&quot;</span><span class="p">:</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="s2">&quot;h_c&quot;</span><span class="p">:</span><span class="mf">2.0</span>
-<span class="p">}</span>
-
-
-<span class="n">rubisco</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;RBPC&quot;</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ribulose-bisphosphate carboxylase&quot;</span><span class="p">)</span>
-
-<span class="n">model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">rubisco</span><span class="p">)</span>
-<span class="n">rubisco</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">stoich</span><span class="p">)</span>
-
-<span class="c1">#show the reactions</span>
-<span class="n">pruk</span>
-</pre></div>
-</div>
 <table>
     <tr>
         <td><strong>Reaction identifier</strong></td><td>PRUK</td>
@@ -128,11 +83,7 @@ Phosphoribulokinase and Rubisco.</p>
     </tr><tr>
         <td><strong>Upper bound</strong></td><td>1000</td>
     </tr>
-</table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="c1"># now rubisco</span>
-<span class="n">rubisco</span>
-</pre></div>
-</div>
-<table>
+</table><table>
     <tr>
         <td><strong>Reaction identifier</strong></td><td>RBPC</td>
     </tr><tr>
@@ -153,27 +104,9 @@ Phosphoribulokinase and Rubisco.</p>
     </tr><tr>
         <td><strong>Upper bound</strong></td><td>1000.0</td>
     </tr>
-</table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Removed pfkA, pfkB and zwf</span>
-<span class="n">model</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s2">&quot;b3916&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">knock_out</span><span class="p">()</span>
-<span class="n">model</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s2">&quot;b1723&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">knock_out</span><span class="p">()</span>
-<span class="n">model</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s2">&quot;b1852&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">knock_out</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>Now we have added the reactions, we would probably want to make sure
+</table><p>Now we have added the reactions, we would probably want to make sure
 they work. To do this we need to change the medium.</p>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cameo.core.utils</span> <span class="k">import</span> <span class="n">medium</span><span class="p">,</span> <span class="n">load_medium</span>
-
-<span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">EX_glc__D_e</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.0</span>
-<span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">EX_nh4_e</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1000.0</span>
-
-<span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span><span class="o">.</span><span class="n">f</span>
-</pre></div>
-</div>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">0.9686322977222491</span>
-</pre></div>
-</div>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">design</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">save_design</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;cbb_cycle&#39;</span><span class="p">,</span> <span class="s1">&#39;calvin cycle&#39;</span><span class="p">,</span>
-                    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Reactions necissary for the calvin cycle in ecoli&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="section" id="inherited-designs">
@@ -182,35 +115,6 @@ they work. To do this we need to change the medium.</p>
 we will create a child design so we can reuse the calvin cycle without
 making it part of the wild type ecoli core model.</p>
 <p>First, we want to start from the parent calvin cycle design as a base.</p>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
-<span class="c1"># Start from the design as a base model</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_design</span><span class="p">(</span><span class="s1">&#39;cbb_cycle&#39;</span><span class="p">)</span>
-<span class="n">reaction</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;HMGCOASi&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hydroxymethylglutaryl CoA synthase&quot;</span><span class="p">)</span>
-
-<span class="n">aacoa</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;aacoa_c&quot;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=-</span><span class="mi">4</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C25H36N7O18P3S&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Acetoacetyl-CoA&quot;</span><span class="p">)</span>
-<span class="n">hmgcoa</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;hmgcoa_c&quot;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=-</span><span class="mi">5</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C27H40N7O20P3S&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hydroxymethylglutaryl CoA&quot;</span><span class="p">)</span>
-
-
-<span class="n">model</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">([</span><span class="n">aacoa</span><span class="p">,</span> <span class="n">hmgcoa</span><span class="p">])</span>
-
-<span class="n">stoich</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-    <span class="n">aacoa_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">accoa_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">coa_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">h_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">h2o_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">hmgcoa_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<span class="p">)</span>
-
-
-<span class="n">model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
-<span class="n">reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">stoich</span><span class="p">)</span>
-<span class="n">reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1000.0</span>
-<span class="n">reaction</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="mf">1000.0</span>
-
-<span class="n">reaction</span>
-</pre></div>
-</div>
 <table>
     <tr>
         <td><strong>Reaction identifier</strong></td><td>HMGCOASi</td>
@@ -232,29 +136,7 @@ making it part of the wild type ecoli core model.</p>
     </tr><tr>
         <td><strong>Upper bound</strong></td><td>1000.0</td>
     </tr>
-</table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">mev__R</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;mev__R_c&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;R Mevalonate&quot;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C6H11O4&quot;</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">([</span><span class="n">mev__R</span><span class="p">])</span>
-
-<span class="n">reaction</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;HMGCOAR&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hydroxymethylglutaryl CoA reductase&quot;</span><span class="p">)</span>
-<span class="n">reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1000.0</span>
-<span class="n">reaction</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="mf">1000.0</span>
-
-<span class="n">stoich</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-    <span class="n">coa_c</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">h_c</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
-    <span class="n">nadp_c</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">,</span>
-    <span class="n">nadph_c</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
-    <span class="n">hmgcoa_c</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">mev__R_c</span><span class="o">=-</span><span class="mf">1.0</span>
-<span class="p">)</span>
-
-<span class="n">model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
-
-<span class="n">reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">stoich</span><span class="p">)</span>
-<span class="n">reaction</span>
-</pre></div>
-</div>
-<table>
+</table><table>
     <tr>
         <td><strong>Reaction identifier</strong></td><td>HMGCOAR</td>
     </tr><tr>
@@ -275,17 +157,7 @@ making it part of the wild type ecoli core model.</p>
     </tr><tr>
         <td><strong>Upper bound</strong></td><td>1000.0</td>
     </tr>
-</table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">add_boundary</span><span class="p">(</span><span class="n">mev__R</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;sink&#39;</span><span class="p">)</span> <span class="c1"># add somewhere for mevalonate to go</span>
-
-<span class="n">design</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">save_design</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;mevalonate_cbb&#39;</span><span class="p">,</span> <span class="s1">&#39;mevalonate production&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="s1">&#39;cbb_cycle&#39;</span><span class="p">,</span>
-                    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Reactions for the production of mevalonate&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">des</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_design</span><span class="p">(</span><span class="s1">&#39;mevalonate_cbb&#39;</span><span class="p">)</span>
-<span class="n">des</span>
-</pre></div>
-</div>
-<table>
+</table><table>
     <tr>
         <td><strong>Name</strong></td>
         <td>iJO1366:ds_cbb_cycle:ds_cbb_cycle:ds_mevalonate_cbb</td>
@@ -320,12 +192,6 @@ making it part of the wild type ecoli core model.</p>
 </div>
 <p>This can also be loaded as an isolated pathway cobra model (though FBA
 cannot be performed on this object).</p>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="k">import</span> <span class="n">GSMProject</span>
-<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
-<span class="n">des</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_design</span><span class="p">(</span><span class="s1">&#39;mevalonate_cbb&#39;</span><span class="p">)</span>
-<span class="n">des</span><span class="o">.</span><span class="n">as_pathway_model</span><span class="p">()</span>
-</pre></div>
-</div>
 <table>
     <tr>
         <td><strong>Name</strong></td>
@@ -346,11 +212,7 @@ cannot be performed on this object).</p>
         <td><strong>Compartments</strong></td>
         <td></td>
     </tr>
-  </table><div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">des</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_design</span><span class="p">(</span><span class="s1">&#39;cbb_cycle&#39;</span><span class="p">)</span>
-<span class="n">des</span><span class="o">.</span><span class="n">as_pathway_model</span><span class="p">()</span>
-</pre></div>
-</div>
-<table>
+  </table><table>
     <tr>
         <td><strong>Name</strong></td>
         <td>:ds_cbb_cycle</td>
@@ -539,7 +401,7 @@ mercurial) to ensure that changes to existing designs are tracked.</strong></p>
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
