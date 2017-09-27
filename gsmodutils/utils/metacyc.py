@@ -1,7 +1,8 @@
 import os
 from collections import defaultdict, Counter
-
-from cobra import Reaction, Metabolite
+from gsmodutils.utils.io import load_model
+from cobra import Reaction, Metabolite, Model
+from cobra.io import save_json_model
 
 
 def parse_db(db_path):
@@ -50,7 +51,7 @@ def parse_metacyc_file(fpath, unique_fields):
                     continue
 
                 it = spt[0]
-                val = spt[1]
+                val = str(spt[1])
                 entry[it].append(val)
                 if it == "^COEFFICIENT" and lprev is not None:
                     # repeat the last entry in metabolites
@@ -162,19 +163,53 @@ def add_reaction(model, reaction_id, db):
         if mid not in model.metabolites:
             m = Metabolite(id=mid)
             m.name = db['compounds'][mid]['COMMON-NAME']
-            # TODO: add other metabolite info
+            m.annotation = dict(metacyc_data=db['compounds'][mid])
             model.add_metabolites([m])
             added_metabolites.append(mid)
 
     reaction.add_metabolites(metabolites)
-    if dbr['REACTION-DIRECTION'] in ['LEFT-TO-RIGHT', 'PHYSIOL-LEFT-TO-RIGHT']:
+    if 'REACTION-DIRECTION' in dbr and dbr['REACTION-DIRECTION'] in ['LEFT-TO-RIGHT', 'PHYSIOL-LEFT-TO-RIGHT']:
         reaction.lower_bound = -1000.0
         reaction.upper_bound = 0
-    elif dbr['REACTION-DIRECTION'] in ['RIGHT-TO-LEFT', 'PHYSIOL-RIGHT-TO-LEFT']:
+    elif 'REACTION-DIRECTION' in dbr and dbr['REACTION-DIRECTION'] in ['RIGHT-TO-LEFT', 'PHYSIOL-RIGHT-TO-LEFT']:
         reaction.lower_bound = 0
         reaction.upper_bound = 1000.0
     else:
         reaction.lower_bound = -1000.0
         reaction.upper_bound = 1000.0
 
+    reaction.annotation = dict(metacyc_data=dbr)  # TODO: Add enzyme identifiers
+
     return reaction, added_metabolites
+
+
+def build_universal_model(path, use_cache=True):
+    """
+    Constructs a universal model from all the reactions in the metacyc database
+
+    :param path: path to folder containing metacyc dat files
+    :param use_cache: optionally store the resulting model in cached form
+    :return:
+    """
+    cache_location = '.metacyc_universal.json'
+
+    try:
+        if use_cache and os.path.exists(cache_location):
+            model = load_model(cache_location)
+            return model
+    except (IOError, TypeError):
+        pass  # This means cached model couldn't be loaded, we'll create a new one
+
+    db = parse_db(path)
+    model = Model()
+    for reaction_id in db['reactions']:
+        try:
+            add_reaction(model, reaction_id, db)
+        except KeyError:
+            # Exception handling ignores badly formatted reactions
+            pass
+
+    if use_cache:
+        save_json_model(model, cache_location)
+
+    return model
