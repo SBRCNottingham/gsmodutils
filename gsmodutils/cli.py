@@ -59,8 +59,8 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
             
         _output_child_logs(clog, verbose=verbose, indent=indent+baseindent)
 
-        if verbose and log.std_out is not None:
-            click.echo("-------- Captured standard output ----------")
+        if verbose and log.std_out not in [None, "", " "]:
+            click.echo("-------- Start standard output ----------")
             click.echo(log.std_out)
             click.echo("-------- End standard output ----------")
         click.echo()
@@ -154,7 +154,7 @@ def test(project_path, test_id, skip_default, verbose, log_path):
         # Count total tests, count total assertions
         _output_child_logs(log, verbose=verbose)
 
-        if log.std_out is not None:
+        if log.std_out not in [None, "", " "]:
             click.echo(
                 click.style(barstr + ' Captured standard output ' + barstr, fg='black', bg='white')
             )
