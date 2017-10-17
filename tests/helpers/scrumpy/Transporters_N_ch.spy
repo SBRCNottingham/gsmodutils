@@ -1,0 +1,280 @@
+Structural()
+
+
+#
+##
+### inputs
+##
+#
+##
+
+
+Glc_tx:
+    1 x_glc + 1 "PHOSPHO-ENOL-PYRUVATE" -> 1 "GLC-6-P" + 1 "PYRUVATE"
+    ~
+
+
+
+NH3_tx:
+    1 x_NH3 -> 1 "AMMONIA"
+    ~
+
+
+O2_tx:
+    1 x_O2 -> 1 "OXYGEN-MOLECULE"
+    ~
+    
+SO4_tx:
+    1 x_SO4 -> 1 "SULFATE"
+    ~
+    
+Phosphate_tx:
+    1 x_Pi -> 1 "Pi"
+    ~
+
+
+
+#######Metabolic by-products, excreted to the environment
+
+CO2_tx:
+
+    x_CO2 <- "CARBON-DIOXIDE"
+    ~
+   
+Metyltioadenosine_tx:
+    1 x_MTR <> 1 "MTR"
+    ~
+
+Urate_tx:
+    x_urate <> "URATE"
+    ~
+    
+Thymine_tx:
+    x_tymine <> "THYMINE"
+    ~
+
+his_tx:
+    x_his <> "HIS"
+    ~
+
+leu_tx:
+    x_leu <> "LEU"
+    ~
+
+met_tx:
+    x_met <> "MET"
+    ~
+
+
+
+#
+##
+### outputs
+##
+#
+
+
+
+Tyr_tx:
+	1 "x_TYR" <> 1 "TYR"
+	~
+Star_tx:	
+	1 "x_Starch" <> 1 "Starch"
+	~
+Glt_tx:
+	1 "x_GLT" <> 1 "GLT"
+	~
+amp_tx:
+	1 "x_AMP" <> 1 "AMP"
+	~
+
+Lys_tx:
+	1 "x_LYS" <> 1 "LYS"
+	~
+
+Val_tx:
+	1 "x_VAL" <> 1 "VAL"
+	~
+
+Phe_tx:
+	1 "x_PHE" <> 1 "PHE"
+	~
+Gln_tx:
+	1 "x_GLN" <> 1 "GLN"
+	~
+Thr_tx:
+	1 "x_THR" <> 1 "THR"
+	~
+Met_tx:
+	1 "x_MET" <> 1 "MET"
+	~
+Trp_tx:
+	1 "x_TRP" <> 1 "TRP"
+	~
+
+Ser_tx:
+	1 "x_SER" <> 1 "SER"
+	~
+Gly_tx:
+	1 "x_GLY" <> 1 "GLY"
+	~
+
+His_tx:
+	1 "x_HIS" <> 1 "HIS"
+	~
+Leu_tx:
+	1 "x_LEU" <> 1 "LEU"
+	~
+Cys_tx:
+	1 "x_CYS" <> 1 "CYS"
+	~
+
+Asp_tx:
+	1 "x_ASP" <> 1 "L-ASPARTATE"
+	~
+
+Ile_tx:
+	1 "x_ILE" <> 1 "ILE"
+	~
+
+Ala_tx:
+	1 "x_ALA" <> 1 "L-ALPHA-ALANINE"
+	~
+Asn_tx:
+	1 "x_ASN" <> 1 "ASN"
+	~
+Arg_tx:
+	1 "x_ARG" <> 1 "ARG"
+	~
+Pro_tx:
+	1 "x_PRO" <> 1 "PRO"
+	~
+Mthf_tx:
+    1 "x_5mthf" <> 1 "5-METHYL-THF"
+    ~
+DGR_tx:
+    "x_12DGR" <>  12DGR
+    ~
+AcCoA_tx:
+    1 "x_AcCoa" <> 1 "ACETYL-COA"
+    ~
+atp_tx:
+    1 "x_ATP" <> 1 "ATP"
+    ~
+clpn_tx:
+    1 "x_CLPN" <> 1 CLPN
+    ~
+Coa_tx:
+    1 "x_Coa" <> 1 "CO-A"
+    ~
+ctp_tx:
+    1 "x_CTP" <> 1 "CTP"
+    ~
+dATP_tx:
+    1 "x_dATP" <> 1 "DATP"
+    ~
+dCTP_tx:
+    1 "x_dCTP" <> 1 "DCTP"
+    ~
+dGTP_tx:
+    1 "x_dGTP" <> 1 "DGTP"
+    ~
+dTTP_tx:
+    1 "x_dTTP" <> 1 "TTP"
+    ~
+fad_tx:
+    1 "x_FAD" <> 1 "FAD"
+    ~
+
+lps_tx:
+    1 "x_LPS" <> 1 LPS
+    ~
+nad_tx:
+    1 "x_NAD" <> 1 "NAD"
+    ~
+nadh_tx:
+    1 "x_NADH" <> 1 "NADH"
+    ~
+nadp_tx:
+    1 "x_NADP" <> 1 "NADP"
+    ~
+nadph_tx:
+    1 "x_NADPH" <> 1 "NADPH"
+    ~
+Phosphatidate_tx:
+    1 "x_PA" <> 1 PA
+    ~
+Phosphatidylethanolamine_tx:
+    1 "x_PE" <> 1 PE
+    ~
+Peptidoglycan_tx:
+    1 "x_Peptidoglycan" <> 1 Peptidoglycan
+    ~
+Phosphatidylglycerol_tx:
+    1 "x_PG" <> 1 PG
+    ~
+Phosphatidylserin_tx:
+    1 "x_PS" <> 1 PS
+    ~
+Putrescine_tx:
+    1 "x_PUTRESCINE" <> 1 "PUTRESCINE"
+    ~
+Spermidine_tx:
+    1 "x_SPERMIDINE" <> 1 "SPERMIDINE"
+    ~
+Succoa_tx:
+    1 "x_Succoa" <> 1 "SUC-COA"
+    ~
+"UDP-Glucose_tx":
+    1 "x_UDPglc" <> 1 "UDP-GLUCOSE"
+    ~
+utp_tx:
+    1 "x_UTP" <> 1 "UTP"
+    ~
+
+gtp_tx:
+    1 "x_GTP" <> 1 "GTP"
+    ~  
+
+
+###############FERMENTATION BY-PRODUCTS##########################
+
+EtOH_tx:
+    x_ethanol <> "ETOH"
+    ~
+
+Ac_tx:
+    x_acetate <> "ACET"
+    ~
+
+Form_tx:
+    x_formate  <> "FORMATE"
+    ~
+
+Suc_tx:
+    x_succinate <> "SUC"
+    ~
+
+Lact_tx:
+    x_D_lactate <> "D-LACTATE"
+    ~
+
+ 
+
+
+
+
+    
+
+
+
+    
+
+    
+
+
+
+
+    
+
+

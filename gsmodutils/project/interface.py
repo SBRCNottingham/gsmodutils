@@ -25,7 +25,6 @@ class GSMProject(object):
             Designs that the model uses
         """
         self._project_path = os.path.abspath(path)
-        self._loaded_model = None
         self.update()
         self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
         self._designs_store = dict()  # In memory store for designs
@@ -132,10 +131,7 @@ class GSMProject(object):
         """
         Returns default model for project
         """
-        if self._loaded_model is None:
-            self._loaded_model = self.load_model()
-            
-        return self._loaded_model
+        return self.load_model()
 
     def add_model(self, model_path, validate=True):
         """
@@ -244,10 +240,11 @@ class GSMProject(object):
         other bounds are set afterwards
         """
         des = self.get_design(design)
-        if model is None:
-            model = self.model
-        return des.add_to_model(model, copy=copy)
-    
+        if model is not None:
+            return des.add_to_model(model, copy=copy)
+
+        return des.load()
+
     def save_design(self, model, did, name, description='', conditions=None, base_model=None, parent=None,
                     overwrite=False):
         """

@@ -173,8 +173,8 @@ class ProjectConfig(object):
             for mdl_path in addmodels:
 
                 if isinstance(mdl_path, cobra.Model):
-                    if mdl_path.id in [" ", ""]:
-                        raise NameError("Passed model without identifier, cannot write to disk")
+                    if mdl_path.id in [" ", "", None]:
+                        raise NameError("Passed model without identifier (Model.id), cannot write to disk")
 
                     # write new model object to disk
                     save_path = os.path.abspath(os.path.join(project_path, mdl_path.id + ".json"))

@@ -1,0 +1,17 @@
+DeQuote()
+Structural()
+##AutoPolymer(Produced)
+ElType(float)
+
+
+External("WATER", "PROTON")
+
+
+
+Include(
+    FromBuildModel_New.spy,
+    ETC_core.spy,
+    Transporters_N_ch.spy,
+    Extra_rxn.spy
+)
+

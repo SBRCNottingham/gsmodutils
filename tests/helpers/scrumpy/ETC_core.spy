@@ -1,0 +1,48 @@
+Structural()
+
+External(PROTON_i, "WATER")
+
+NADH_DH_ubi:
+    "NADH" + "UBIQUINONE-8" + 4 PROTON_i -> "UBIQUINOL-8" + 3 PROTON_p + "NAD"
+    ~
+
+NADH_DH_meno:
+    "NADH" + "Menaquinones" + 4 PROTON_i -> "Menaquinols" + 3 PROTON_p + "NAD"
+    ~
+    
+Cytochrome_c_oxidase:
+    1/2 "OXYGEN-MOLECULE" + "UBIQUINOL-8" + 2 PROTON_i -> "UBIQUINONE-8" + "WATER" + 2 PROTON_p
+    ~
+
+
+##Succ_DH:		#substituted by MetaCyc rxn: SUCCINATE-DEHYDROGENASE-UBIQUINONE-RXN
+##    "SUC" + "UBIQUINONE-8" <> "FUM" + "UBIQUINOL-8"
+##    ~
+##
+##Succ_DH:
+##    "SUC" + "NAD" <> "FUM" + "NADH"
+##    ~
+
+
+################################
+
+ATPSynth:
+    "ADP" + "Pi" + 4 PROTON_p -> "ATP" + "WATER" + 3 PROTON_i
+    ~
+
+ATPase:
+    "ATP" -> "ADP" + "Pi" + x_ATPWork
+    ~
+
+##NADHOx:
+##    "NADH" -> "NAD" + x_RedOx
+##    ~
+##
+##NADPHOx:
+##    "NADPH" -> "NADP" + x_RedOx
+##    ~
+
+##NADHWork:
+##    NAD + x_Ox -> NADH
+##    ~
+

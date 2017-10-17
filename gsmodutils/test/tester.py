@@ -18,7 +18,7 @@ from gsmodutils.test.utils import TestRecord
 def stdout_ctx(stdout=None):
     """
     Context to capture standard output of python executed tests during run time
-    This is displayed to the user for them to see
+    This is displayed to the user for them to see after the tests are run
     """
     old = sys.stdout
     if stdout is None:

@@ -1,6 +1,7 @@
 """
 Test cases for the GSMTests class and associated files
 """
+from __future__ import print_function
 from gsmodutils import GSMProject
 from gsmodutils.test.tester import GSMTester
 
@@ -12,6 +13,7 @@ from cobra.exceptions import Infeasible
 from cameo.core.utils import load_medium
 from click.testing import CliRunner
 import gsmodutils.cli
+from gsmodutils.test.tester import stdout_ctx
 
 
 def test_json_tests():
@@ -104,7 +106,7 @@ def test_func_cove(model, project, log):
 
 def test_model(model, project, log):
     solution = model.solver.optimize()
-    print('This is the end {}'.format(solution))
+    print('This is the end')
     log.assertion(True, "Model grows", "Model does not grow")
     log.assertion(False, "Model grows", "Model does not grow")
     
@@ -126,7 +128,8 @@ def test_model(model, project, log):
         load_medium(mdl, dict())
         fp.project.save_conditions(mdl, "bad", apply_to=fp.project.config.default_model, observe_growth=False)
 
-        tfp = os.path.join(project.tests_dir, 'test_x.py')
+        test_codep = 'test_code.py'
+        tfp = os.path.join(project.tests_dir, test_codep)
         
         with open(tfp, 'w+') as testf:
             testf.write(code_str)
@@ -141,6 +144,9 @@ def test_model(model, project, log):
         
         assert len(tester.syntax_errors) == 1
 
+        log = tester.run_by_id('test_code.py_test_model')
+        assert log.std_out == "This is the end\n" # Test record should capture the standard output
+
         runner = CliRunner()
         lpath = os.path.join(fp.path, 'lp.json')
         result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose', '--log_path', lpath])
@@ -148,11 +154,11 @@ def test_model(model, project, log):
 
         tester._run_py_tests()
         result = runner.invoke(gsmodutils.cli.test,
-                               ['--project_path', fp.path, '--verbose', '--test_id', 'test_x.py'])
+                               ['--project_path', fp.path, '--verbose', '--test_id', test_codep])
 
         assert result.exit_code == 0
         result = runner.invoke(gsmodutils.cli.test,
-                               ['--project_path', fp.path, '--verbose', '--test_id', 'test_x.py_test_func'])
+                               ['--project_path', fp.path, '--verbose', '--test_id', '{}_test_func'.format(test_codep)])
 
         assert result.exit_code == 0
 
@@ -224,3 +230,24 @@ def test_essential_pathways():
         # Test conditions designs and
         tester = fp.project.project_tester()
         tester.run_all()
+
+
+def test_std_out_capture():
+    """ Test the context manager for capturing standard output by python tests """
+    output_message = "foooo"
+    with stdout_ctx() as context:
+        print(output_message)
+    assert context.getvalue() == output_message+"\n"
+
+
+def test_std_out_capture_in_exec():
+    """ Test the context manager for capturing standard output by python tests inside a string executed function """
+    output_message = "foooo"
+
+    exec_code = 'print("{}")'.format(output_message)
+
+    with stdout_ctx() as context:
+        compiled_code = compile(exec_code, '', 'exec')
+        exec(compiled_code, {})
+
+    assert context.getvalue() == output_message+"\n"
