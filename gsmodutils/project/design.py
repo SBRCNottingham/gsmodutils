@@ -365,7 +365,7 @@ class StrainDesign(object):
                 met.remove_from_model()
             except KeyError:
                 pass
-        mdl.id += ":ds_{}".format(self.id)
+        mdl.id += "::{}".format(self.id)
 
         # Add gene annotation
         for gene in self.genes:
