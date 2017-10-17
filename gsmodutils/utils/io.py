@@ -1,5 +1,6 @@
 import cobra
 import os
+from gsmodutils.utils.scrumpy import load_scrumpy_model
 
 
 def load_model(path, file_format=None):
@@ -25,6 +26,8 @@ def load_model(path, file_format=None):
         cobra_model = cobra.io.read_sbml_model(path)
     elif file_format in ["mat", "m", "matlab"]:
         cobra_model = cobra.io.load_matlab_model(path)
+    elif file_format in ['spy', 'scrumpy']:
+        cobra_model = load_scrumpy_model(path)
     else:
         raise TypeError('Cannot load file format {}'.format(file_format))
 

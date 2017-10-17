@@ -6,6 +6,11 @@ import os
 
 import cobra
 from cameo.core.utils import load_medium
+import re
+
+
+class ParseError(Exception):
+    pass
 
 
 def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
@@ -60,7 +65,7 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
         for met in exch.metabolites:
             mset[met] = -1 * exch.metabolites[met]
             
-        exch.clear_metabolites()
+        exch.subtract_metabolites(exch.metabolites)
         exch.add_metabolites(mset)
         
         if exch.id not in media:
@@ -103,7 +108,6 @@ def get_tokens(line_dt):
     """
 
     tokens = []
-    
     quoted = False
     tk_str = ""
     line_dt = line_dt.replace("->", "-> ")
@@ -153,6 +157,7 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
     if fp_stack is None:
         fp_stack = []
 
+    num_match = re.compile("[0-9]*/[0-9]*")
     reactions = []
     metabolites = []
     with open(rel_path+'/'+filepath) as infile:
@@ -192,13 +197,16 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
                         try:
                             si = float(token)
                         except ValueError:
-                            
-                            metab = token.replace('"', '').replace("'", '')
-                            if metab[:2] != "x_":
-                                metabolites.append(metab)
-                                # not a stoichiometric value
-                                reaction['metabolites'][metab] = s_coef * si
-                            si = 1.0
+
+                            if num_match.match(token):
+                                si = eval(token)
+                            elif len(token.strip()):
+                                metab = token.replace('"', '').replace("'", '')
+                                if metab[:2] != "x_":
+                                    metabolites.append(metab)
+                                    # not a stoichiometric value
+                                    reaction['metabolites'][metab] = s_coef * si
+                                si = 1.0
                             
                     prev_token = token
                     continue
@@ -231,7 +239,7 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
                     elif token == ')':
                         in_include = False
                     elif token in fp_stack:
-                        raise Exception('Cyclic dependency for file {}'.format(token))
+                        raise ParseError('Cyclic dependency for file {}'.format(token))
                     else:
                         rset, mset = parse_file(token, fp_stack + [filepath], rel_path)
                         reactions += rset
@@ -246,6 +254,8 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
                     
                 elif token == 'Include':
                     in_include = True
+                elif token == 'DeQuote()':
+                    pass
                 elif token == ":":
                     in_reaction = True
                     s_coef = -1

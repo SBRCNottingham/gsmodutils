@@ -1,0 +1,442 @@
+DeQuote()
+Structural()
+
+#Due to presence of metabolites with undefined empform (eg. ACP derivatives, FAs ets) in FA biosynthesis these are replaced with generic reactions
+
+##########Generic FA
+
+FA_Synth:
+    8 "ACETYL-COA" + 14 "NADPH" + 7 "ATP" <> 1 Palmitate + 14 "NADP" + 8 "CO-A" + 7 "ADP" + 7 "Pi"
+    ~
+
+###########Generic phospholipids. NB: requires that new metabolites are introduced in model.(abbrev: PA - phosphatidate, CDPdag - CDP-diacylglycerol, PS - phosphatidylserin,
+###########PE - phosphatidylethanolamine, PG - phosphatidylglycerol, CLPN - cardiolipin, DGR - 1,2-diacylglycerol) 
+
+PA_synth_NADPH:
+    "DIHYDROXY-ACETONE-PHOSPHATE" + "NADPH" + 2 Palmitate <> PA + "NADP" 
+    ~
+##PA_synth_NADH:
+##    "DIHYDROXY-ACETONE-PHOSPHATE" + "NADH" + 2 Palmitate <> PA + "NAD" 
+##    ~
+CDPdag_synth:
+    PA + "CTP" <> CDPdag + "PPI"
+    ~
+PS_synth:
+    CDPdag + "SER" <> PS + "CMP"
+    ~
+PE_synth:
+    PS <> "CARBON-DIOXIDE" + PE
+    ~
+PG_synth:
+    CDPdag + "GLYCEROL-3P" + "WATER" <> PG + "CMP" + "Pi"
+    ~
+CLPN_synth:
+    2 PG <> "GLYCEROL" + CLPN
+    ~
+"12DGR_synth1":		#corresponds to diacylglycerol kinase (STM4236)
+    "ATP" + DGR -> "ADP" + PA
+    ~
+"12DGR_synth2":			
+    "WATER" + PA <> DGR + "Pi"
+    ~
+
+############Generic peptidoglycan (new metabolite: "PEPTIDOGLYCAN")
+
+Pep_synth:
+    3 "L-ALPHA-ALANINE" + "PHOSPHO-ENOL-PYRUVATE" + "NADPH" + "D-GLT" + 5 "ATP" + "MESO-DIAMINOPIMELATE" + "UNDECAPRENYL-DIPHOSPHATE" + 2 "UDP-N-ACETYL-D-GLUCOSAMINE" <> Peptidoglycan + 5 "ADP" + 7 "Pi" + "UMP" + "UDP" + "NADP"
+    ~
+
+############Generic LPS (new metabolite: "LPS" (palmitate introduced in FA_synth))
+
+LPS_synth:
+    2 "CMP-KDO" + 4 "ADP-L-GLYCERO-D-MANNO-HEPTOSE" + 3 "UDP-GLUCOSE" + 2 "UDP-N-ACETYL-D-GLUCOSAMINE" + 6 Palmitate + 3 "ATP" + "UDP-GALACTOSE" <> LPS + 7 "ADP" + "ACET" + "UMP" + 5 "UDP" + 2 "CMP" 
+    ~
+
+
+#############Nucleoside phosphatase (replaces generic reactions)
+
+#dATP_pyrophosphatase:		isostoichiometric to RXN0-384
+#    "DATP" + "WATER" -> "DAMP" + "PPI"
+#    ~
+dATP_monophosphatase:
+    "DATP" + "WATER" -> "DADP" + "Pi"
+    ~
+
+##dGTP_pyrophosphatase:
+##    "DGTP" + "WATER" -> "DGMP" + "PPI"
+##    ~
+dGTP_triphosphatase:
+    "DGTP" + "WATER" -> "DGDP" + "Pi"
+    ~
+    
+dCTP_pyrophosphatase:
+    "DCTP" + "WATER" -> "DCMP" + "PPI"
+    ~
+dCTP_triphosphatase:
+    "DCTP" + "WATER" -> "DCDP" + "Pi"
+    ~
+    
+##dUTP_pyrophosphatase:
+##    "DUTP" + "WATER" -> "DUMP" + "PPI"
+##    ~
+dUTP_triphosphatase:
+    "DUTP" + "WATER" -> "DUDP" + "Pi"
+    ~
+    
+dTTP_pyrophosphatase:
+    "TTP" + "WATER" -> "TMP" + "PPI"
+    ~
+dTTP_triphosphatase:
+    "TTP" + "WATER" -> "TDP" + "Pi"
+    ~
+
+############Ribonucleoside/deoxy-ribonucleoside interconversion, replaces generic (dNTP reaction). NB: thioredoxins lack defined empform
+ATP_reductase:
+    "ATP" + "WATER" + "Red-Thioredoxin" -> "DATP" + "Ox-Thioredoxin"
+    ~
+
+CTP_reductase:
+    "CTP" + "WATER" + "Red-Thioredoxin" -> "DCTP" + "Ox-Thioredoxin"
+    ~
+
+GTP_reductase:
+    "GTP" + "WATER" + "Red-Thioredoxin" -> "DGTP" + "Ox-Thioredoxin"
+    ~
+
+UTP_reductase:
+    "UTP" + "WATER" + "Red-Thioredoxin"  -> "DUTP" + "Ox-Thioredoxin"
+    ~
+
+
+#############Candidate reactions for replacing "missing" reactions in network + dummy/regeneration reactions
+
+
+#############Hydrogen peroxide detox, replaces thiredoxin ditto
+
+#H2O2_detox:
+#    "UBIQUINOL-8" + "HYDROGEN-PEROXIDE" -> "UBIQUINONE-8" + "WATER"
+#    ~
+
+
+############Ammonia to nitrite conversion 
+#Nitrite_reductase:
+#    "AMMONIA" + 6 "Cyt_ox" + 2 "WATER" -> "NITRITE" + 6 "Cyt" + 7 "PROTON"
+#    ~
+
+##########Biotin synthesis
+
+#Biotin_synth:
+#    "HS" + "DETHIOBIOTIN" + 2 "S-ADENOSYLMETHIONINE" -> "BIOTIN" + 2 "CH33ADO" 2 + "MET"
+#    ~
+
+############Regeneration dummies for biomass analysis
+
+#CoA_regen:	#dummy rxn for coa regeneration. WARNING: produces C from nothing
+#    "ACETYL-COA" <> "CO-A"
+#    ~
+
+##THF_regen:
+##    "5-METYL-THF" <> "THF"
+##    ~
+
+
+##NADP_regen:
+##    "NADPH" -> "NADP" + "PROTON"
+##    ~
+
+
+
+"METHYLTHIOADENOSINE-NUCLEOSIDASE-RXN":	#NB: in vivo rxn mapps to gene STM0207, which encodes another similar rxn, thus keep this one in model
+    "5-METHYLTHIOADENOSINE" + "WATER" -> "ADENINE" + "MTR"
+    ~
+
+##Spermid_alt: #should be equal to FromBuild reac SPERMIDINESYN-RXN
+##    1.0 "PUTRESCINE" + 1.0 "S-ADENOSYLMETHIONINAMINE" <> 1.0 "SPERMIDINE"
+##    ~
+
+    
+
+#############Sulfate rxn not present in styp99287
+
+"1.8.4.8-RXN":	#rxn mapps to STM2946, but no rxn assigned to gene
+    "PAPS" + "Red-Thioredoxin" -> "HSO3" + "Ox-Thioredoxin" + "PAP"
+    ~
+
+"SULFITE-REDUCT-RXN":	#rxn mapps to STM2948, STM2947 (-> difunctional enzyme, only one reac acconted for in MetaCyc), keep rxn
+    "HSO3" + 5 "PROTON" + 3 "NADPH" <> 3 "WATER" + 3 "NADP" + "HS"
+    ~
+
+###########Polyisopren biosynthesis
+
+###########Undecaprenyl-PP phosphatase, required for undecaprenyl-P generation, equivalent enz not in styp99287, present in E. coli
+
+##"UNDECAPRENYL-DIPHOSPHATASE-RXN":
+##    "T-POLY-C-UNDECAPRENYL-DIPHOSPHATE" + "WATER" -> "UNDECAPRENYL-P" + "Pi" + "PROTON"
+##    ~
+
+###########Biosynthesis of T-POLY-C-DECAPRENYL-DIPHOSPHATE 
+
+##"RXN-8999": pressent in new DB
+##    "FARNESYL-PP" + 8 "DELTA3-ISOPENTENYL-PP" + 5 "PROTON" -> "T-POLY-C-UNDECAPRENYL-DIPHOSPHATE" + 8 "PPI"
+##    ~
+
+##Ispg_rxn:	#present in SalCyc as STM2523 -> RXN0-882, but def in wrong direction
+##    "2C-METH-D-ERYTHRITOL-CYCLODIPHOSPHATE" + ferrodoxin_red -> ferrodoxin_ox + "HYDROXY-METHYL-BUTENYL-DIP"
+##    ~
+
+##Ferro_regen:
+##    ferrodoxin_ox -> ferrodoxin_red
+##    ~
+
+###############LPS precursors
+
+##"DARAB5PISOM-RXN":	#rxn mapps to STM3315, but no rxn assigned to gene, present in new DB
+##    "RIBULOSE-5P" <> "ARABINOSE-5P"
+##    ~
+
+################Missing L-aspartate oxidase pseudo-isostoichiometric reaction (EC  1.4.3.16)
+
+"RXN-9772":
+   "FUM" + "L-ASPARTATE" -> "SUC" + "IMINOASPARTATE" + "PROTON"
+    ~ 
+
+################C/N source analysis
+
+#reaction required for cystein based metabolism in salmonella,
+#should be present in styp99287, associated reaction (RXN-6763) uses non-standard
+#metabolite abbreviations. Genes: STM3161 (metC) 
+
+"LCYSDESULF-RXN":	
+    "CYS" + "WATER" <> "PYRUVATE" + "AMMONIA" + "HS" + "PROTON"
+    ~
+#dummy reac
+
+##"GLYCEROL-KIN-RXN":
+##    1.0 "GLYCEROL" + 1.0 "ATP" -> 1.0 "GLYCEROL-3P" + 1.0 "ADP"
+##    ~
+##
+
+
+
+###################reactions identified as present during DeadReacs analysis
+
+"RXN0-5038":
+    "CAMP" -> "AMP"
+    ~
+
+"RXN-8626":		#aminopropanol phosphate biosynthesis, should be included in DB
+    "THR" + "ATP" -> "L-THREONINE-O-3-PHOSPHATE" + "ADP"
+    ~
+
+"4.1.1.81-RXN":#aminopropanol phosphate biosynthesis, should be included in DB
+    "L-THREONINE-O-3-PHOSPHATE" -> "R-1-AMINOPROPAN-2-YL-PHOSPHATE" + "CARBON-DIOXIDE"
+    ~
+
+"TRIPHOSPHATASE-RXN":	#P3I generated in vitamin B12 synth, not consumed in any reac, reac with same stoichiometry as TRIPHOSPHATASE-RXN is required (e.g. EXOPOLYPHOSPHATASE-RXN with P3I as substrate)
+    "P3I" + "WATER" -> "PPI" + "Pi"
+    ~
+
+#########################ATPase scan
+
+"2OXOGLUTARATEDEH-RXN":
+    "2-KETOGLUTARATE" + "CO-A" + "NAD" -> "SUC-COA" + "CARBON-DIOXIDE" + "NADH"
+    ~
+#########################
+
+"PREPHENATEDEHYDROG-RXN": #removed from 2011 salcyc release, though experimentally verified to be present, req. by model for growth anaerobically
+	1.0 "PREPHENATE" + 1.0 "NAD" -> 1.0 "NADH" + 1.0 "P-HYDROXY-PHENYLPYRUVATE" + 1.0 "CARBON-DIOXIDE"
+	~
+
+########################## BioLog analysis
+
+######### C comp
+
+"RXN-9598":	#BioCyc id for generic monoamine oxidase, stoich represents instance with tymine as amine. Present, but GPR assoc. unkown, old lit. gene name: tynA
+    "TYRAMINE" + "WATER" + "OXYGEN-MOLECULE" <> "AMMONIA" + "HYDROGEN-PEROXIDE" + "4-HYDROXYPHENYLACETATE"
+    ~
+
+gly_glt_peptidase: #generic peptidase reac (3.4.13.18-RXN) with instance hydrolysis of "CPD-3569". Presence indicated by PRIAM (EC: 3.4.13.18), gene: STM0207
+    "CPD-3569" + "WATER" -> "GLY" + "GLT"
+    ~
+
+ala_gly_peptidase: #generic peptidase reac (3.4.13.18-RXN) with instance hydrolysis of "ALA-GLY". Presence indicated by PRIAM (EC: 3.4.13.18), gene: STM0207
+    "ALA-GLY" + "WATER" -> "L-ALPHA-ALANINE" + "GLY"
+    ~
+
+"GALACTODEHYDROG-RXN":	#indicated by PRIAM analysis, gene: STM1462.S 
+    "NAD" + "GALACTOSE" <> "PROTON" + "NADH" + "D-GALACTONO-1-4-LACTONE"
+    ~
+
+"N-ACETYLGLUCOSAMINE-KINASE-RXN": #precent  acc. to BioCyc and PRIAM, gene: STM1220
+    "N-ACETYL-D-GLUCOSAMINE" + "ATP" -> "PROTON" + "N-ACETYL-D-GLUCOSAMINE-6-P" + "ADP"
+    ~
+
+tricarballylate_DH:	#tricarballylate degredation, nb: not in BioCyc, from Lewis et al. 2004, 2006 (under Documents/experimental). gene: STM0691
+    "CPD-3571" + "NAD" -> "CIS-ACONITATE" + "NADH"
+    ~
+
+tagatose_1_P_kinase:	#nb: see Shakeri-Garakani et al 2004 under Documents/experimental, tagatose metabolism partially described in sal, not in BioCyc, tagatose 1P not defined in BioCyc.this reac corresponds to gene prod of tagK
+    tagatose_1_P + "ATP" -> "TAGATOSE-1-6-DIPHOSPHATE" + "ADP"
+    ~
+
+gly_pro_peptidase: #generic peptidase reac (3.4.13.18-RXN) with instance hydrolysis of "CPD-3569". Presence indicated by PRIAM (EC: 3.4.13.18), gene: STM0207
+    "CPD-10814" + "WATER" -> "GLY" + "PRO"
+    ~
+
+gly_asp_peptidase: #generic peptidase reac (3.4.13.18-RXN) presence indicated by PRIAM (EC: 3.4.13.18), gene: STM0207
+    "CPD-13406"+ "WATER" -> "GLY" +"L-ASPARTATE"
+    ~
+
+"RXN-7682":	#reacs encoded by the same genes as this reac are present, should be included
+    "HYPOXANTHINE" + "NAD" + "WATER" -> "XANTHINE" + "NADH" + "PROTON"
+    ~
+
+####### part of 2-methylcitrate cycle, precense confired by gene annotation information ,literature and/or priam (see Rocco et al. 2010, under Doc../experimental)
+
+"2-METHYLCITRATE-DEHYDRATASE-RXN":	#priam confirmed, gene: STM0370	
+    "CPD-622" -> "CPD-1136" + "WATER"
+    ~
+
+##"2-METHYLCITRATE-SYNTHASE-RXN": #test dummy, should be omitted from Unwanted
+##    "OXALACETIC_ACID" + "WATER" + "PROPIONYL-COA" -> "PROTON" + "CPD-622" + "CO-A"
+##    ~
+
+"4.2.1.99-RXN":	#gene:STM0158,STM1712
+    "CPD-1136" + "WATER"-> "CPD-618"
+    ~
+    
+"METHYLISOCITRATE-LYASE-RXN":	#gene: STM0368
+    "CPD-618" -> "SUC" + "PYRUVATE"
+    ~
+
+############ myo-inositol degradation reactions, presence supported by priam analysis
+
+"MYO-INOSITOL-2-DEHYDROGENASE-RXN":		#gene:STM4425
+    "NAD" + "MYO-INOSITOL" -> "PROTON" + "NADH" + "CPD-365"
+    ~
+
+"MYO-INOSOSE-2-DEHYDRATASE-RXN": #gene: STM4424.S
+    "CPD-365" -> "WATER" + "CPD-1133"
+    ~
+
+"R503-RXN":
+    "CPD-1133" + "WATER" -> "PROTON" + "CPD-827"
+    ~
+
+"5-DEHYDRO-2-DEOXYGLUCONOKINASE-RXN":	#NB: highest scoring gene: STM3251
+    "CPD-827" + "ATP" -> "PROTON" + "CPD-645" + "ADP"
+    ~
+    
+"4.1.2.29-RXN":	#gene: STM3253
+    "CPD-645" -> "MALONATE-S-ALD" + "DIHYDROXY-ACETONE-PHOSPHATE"
+    ~
+    
+"RXN-2902":	
+    "MALONATE-S-ALD" + "CO-A" + "NAD" -> "ACETYL-COA" + "CARBON-DIOXIDE" + "NADH"
+    ~
+
+##############
+
+"ACETOACETYL-COA-TRANSFER-RXN":	#indicated to be present by blast and gene annotation, not certain, gene: STM1357.S
+    "ACETYL-COA" + "3-KETOBUTYRATE" -> "ACET" + "ACETOACETYL-COA"
+    ~
+
+
+################ N comp
+
+ala_asp_peptidase:	#generic peptidase reac (3.4.13.18-RXN) with instance hydrolysis of "CPD-13404". Presence indicated by PRIAM (EC: 3.4.13.18), gene: STM0207
+    "CPD-13404" + "WATER" -> "L-ALPHA-ALANINE" + "L-ASPARTATE"
+    ~
+
+ala_gln_peptidase:	#generic peptidase reac (3.4.13.18-RXN)
+    "CPD-13403" + "WATER" -> "L-ALPHA-ALANINE" + "GLN"
+    ~
+
+ala_glu_peptidase:	#generic peptidase reac (3.4.13.18-RXN) 
+    "CPD0-1445" + "WATER" -> "L-ALPHA-ALANINE" + "GLT"
+    ~
+
+ala_his_peptidase: # generic peptidase reac (3.4.13.18-RXN)
+    "CPD-13401" + "WATER" -> "L-ALPHA-ALANINE" + "HIS"
+    ~
+    
+ala_leu_peptidase: # generic peptidase reac (3.4.13.18-RXN)
+    "CPD-13398" + "WATER" -> "L-ALPHA-ALANINE" + "LEU"
+    ~
+    
+ala_thr_peptidase: # generic peptidase reac (3.4.13.18-RXN)
+    "CPD-13397" + "WATER" -> "L-ALPHA-ALANINE" + "THR"
+    ~
+
+gly_asn_peptidase: # generic peptidase reac (3.4.13.18-RXN)
+    "CPD-13395" + "WATER" -> "GLY" + "ASN"
+    ~
+
+gly_gln_peptidase: # generic peptidase reac (3.4.13.18-RXN)
+    "CPD-13394" + "WATER" -> "GLY" + "GLN"
+    ~
+
+met_ala_peptidase: # generic peptidase reac (3.4.13.18-RXN)
+    "CPD-13390" + "WATER" -> "MET" + "L-ALPHA-ALANINE"
+    ~
+
+cyc_gly_peptidase: # generic peptidase reac (3.4.13.18-RXN)
+    "CYS-GLY"+ "WATER" -> "CYS" + "GLY"
+    ~
+
+gly_met_peptidase: # generic peptidase reac (3.4.13.18-RXN)
+    "CPD-13393" + "WATER" -> "GLY" + "MET"
+    ~
+
+
+
+
+################ S comp
+
+"RXN-8358":	#D-cysteine desulfhydrase confiremd by BioCyc and PRIAM, gene: STM1953 
+    "CPD-14" + "NADH" -> 2 "S2O3" + "NAD"
+    ~
+
+
+##################### reacs of the phosphonotase pathway, not included in styp99287_10, but known to occur in sal, confiremed by PRIAM
+    
+"2.6.1.37-RXN":	#gene: STM0431
+    "PYRUVATE" + "CPD-1106" -> "L-ALPHA-ALANINE" + "CPD-551"
+    ~
+
+"PHOSPHONOACETALDEHYDE-HYDROLASE-RXN":	#gene: STM0432
+    "WATER" + "CPD-551" -> "PROTON" + "Pi" + "ACETALD"
+    ~
+
+
+####################### P comp
+
+"3-NUCLEOTID-RXN_adenosine":	#present acc. to NCBI annotation, gene:STM4403
+    "CPD-3706" + "WATER" -> "ADENOSINE" + "Pi"
+    ~
+
+"CYCPHOSDIESTER-RXN":	#present acc. to NCBI annotation, gene:STM4403
+    "CPD-3707" + "WATER" -> "CPD-3706" + "PROTON"
+    ~
+
+"GLYCEROL-2-PHOSPHATASE-RXN":	#present acc. to NCBI annotation, gene:STM2546
+    "CPD-536" + "WATER" -> "GLYCEROL" + "Pi"
+    ~
+    
+"3-NUCLEOTID-RXN_guanine":	#present acc. to NCBI annotation, gene:STM4403
+    "CPD-3708" + "WATER" -> "GUANOSINE" + "Pi"
+    ~
+
+"3-NUCLEOTID-RXN_cytidine":	#present acc. to NCBI annotation, gene:STM4403
+    "CPD-3711" + "WATER" -> "CYTIDINE" + "Pi"
+    ~
+
+"3-NUCLEOTID-RXN_uridine":	#present acc. to NCBI annotation, gene:STM4403
+    "CPD-3724" + "WATER" -> "URIDINE" + "Pi"
+    ~
+
+"3-NUCLEOTID-RXN_thymidine":	#present acc. to NCBI annotation, gene:STM4403
+    "CPD-3732" + "WATER" -> "THYMIDINE" + "Pi"
+    ~
+
+    
