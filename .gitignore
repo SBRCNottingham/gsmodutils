@@ -33,3 +33,12 @@ tests/cov_html/style.css
 tests/.coverage
 tests/.coverage.*
 cov_html/
+article/*.log
+article/*.bbl
+article/*.bcf
+article/*.blg
+article/*.run.xml
+article/*.aux
+article/article.pdf
+*.backup
+*.whl
