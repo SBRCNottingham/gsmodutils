@@ -1,4 +1,5 @@
 {
+    "ATPase": 3.0,
     "Mthf_tx" : -0.05,
     "Putrescine_tx" : -0.035,
     "Succoa_tx" : -3e-06,

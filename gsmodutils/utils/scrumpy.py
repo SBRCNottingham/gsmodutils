@@ -13,8 +13,8 @@ class ParseError(Exception):
     pass
 
 
-def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
-                       media=None, objective_reactions=None, obj_dir='max'):
+def load_scrumpy_model(filepath, name=None, model_id=None, media=None, objective_reactions=None, obj_dir='min',
+                       fixed_fluxes=None):
     """
     Specify a base scrumpy structural model file and returns a cameo model.
     This hasn't be thoroughly tested so expect there to be bugs
@@ -22,19 +22,20 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
     To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media
 
     :param filepath:
-    :param atpase_reaction:
-    :param atpase_flux:
+    :param name:
+    :param model_id:
     :param media:
     :param objective_reactions:
     :param obj_dir:
+    :param fixed_fluxes:
     :return:
     """
 
     if objective_reactions is None:
         objective_reactions = ['Biomass']
 
-    if media is None:
-        media = {}
+    if fixed_fluxes is not None:
+        assert isinstance(fixed_fluxes, dict)
 
     rel_path = '/'.join(os.path.abspath(filepath).split('/')[:-1])
 
@@ -53,39 +54,33 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
             r.upper_bound = reaction['bounds'][1]
             r.add_metabolites(reaction['metabolites'])
             added_reactions.append(reaction['id'])
-    
+
+    # We need to add transporters for external metabolites not defined with the "External" directive
     for metabolite in model.metabolites:
         if metabolite.id[:2] == "x_":
-            metabolite.remove_from_model()
-    
-    for exch in model.exchanges:
-        # flip stoichiometric stoichiometric coef
-        mset = {}
-        
-        for met in exch.metabolites:
-            mset[met] = -1 * exch.metabolites[met]
-            
-        exch.subtract_metabolites(exch.metabolites)
-        exch.add_metabolites(mset)
-        
-        if exch.id not in media:
-            exch.lower_bound = 0
-            exch.upper_bound = 1000
-        else:
-            exch.lower_bound = -1000
-            exch.upper_bound = 1000
 
-    load_medium(model, media)
-    
-    try:
-        atpase = model.reactions.get_by_id(atpase_reaction)
-        atpase.lower_bound = atpase_flux
-        atpase.upper_bound = atpase_flux
-    except KeyError:
-        print('Error setting ATPase flux, reaction name {} not found'.format(atpase_reaction))
-    
+            r = cobra.Reaction("EX_{}".format(metabolite.id[2:]))
+            model.add_reactions([r])
+            r.lower_bound = -1000.0
+            r.upper_bound = 1000.0
+            r.add_metabolites({
+                metabolite.id: -1.0
+            })
+            added_reactions.append(r.id)
+
+    if media is not None:
+        load_medium(model, media)
+
+    if fixed_fluxes is not None:
+        for rid, flux in fixed_fluxes.items():
+            try:
+                reaction = model.reactions.get_by_id(rid)
+                reaction.lower_bound = flux
+                reaction.upper_bound = flux
+            except KeyError:
+                click.echo('Error setting fixed flux for reaction id {}, not found'.format(rid))
+
     for oreact in objective_reactions:
-        
         try:
             objreac = model.reactions.get_by_id(oreact)
             objreac.objective_coefficient = 1.0
@@ -93,7 +88,9 @@ def load_scrumpy_model(filepath, atpase_reaction="ATPase", atpase_flux=3.0,
             print('Error setting objective, reaction name {} not found'.format(oreact))
     
     model.objective.direction = obj_dir
-    
+
+    model.id = model_id
+    model.name = name
     return model
 
 
@@ -155,7 +152,9 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
     :return:
     """
     if fp_stack is None:
-        fp_stack = []
+        fp_stack = [filepath]
+    else:
+        fp_stack.append(filepath)
 
     num_match = re.compile("[0-9]*/[0-9]*")
     reactions = []
@@ -202,10 +201,10 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
                                 si = eval(token)
                             elif len(token.strip()):
                                 metab = token.replace('"', '').replace("'", '')
-                                if metab[:2] != "x_":
-                                    metabolites.append(metab)
-                                    # not a stoichiometric value
-                                    reaction['metabolites'][metab] = s_coef * si
+
+                                metabolites.append(metab)
+                                # not a stoichiometric value
+                                reaction['metabolites'][metab] = s_coef * si
                                 si = 1.0
                             
                     prev_token = token
@@ -222,7 +221,7 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
                         metabolites.append(token)
                         rs = dict(
                             id='{}_tx'.format(token),
-                            metabolites={token: 1.0},
+                            metabolites={token: -1.0},
                             source=filepath,
                             bounds=[-1000.0, 1000.0]
                         )
@@ -241,7 +240,7 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
                     elif token in fp_stack:
                         raise ParseError('Cyclic dependency for file {}'.format(token))
                     else:
-                        rset, mset = parse_file(token, fp_stack + [filepath], rel_path)
+                        rset, mset = parse_file(token, fp_stack, rel_path)
                         reactions += rset
                         metabolites += mset
                     continue
@@ -254,8 +253,6 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
                     
                 elif token == 'Include':
                     in_include = True
-                elif token == 'DeQuote()':
-                    pass
                 elif token == ":":
                     in_reaction = True
                     s_coef = -1
@@ -273,31 +270,46 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
 
 @click.command()
 @click.argument('model')
+@click.argument('model_id')
+@click.option('--name', default=None, help='Specify a name for this model')
 @click.option('--output', default='omodel.json', help='output location for json file')
-@click.option('--atpase_reaction', default='ATPase', type=str, help='atpase reaction id')
-@click.option('--atpase_flux', default=-3.0, type=float, help='atpase reaction id')
-@click.option('--media', default='default_media.json', type=str, help='A growth media constraints file')
-@click.option('--objective_reaction', default='Biomass', help='Objective reaction id')
-@click.option('--objective_direction', default='max', help='objective direction (min or max)')
-def scrumpy_to_cobra(model, output, atpase_reaction, atpase_flux, media, objective_reaction, objective_direction):
+@click.option('--media', default=None, type=str, help='A growth media constraints file')
+@click.option('--fixed_fluxes', default=None, help='Path to a json dictionary containing biomass composition')
+@click.option('--objective', default='Biomass', help='Objective reaction id')
+@click.option('--objective_direction', default='min', help='objective direction (min or max)')
+def scrumpy_to_cobra(model, model_id, name, output, media, fixed_fluxes, objective,
+                     objective_direction):
     """
     Command line utility for parsing scrumpy files and creating cobrapy models
-    TODO: Need to standardise to change objective function to minimisation of fluxes with a fixed Biomass flux
+
+    By default, models use the minimisation of flux objective function approach, though if a lumped biomass reaction
+    is present, this can be specified as a maximisation objective.
+
+    For the minimisation of fluxes approach a biomass composition should be specified.
+    This should be a json file of fixed biomass transporter reaction identifiers and their associated flux value.
+
+    If the lumped biomass reaction is used the media composition will be required for growth.
+    These values are the lower bounds for the fluxes on uptake reactions.
     """
-    if os.path.exists(media):
+    if fixed_fluxes is not None and os.path.exists(fixed_fluxes):
+        with open(fixed_fluxes) as mp:
+            fixed_fluxes = json.load(mp)
+    else:
+        fixed_fluxes = None
+
+    if media is not None and os.path.exists(media):
         with open(media) as mp:
             media = json.load(mp)
     else:
-        media = dict()
-    
-    if len(media) == 0:
-        click.echo("No media transport reactions found, model will not grow")
-   
+        media = None
+
     model = load_scrumpy_model(model,
-                               atpase_reaction=atpase_reaction,
-                               atpase_flux=atpase_flux,
                                media=media, 
-                               objective_reactions=[objective_reaction],
-                               obj_dir=objective_direction)
+                               objective_reactions=[objective],
+                               obj_dir=objective_direction,
+                               fixed_fluxes=fixed_fluxes,
+                               name=name,
+                               model_id=model_id
+                               )
 
     cobra.io.save_json_model(model, output)
