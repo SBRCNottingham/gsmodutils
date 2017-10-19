@@ -72,7 +72,7 @@ To install, the simplest method is to use pip (FUTURE VERSION)
 
     $ pip install gsmodutils
 
-Alternatively, install a developement version using a virtual environment
+Alternatively, install a development version using a virtual environment
 
 .. code-block:: guess
 
@@ -104,6 +104,8 @@ Check your python version with:
 
     $ python --version
 
+Mac
+***
 If using MacOS and your version of python is outdated, it is recomended that you use hombrew
 ( https://brew.sh ) and then install pip:
 
@@ -118,7 +120,13 @@ If you have python, but not pip easy_install should work:
     $ sudo easy_install pip
     $ sudo pip install virtualenv
 
+Windows
+*******
 For windows users, follow the guides on installing python and pip from the python website.
+
+You will also need to install Microsoft Visual C++ Compiler for Python and glpk (used by cobrapy).
+
+It is strongly reccomended that you use git (or mercurial) for managament of genome scale models.
 
 User guides
 ------------
@@ -128,7 +136,11 @@ Project creation is the first step. This can be done as simply
 
     $ gsmodutils create_project PROJECT_PATH MODEL_PATH
 
-This will give a step by step guide.
+This will prompt the creation of a new project.
+The initial model in `MODEL_PATH` should be a `cobrapy` compatible model (matlab, sbml, json).
+For more information on how to use gsmodutils see the guides listed bellow.
+Many of these processes create files (such as json stores for strain designs), it is strongly advised that you install
+and use sourch control, such as `git` or `mercurial`, and learn how to use it.
 
 .. toctree::
     project
@@ -161,7 +173,7 @@ Indices and tables
 
 
 References
-~~~~~~~~~~
+----------
 [1] Antonovsky, N., Gleizer, S., Noor, E., Zohar, Y., Herz, E.,
 Barenholz, U., Zelcbuch, L., Amram, S., Wides, A., Tepper, N. and
 Davidi, D., 2016. Sugar synthesis from CO 2 in Escherichia coli. Cell,
