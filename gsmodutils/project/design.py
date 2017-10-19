@@ -9,7 +9,8 @@ from gsmodutils.exceptions import DesignError
 
 class StrainDesign(object):
     def __init__(self, did, name, description, project, parent=None, reactions=None, metabolites=None, genes=None,
-                 removed_metabolites=None, removed_reactions=None, removed_genes=None, base_model=None):
+                 removed_metabolites=None, removed_reactions=None, removed_genes=None, base_model=None,
+                 conditions=None):
         """
         Class for handling strain designs created by the project
 
@@ -50,6 +51,8 @@ class StrainDesign(object):
         self._removed_genes = removed_genes
         if self._removed_genes is None:
             self._removed_genes = []
+
+        self.conditions = conditions
 
         self.parent = parent
         self.check_parents()
@@ -188,6 +191,7 @@ class StrainDesign(object):
             name=self.name,
             description=self.description,
             base_model=self.base_model,
+            conditions=self.conditions,
         )
         return rdict
 
@@ -230,7 +234,8 @@ class StrainDesign(object):
             removed_metabolites=design['removed_metabolites'],
             removed_reactions=design['removed_reactions'],
             genes=design['genes'],
-            base_model=design['base_model']
+            base_model=design['base_model'],
+            conditions=design['conditions'],
         )
 
         return this
@@ -255,6 +260,10 @@ class StrainDesign(object):
 
         # Add reactions/genes from design to existing model
         self.add_to_model(model)
+
+        if self.conditions is not None:
+            self.project.load_conditions(self.conditions, model=model)
+
         return model
 
     def as_pathway_model(self):
