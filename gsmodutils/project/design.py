@@ -262,7 +262,10 @@ class StrainDesign(object):
         self.add_to_model(model)
 
         if self.conditions is not None:
-            self.project.load_conditions(self.conditions, model=model)
+            try:
+                self.project.load_conditions(self.conditions, model=model)
+            except KeyError:
+                pass
 
         return model
 
