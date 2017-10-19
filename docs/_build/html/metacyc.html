@@ -1,0 +1,211 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>MetaCyc &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ScrumPy" href="scrumpy.html" />
+    <link rel="prev" title="About project" href="about.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="metacyc">
+<h1>MetaCyc<a class="headerlink" href="#metacyc" title="Permalink to this headline">¶</a></h1>
+<p>This module provides a set of utilities for handling metacyc databases.
+This code does not provide access to the metacyc/biocyc databases and is simply a parser.
+For access to data consult metacyc for the acquisition of a valid licence.</p>
+<div class="section" id="example-usage">
+<h2>Example usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<p>The intended uscase for this code is to allow the addition of pathways to models that use metacyc identifiers.
+The example bellow adds an enzyme to a model using EC identifiers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">metacyc</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">metacyc</span><span class="o">.</span><span class="n">parse_db</span><span class="p">(</span><span class="s1">&#39;/path/to/metacyc/dat/files&#39;</span><span class="p">)</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">()</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
+
+<span class="n">metacyc</span><span class="o">.</span><span class="n">add_pathway</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;EC-1.2.1.10&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="module-gsmodutils.utils.metacyc">
+<span id="code-docs"></span><h2>Code docs<a class="headerlink" href="#module-gsmodutils.utils.metacyc" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gsmodutils.utils.metacyc.add_pathway">
+<code class="descclassname">gsmodutils.utils.metacyc.</code><code class="descname">add_pathway</code><span class="sig-paren">(</span><em>model</em>, <em>enzyme_ids=None</em>, <em>reaction_ids=None</em>, <em>db_path=None</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/metacyc.html#add_pathway"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.metacyc.add_pathway" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given model add enzymes from metacyc database
+:param model: cobra model object
+:param enzyme_ids: list of EC entires in format [“EC-x.x.x.x”, …]
+:param reaction_ids: set of reaction ids to add to model
+:param db_path: path to the metacyc dat files on disk
+:param copy:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.utils.metacyc.add_reaction">
+<code class="descclassname">gsmodutils.utils.metacyc.</code><code class="descname">add_reaction</code><span class="sig-paren">(</span><em>model</em>, <em>reaction_id</em>, <em>db</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/metacyc.html#add_reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.metacyc.add_reaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a metacyc reaction id to a cobrapy model
+:param model: cobrapy model instance
+:param reaction_id: reaction identifier in metacyc
+:param db: dictionary db object
+:return: tuple(reaction, added_metabolites) cobrapy Reaction and Metabolite instances</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.utils.metacyc.build_universal_model">
+<code class="descclassname">gsmodutils.utils.metacyc.</code><code class="descname">build_universal_model</code><span class="sig-paren">(</span><em>path</em>, <em>use_cache=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/metacyc.html#build_universal_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.metacyc.build_universal_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a universal model from all the reactions in the metacyc database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> – path to folder containing metacyc dat files</li>
+<li><strong>use_cache</strong> – optionally store the resulting model in cached form</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.utils.metacyc.get_enzyme_reactions">
+<code class="descclassname">gsmodutils.utils.metacyc.</code><code class="descname">get_enzyme_reactions</code><span class="sig-paren">(</span><em>eid</em>, <em>db</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/metacyc.html#get_enzyme_reactions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.metacyc.get_enzyme_reactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ec number return associated reaction ids
+:param eid: enzyme id format “EC-x.x.x.x”
+:param db: database dict
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.utils.metacyc.parse_db">
+<code class="descclassname">gsmodutils.utils.metacyc.</code><code class="descname">parse_db</code><span class="sig-paren">(</span><em>db_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/metacyc.html#parse_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.metacyc.parse_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse metacyc dat files to build dict containing entries</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.utils.metacyc.parse_metacyc_file">
+<code class="descclassname">gsmodutils.utils.metacyc.</code><code class="descname">parse_metacyc_file</code><span class="sig-paren">(</span><em>fpath</em>, <em>unique_fields</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/utils/metacyc.html#parse_metacyc_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.utils.metacyc.parse_metacyc_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a dat file
+:str fpath: path to dat file
+:list unique_fields: list of fields that there should only be a single item of in each entry
+:return:</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gsmodutils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="project.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="designs.html">Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About project</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MetaCyc</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-usage">Example usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.utils.metacyc">Code docs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scrumpy.html">ScrumPy</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="about.html" title="previous chapter">About project</a></li>
+      <li>Next: <a href="scrumpy.html" title="next chapter">ScrumPy</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, James Gilbert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/metacyc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

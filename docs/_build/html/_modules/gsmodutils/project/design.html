@@ -1,0 +1,561 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>gsmodutils.project.design &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for gsmodutils.project.design</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">cobra</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+
+<span class="kn">from</span> <span class="nn">gsmodutils.exceptions</span> <span class="k">import</span> <span class="n">DesignError</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="StrainDesign"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign">[docs]</a><span class="k">class</span> <span class="nc">StrainDesign</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reactions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metabolites</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">genes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">removed_metabolites</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">removed_reactions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">removed_genes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">base_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">conditions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for handling strain designs created by the project</span>
+
+<span class="sd">        Mainly the useful functionality of this over dicts is validation, relationship to projects, creating the models</span>
+<span class="sd">        as well as displaying the contents as a pandas dataframe</span>
+
+<span class="sd">        :param project: Where project is None, the model will not be able to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_as_model</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_model</span> <span class="o">=</span> <span class="n">base_model</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">did</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reactions</span> <span class="o">=</span> <span class="n">reactions</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reactions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reactions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metabolites</span> <span class="o">=</span> <span class="n">metabolites</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metabolites</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metabolites</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_genes</span> <span class="o">=</span> <span class="n">genes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_genes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_genes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_removed_metabolites</span> <span class="o">=</span> <span class="n">removed_metabolites</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_metabolites</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_removed_metabolites</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_removed_reactions</span> <span class="o">=</span> <span class="n">removed_reactions</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_reactions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_removed_reactions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_removed_genes</span> <span class="o">=</span> <span class="n">removed_genes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_genes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_removed_genes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span> <span class="o">=</span> <span class="n">conditions</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_parents</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_p_model</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="StrainDesign.check_parents"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.check_parents">[docs]</a>    <span class="k">def</span> <span class="nf">check_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_stack</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Tests to see if their is a loop in parental inheritance&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p_stack</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">p_stack</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">p_stack</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DesignError</span><span class="p">(</span><span class="s1">&#39;Error in design </span><span class="si">{id}</span><span class="s1"> - has a cyclical reference&#39;</span><span class="p">)</span>
+
+        <span class="n">p_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">StrainDesign</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;invalid parent design&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">check_parents</span><span class="p">(</span><span class="n">p_stack</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively builds set of reactions inherited from parents&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reactions</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">reactions</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reactions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">metabolites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively builds set of metabolites inherited from parents&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metabolites</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">metabolites</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metabolites</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">genes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively builds set of genes inherited from parents&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_genes</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">genes</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_genes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">removed_reactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively builds set of removed reactions inherited from parents&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_reactions</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">removed_reactions</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_reactions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">removed_metabolites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively builds set of removed metabolites inherited from parents&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_metabolites</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">removed_metabolites</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_metabolites</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">removed_genes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively builds set of removed genes inherited from parents&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_genes</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">removed_genes</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removed_genes</span>
+
+<div class="viewcode-block" id="StrainDesign.reactions_dataframe"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.reactions_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">reactions_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dataframe of the reactions involved in the design</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_pathway_model</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lower_bound</span><span class="o">=</span><span class="p">[],</span> <span class="n">upper_bound</span><span class="o">=</span><span class="p">[],</span> <span class="n">reaction_string</span><span class="o">=</span><span class="p">[],</span> <span class="nb">id</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">p_model</span><span class="o">.</span><span class="n">reactions</span><span class="p">):</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;upper_bound&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;lower_bound&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;reaction_string&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">reaction</span><span class="p">))</span>
+            <span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="StrainDesign.metabolites_dataframe"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.metabolites_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">metabolites_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dataframe of the reactions involved in the design</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_pathway_model</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">reactions</span><span class="o">=</span><span class="p">[],</span> <span class="nb">id</span><span class="o">=</span><span class="p">[],</span> <span class="n">name</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">metabolite</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">p_model</span><span class="o">.</span><span class="n">metabolites</span><span class="p">):</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metabolite</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metabolite</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;reactions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metabolite</span><span class="o">.</span><span class="n">reactions</span><span class="p">)</span>
+            <span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="StrainDesign.genes_dataframe"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.genes_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">genes_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dataframe of the reactions involved in the design</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_pathway_model</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">reactions</span><span class="o">=</span><span class="p">[],</span> <span class="nb">id</span><span class="o">=</span><span class="p">[],</span> <span class="n">name</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">gene</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">p_model</span><span class="o">.</span><span class="n">genes</span><span class="p">):</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gene</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gene</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;reactions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gene</span><span class="o">.</span><span class="n">reactions</span><span class="p">)</span>
+            <span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="StrainDesign.to_dict"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts to design dict (compatible with model diffs)</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">p_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="n">rdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">p_id</span><span class="p">,</span>
+            <span class="n">reactions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reactions</span><span class="p">,</span>
+            <span class="n">removed_reactions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">removed_reactions</span><span class="p">,</span>
+            <span class="n">metabolites</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metabolites</span><span class="p">,</span>
+            <span class="n">removed_metabolites</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">removed_metabolites</span><span class="p">,</span>
+            <span class="n">genes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">genes</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">base_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_model</span><span class="p">,</span>
+            <span class="n">conditions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">rdict</span></div>
+
+<div class="viewcode-block" id="StrainDesign.from_json"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.from_json">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load from a json file</span>
+<span class="sd">        :param did unique design identifier</span>
+<span class="sd">        :param file_path: file location of design</span>
+<span class="sd">        :param project: GSMProject project instance</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">design</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+        <span class="c1"># Makes sure fields are validated</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">did</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">project</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StrainDesign.from_dict"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param did: unique design identifier</span>
+<span class="sd">        :param design: design dict</span>
+<span class="sd">        :param project: GSMProject instance</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">validate_dict</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">design</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_design</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="n">this</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">did</span><span class="o">=</span><span class="n">did</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">],</span>
+            <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+            <span class="n">reactions</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;reactions&#39;</span><span class="p">],</span>
+            <span class="n">metabolites</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;metabolites&#39;</span><span class="p">],</span>
+            <span class="n">removed_metabolites</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;removed_metabolites&#39;</span><span class="p">],</span>
+            <span class="n">removed_reactions</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;removed_reactions&#39;</span><span class="p">],</span>
+            <span class="n">genes</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;genes&#39;</span><span class="p">],</span>
+            <span class="n">base_model</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;base_model&#39;</span><span class="p">],</span>
+            <span class="n">conditions</span><span class="o">=</span><span class="n">design</span><span class="p">[</span><span class="s1">&#39;conditions&#39;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">this</span></div>
+
+<div class="viewcode-block" id="StrainDesign.to_json"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Write to a given file &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Existing file exists in design path and overwrite flag is False&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;w+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">jsn_f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">jsn_f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StrainDesign.load"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a cobra model containing the parent model with the design applied</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DesignError</span><span class="p">(</span><span class="s2">&quot;No specified project or model.&quot;</span><span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_model</span><span class="p">)</span>
+
+        <span class="c1"># Add reactions/genes from design to existing model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_to_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">load_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Cannot find conditions id </span><span class="si">{}</span><span class="s1"> in project specified by design&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="StrainDesign.as_pathway_model"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.as_pathway_model">[docs]</a>    <span class="k">def</span> <span class="nf">as_pathway_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads a cobra model with just the reactions present in this design</span>
+<span class="sd">        Can be useful for the cobra.Model methods</span>
+
+
+<span class="sd">        # TODO: add full metabolite info from parent model (optional, as it will be slower)</span>
+<span class="sd">        :return: mdl instance of cobra.Model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_model</span>
+
+        <span class="n">mdl</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">mdl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_to_model</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">add_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_p_model</span> <span class="o">=</span> <span class="n">mdl</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_model</span></div>
+
+<div class="viewcode-block" id="StrainDesign.add_to_model"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.add_to_model">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add this design to a given cobra model</span>
+<span class="sd">        :param model:</span>
+<span class="sd">        :param copy:</span>
+<span class="sd">        :param add_missing: add missing metabolites to the model</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Expected cobra model&#39;</span><span class="p">)</span>
+
+        <span class="n">mdl</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="n">mdl</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Load parent design first</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">add_to_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="c1"># Add new or changed metabolites to model</span>
+        <span class="k">for</span> <span class="n">metabolite</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metabolites</span><span class="p">:</span>
+            <span class="c1"># create new metabolite object if its not in the model already</span>
+            <span class="k">if</span> <span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">metabolites</span><span class="p">:</span>
+                <span class="n">metab</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">metabolites</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">metab</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">()</span>
+
+            <span class="c1"># Doesn&#39;t check any of these properties for differences, just update them</span>
+            <span class="n">metab</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="n">metab</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">metab</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;charge&#39;</span><span class="p">]</span>
+            <span class="n">metab</span><span class="o">.</span><span class="n">formula</span> <span class="o">=</span> <span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;formula&#39;</span><span class="p">]</span>
+            <span class="n">metab</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;notes&#39;</span><span class="p">]</span>
+            <span class="n">metab</span><span class="o">.</span><span class="n">annotation</span> <span class="o">=</span> <span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;annotation&#39;</span><span class="p">]</span>
+            <span class="n">metab</span><span class="o">.</span><span class="n">compartment</span> <span class="o">=</span> <span class="n">metabolite</span><span class="p">[</span><span class="s1">&#39;compartment&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">metab</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">metabolites</span><span class="p">:</span>
+                <span class="n">mdl</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">([</span><span class="n">metab</span><span class="p">])</span>
+
+        <span class="c1"># Add new or changed reactions to model</span>
+        <span class="k">for</span> <span class="n">rct</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reactions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">reactions</span><span class="p">:</span>
+                <span class="n">reaction</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">rct</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                <span class="n">reaction</span><span class="o">.</span><span class="n">remove_from_model</span><span class="p">()</span>
+
+            <span class="n">reaction</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">()</span>
+            <span class="n">reaction</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+            <span class="n">reaction</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;lower_bound&#39;</span><span class="p">]</span>
+            <span class="n">reaction</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;upper_bound&#39;</span><span class="p">]</span>
+
+            <span class="n">reaction</span><span class="o">.</span><span class="n">gene_reaction_rule</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;gene_reaction_rule&#39;</span><span class="p">]</span>
+            <span class="n">reaction</span><span class="o">.</span><span class="n">subsystem</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;subsystem&#39;</span><span class="p">]</span>
+            <span class="n">reaction</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">reaction</span><span class="o">.</span><span class="n">variable_kind</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;variable_kind&#39;</span><span class="p">]</span>
+
+            <span class="n">mdl</span><span class="o">.</span><span class="n">add_reactions</span><span class="p">([</span><span class="n">reaction</span><span class="p">])</span>
+            <span class="n">reaction</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">reaction</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+            <span class="n">metabolites</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;metabolites&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+
+            <span class="k">if</span> <span class="n">add_missing</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">mid</span> <span class="ow">in</span> <span class="n">metabolites</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">mdl</span><span class="o">.</span><span class="n">metabolites</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">mid</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="n">metab</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">mid</span><span class="p">)</span>
+                        <span class="n">mdl</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">metab</span><span class="p">)</span>
+
+            <span class="n">reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">metabolites</span><span class="p">)</span>
+            <span class="n">reaction</span><span class="o">.</span><span class="n">objective_coefficient</span> <span class="o">=</span> <span class="n">rct</span><span class="p">[</span><span class="s1">&#39;objective_coefficient&#39;</span><span class="p">]</span>
+
+        <span class="c1"># delete removed metabolites/reactions</span>
+        <span class="k">for</span> <span class="n">rtid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">removed_reactions</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">reaction</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">rtid</span><span class="p">)</span>
+                <span class="n">reaction</span><span class="o">.</span><span class="n">remove_from_model</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">for</span> <span class="n">metid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">removed_metabolites</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">met</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">metabolites</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">metid</span><span class="p">)</span>
+                <span class="n">met</span><span class="o">.</span><span class="n">remove_from_model</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">id</span> <span class="o">+=</span> <span class="s2">&quot;::</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="c1"># Add gene annotation</span>
+        <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">genes</span><span class="p">:</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">gobj</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">gene</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c1"># genes should already be contained in the model if they have a reaction relationship</span>
+                <span class="c1"># However, tolerate bad designs</span>
+                <span class="k">continue</span>
+            <span class="n">gobj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">gene</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">gobj</span><span class="o">.</span><span class="n">functional</span> <span class="o">=</span> <span class="n">gene</span><span class="p">[</span><span class="s1">&#39;functional&#39;</span><span class="p">]</span>
+            <span class="n">gobj</span><span class="o">.</span><span class="n">annotation</span> <span class="o">=</span> <span class="n">gene</span><span class="p">[</span><span class="s1">&#39;annotation&#39;</span><span class="p">]</span>
+            <span class="n">gobj</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">gene</span><span class="p">[</span><span class="s1">&#39;notes&#39;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">mdl</span></div>
+
+<div class="viewcode-block" id="StrainDesign.validate_dict"><a class="viewcode-back" href="../../../strain_design.html#gsmodutils.project.design.StrainDesign.validate_dict">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">validate_dict</span><span class="p">(</span><span class="n">design_dict</span><span class="p">,</span> <span class="n">throw_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check required fields are present</span>
+<span class="sd">        :param design_dict:</span>
+<span class="sd">        :param throw_exceptions:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">required_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;metabolites&quot;</span><span class="p">,</span> <span class="s2">&quot;reactions&quot;</span><span class="p">,</span> <span class="s2">&quot;genes&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">design_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">throw_exceptions</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">raise</span> <span class="n">DesignError</span><span class="p">(</span><span class="s2">&quot;Required field </span><span class="si">{}</span><span class="s2"> missing from design&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+
+        <span class="c1"># TODO: test if reactions are valid</span>
+        <span class="c1"># TODO: test if metabolites are valid</span>
+        <span class="c1"># TODO: test genes are valid</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">reactions</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reactions</span><span class="p">),</span>
+            <span class="n">genes</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">genes</span><span class="p">),</span>
+            <span class="n">metabolites</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metabolites</span><span class="p">),</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">pid</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">info</span>
+
+    <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method intended for jupyter notebooks&quot;&quot;&quot;</span>
+        <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&lt;table&gt;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">info_str</span> <span class="o">+=</span> <span class="s2">&quot;&lt;tr&gt; &lt;td&gt; &lt;strong&gt; </span><span class="si">{0}</span><span class="s2"> &lt;/strong&gt; &lt;/td&gt; &lt;td&gt; </span><span class="si">{1}</span><span class="s2"> &lt;/td&gt; &lt;/tr&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">info_str</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/table&gt;&quot;</span>
+        <span class="k">return</span> <span class="n">info_str</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">repr_s</span> <span class="o">=</span> <span class="s2">&quot;&lt; StraignDesign </span><span class="si">{id}</span><span class="s2"> with </span><span class="si">{reactions}</span><span class="s2"> reactions, </span><span class="si">{genes}</span><span class="s2"> genes and </span><span class="si">{metabolites}</span><span class="s2"> metabolites&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">repr_s</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">gsmodutils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../designs.html">Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tests.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docker.html">Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About project</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../metacyc.html">MetaCyc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scrumpy.html">ScrumPy</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, James Gilbert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,475 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Projects &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Designs" href="designs.html" />
+    <link rel="prev" title="gsmodutils - genome scale model management utilities" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="projects">
+<h1>Projects<a class="headerlink" href="#projects" title="Permalink to this headline">¶</a></h1>
+<p>Projects are at the heart of gsmodutils.
+Essentially, a project is a directory that contains all the models, designs, conditions and other gsmodutils tools
+such as Docker files.</p>
+<div class="section" id="creating-projects">
+<h2>Creating projects<a class="headerlink" href="#creating-projects" title="Permalink to this headline">¶</a></h2>
+<p>Project creation is best done with the command line utility.
+This provides a step by step guide for project creation.</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ gsmodutils create_project PROJECT_PATH MODEL_PATH
+</pre></div>
+</div>
+<p>Alternatively, this can be done in python using the GSMProject class.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="kn">from</span> <span class="nn">cameo</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">bigg</span><span class="o">.</span><span class="n">e_coli_core</span>
+
+<span class="c1"># Note, running more than once will throw an error.</span>
+<span class="c1"># Projects can&#39;t be created in the folder more than once.</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="o">.</span><span class="n">create_project</span><span class="p">(</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="p">],</span>
+    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Example ecoli core model&#39;</span><span class="p">,</span>
+    <span class="n">author</span><span class="o">=</span><span class="s1">&#39;A user&#39;</span><span class="p">,</span>
+    <span class="n">author_email</span><span class="o">=</span><span class="s1">&#39;A.user@example.com&#39;</span><span class="p">,</span>
+    <span class="n">project_path</span><span class="o">=</span><span class="s1">&#39;example_project&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Using the cli lets have a look inside the newly created project:</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>$ gsmodutils create_project ./example_project e_coli_core.json
+...
+$ <span class="nb">cd</span> example_project
+$ gsmodutils info
+--------------------------------------------------------------------------------------------------
+Project description - Example ecoli core model
+Author<span class="o">(</span>s<span class="o">)</span>: - A user
+Author email - A.user@example.com
+Designs directory - designs
+Tests directory - tests
+
+Models:
+        * e_coli_core.json
+                 e_coli_core
+--------------------------------------------------------------------------------------------------
+</pre></div>
+</div>
+<p>This will also allow access to a project object that can be used to access gsmodutils features, such as accessing models</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
+<span class="c1"># load the default model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It is now recomended that you use source control, such as <code class="docutils literal"><span class="pre">git</span></code> or <code class="docutils literal"><span class="pre">mercurial</span></code>, create a repository and add the
+project to it to track all changes to models that are made over the course of the project.</p>
+</div>
+<div class="section" id="adding-conditions">
+<h2>Adding conditions<a class="headerlink" href="#adding-conditions" title="Permalink to this headline">¶</a></h2>
+<p>In many cases it is desirable to compare models configured with different growth conditions.
+In this simplistic example we show how conditions can be adjusted by switching the growth media from glucose to
+fructose.
+This setting can then be saved and reloaded at a later time.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils</span> <span class="kn">import</span> <span class="n">GSMProject</span>
+<span class="c1"># Load existing project</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">GSMProject</span><span class="p">(</span><span class="s1">&#39;example_project&#39;</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">model</span>
+
+<span class="c1"># Switching off glucose uptake</span>
+<span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">EX_glc__D_e</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="c1"># switching on Xylose uptake</span>
+<span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">EX_fru_e</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span>
+<span class="c1"># Check it works</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+<span class="n">project</span><span class="o">.</span><span class="n">save_conditions</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;fructose_growth&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Loading them back should now be straightforward:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># loading the conditions back into a different model</span>
+<span class="n">fructose_m</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_conditions</span><span class="p">(</span><span class="s1">&#39;fructose_growth&#39;</span><span class="p">)</span>
+
+<span class="c1"># These will raise assertion errors if this hasn&#39;t worked</span>
+<span class="c1"># fructose should be in the medium</span>
+<span class="c1"># Glucose should not be present</span>
+<span class="k">assert</span> <span class="s2">&quot;EX_fru_e&quot;</span> <span class="ow">in</span> <span class="n">fructose_m</span><span class="o">.</span><span class="n">medium</span>
+<span class="k">assert</span> <span class="s2">&quot;EX_glc__D_e&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fructose_m</span><span class="o">.</span><span class="n">medium</span>
+<span class="k">assert</span> <span class="n">fructose_m</span><span class="o">.</span><span class="n">medium</span><span class="p">[</span><span class="s2">&quot;EX_fru_e&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">10</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="module-gsmodutils.project.interface">
+<span id="gsmproject-class"></span><h2>GSMProject class<a class="headerlink" href="#module-gsmodutils.project.interface" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gsmodutils.project.interface.GSMProject">
+<em class="property">class </em><code class="descclassname">gsmodutils.project.interface.</code><code class="descname">GSMProject</code><span class="sig-paren">(</span><em>path='.'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.add_essential_pathway">
+<code class="descname">add_essential_pathway</code><span class="sig-paren">(</span><em>tid</em>, <em>reactions</em>, <em>description=''</em>, <em>reaction_fluxes=None</em>, <em>models=None</em>, <em>designs=None</em>, <em>conditions=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.add_essential_pathway"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.add_essential_pathway" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a pathway to automated testing to confirm reactions are always present in model and the pathway always
+carries flux.</p>
+<p>This is just a simpler way of adding essential pathways than manually adding a json file with the same
+information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tid</strong> – </li>
+<li><strong>reactions</strong> – </li>
+<li><strong>description</strong> – </li>
+<li><strong>reaction_fluxes</strong> – </li>
+<li><strong>models</strong> – If None, only the default model is checked unless at least one design is specified</li>
+<li><strong>designs</strong> – By default designs are never checked. specifying all tests the pathway on all designs</li>
+<li><strong>conditions</strong> – None, by default. Specifies the conditions which a pathway is present in.</li>
+<li><strong>overwrite</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.add_model">
+<code class="descname">add_model</code><span class="sig-paren">(</span><em>model_path</em>, <em>validate=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.add_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.add_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a model given a path to it copy it to model directory unless its in the project path already.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.clean_project">
+<code class="descname">clean_project</code><span class="sig-paren">(</span><em>auto_remove=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.clean_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.clean_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check all design and condition settings to see if they contain orphans or links to non-existing models
+If auto_remove is true applied, any orphan files are automatically deleted and entries to missing models are
+also removed.
+:return: tuple(list, list) of all orphan designs and conditions (ones removed if auto_remove is set to true)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.conditions">
+<code class="descname">conditions</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.conditions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="gsmodutils.project.interface.GSMProject.create_project">
+<em class="property">classmethod </em><code class="descname">create_project</code><span class="sig-paren">(</span><em>models</em>, <em>description</em>, <em>author</em>, <em>author_email</em>, <em>project_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.create_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.create_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates new projects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>models</strong> – iterable of models can be strings to path locations or cobra model instances.</li>
+<li><strong>description</strong> – String description of project</li>
+<li><strong>author</strong> – string author names, separate with &amp;</li>
+<li><strong>author_email</strong> – email of project owner. separate with ‘;’</li>
+<li><strong>project_path</strong> – location on disk to place project. Must not contain existing gsmodutils project.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.design_path">
+<code class="descname">design_path</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.design_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.designs">
+<code class="descname">designs</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.designs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of all the designs stored for the project</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.get_conditions">
+<code class="descname">get_conditions</code><span class="sig-paren">(</span><em>update=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.get_conditions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.get_conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the saved conditions file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.get_design">
+<code class="descname">get_design</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.get_design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.get_design" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the StrainDesign object (not resulting model) of a design
+:param design: design identifier
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.growth_condition">
+<code class="descname">growth_condition</code><span class="sig-paren">(</span><em>conditions_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.growth_condition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.growth_condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.iter_models">
+<code class="descname">iter_models</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.iter_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.iter_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator for models</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.list_designs">
+<code class="descname">list_designs</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.list_designs" title="Permalink to this definition">¶</a></dt>
+<dd><p>List designs stored in design dir</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.load_conditions">
+<code class="descname">load_conditions</code><span class="sig-paren">(</span><em>conditions_id</em>, <em>model=None</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.load_conditions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.load_conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a model with a given set of pre-saved media conditions
+:param conditions_id: identifier of conditions file
+:param model: string or cobrapy/cameo model
+:param copy: return copy of model or modify inplace
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.load_design">
+<code class="descname">load_design</code><span class="sig-paren">(</span><em>design</em>, <em>model=None</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.load_design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.load_design" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a model with a specified design modification</p>
+<p>Design must either be a design stored in the folder path or a path to a json file
+The json file should conform to the same standard as a json model</p>
+<dl class="docutils">
+<dt>required fields:</dt>
+<dd>“metabolites”:[]
+“reactions”:[]
+“description”: “”, 
+“notes”: {}, 
+“genes”: [], 
+“id”:”“</dd>
+<dt>optional fields:</dt>
+<dd>“parent”: str - parent design to be applied first
+“conditions”: “”
+“removed_reactions”:[]
+“removed_metabolites”:[]</dd>
+</dl>
+<p>Note if conditions is specified it is loaded first
+other bounds are set afterwards</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.load_diff">
+<code class="descname">load_diff</code><span class="sig-paren">(</span><em>diff</em>, <em>base_model=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.load_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.load_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a diff dictionary and add it to a model (does not require saving a design file)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.load_model">
+<code class="descname">load_model</code><span class="sig-paren">(</span><em>mpath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.load_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.load_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a model stored by the project
+mpath refers to the relative path of the model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.model">
+<code class="descname">model</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns default model for project</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.models">
+<code class="descname">models</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists all the models that can be loaded</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.project_path">
+<code class="descname">project_path</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.project_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.project_tester">
+<code class="descname">project_tester</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.project_tester"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.project_tester" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a tester for this project instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.save_conditions">
+<code class="descname">save_conditions</code><span class="sig-paren">(</span><em>model</em>, <em>conditions_id</em>, <em>carbon_source=None</em>, <em>apply_to=None</em>, <em>observe_growth=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.save_conditions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.save_conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add media conditions that a given model has to the project. Essentially the lower bounds on transport reactions.
+All other trnasport reactions will be switched off.</p>
+<p>In some cases, one may wish to set conditions under which a model should not grow.
+observe_growth allows this to be configured. If using a single model or if the condition should not grow under
+any circumstances, observe_growth can be set to false.</p>
+<p>If certain models should grow, specify this with a a tuple where the entries refer to the model files tracked by
+the project. All models specified must be contained within the project.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>model</strong> – cobrapy or cameo model</li>
+<li><strong>conditions_id</strong> – identifier for the conditions should be unique</li>
+<li><strong>carbon_source</strong> – name of carbon source in the media that has a fixed uptake rate</li>
+<li><strong>apply_to</strong> – iterable of models that this set of conditions applies to</li>
+<li><strong>observe_growth</strong> – bool or list.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.save_design">
+<code class="descname">save_design</code><span class="sig-paren">(</span><em>model</em>, <em>did</em>, <em>name</em>, <em>description=''</em>, <em>conditions=None</em>, <em>base_model=None</em>, <em>parent=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.save_design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.save_design" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a design from a diff of model_a and model_b</p>
+<p>id should be a string with no spaces (conversion handled)</p>
+<p>Returns the saved design diff</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> – cobrapy/cameo model</li>
+<li><strong>did</strong> – design identifier</li>
+<li><strong>name</strong> – name of the design</li>
+<li><strong>description</strong> – text description of what it does</li>
+<li><strong>conditions</strong> – conditions that should be applied for the design</li>
+<li><strong>base_model</strong> – Model that the design should be derived from - specified model included in project</li>
+<li><strong>parent</strong> – string for parent design that this design is a diff from</li>
+<li><strong>overwrite</strong> – overwrite and existing design (only applies if the id is already in use)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.tests_dir">
+<code class="descname">tests_dir</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.tests_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests directory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.project.interface.GSMProject.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates this class from configuration file</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gsmodutils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Projects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-projects">Creating projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-conditions">Adding conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.project.interface">GSMProject class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="designs.html">Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About project</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="metacyc.html">MetaCyc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrumpy.html">ScrumPy</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">gsmodutils - genome scale model management utilities</a></li>
+      <li>Next: <a href="designs.html" title="next chapter">Designs</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, James Gilbert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/project.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
