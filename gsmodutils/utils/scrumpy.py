@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import argparse
+import click
 import json
 import os
 
@@ -271,45 +271,33 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
     return reactions, metabolites
 
 
-def scrumpy_to_cobra():
+@click.command()
+@click.argument('model')
+@click.option('--output', default='omodel.json', help='output location for json file')
+@click.option('--atpase_reaction', default='ATPase', type=str, help='atpase reaction id')
+@click.option('--atpase_flux', default=-3.0, type=float, help='atpase reaction id')
+@click.option('--media', default='default_media.json', type=str, help='A growth media constraints file')
+@click.option('--objective_reaction', default='Biomass', help='Objective reaction id')
+@click.option('--objective_direction', default='max', help='objective direction (min or max)')
+def scrumpy_to_cobra(model, output, atpase_reaction, atpase_flux, media, objective_reaction, objective_direction):
     """
     Command line utility for parsing scrumpy files and creating cobrapy models
-    TODO: update to use click rather than argparse
-    TODO: update for better handling of import constraints
-    TODO: setting minimisation of sum of fluxes as an objective rather than biomass maximisation
+    TODO: Need to standardise to change objective function to minimisation of fluxes with a fixed Biomass flux
     """
-    # Parser argument
-    parser = argparse.ArgumentParser(description='parse a scrumpy file and output a json cobra compatable model')
-   
-    parser.add_argument('--model', required=True, action="store",
-                        help='Path to the main scrumpy model')
-    
-    parser.add_argument('--output', default='omodel.json', action="store",
-                        help='output location for json file')
-    
-    parser.add_argument('--media', default='default_media.json', action='store')
-    
-    parser.add_argument('--atpase_reaction', default="ATPase", action="store")
-    parser.add_argument('--atpase_flux', default=3.0, type=float)
-    
-    parser.add_argument('--objective_reaction', default='Biomass')
-    parser.add_argument('--objective_direction', default='max', action="store")
-    
-    args = parser.parse_args()
-    
-    if os.path.exists(args.media):
-        media = json.load(open(args.media))
+    if os.path.exists(media):
+        with open(media) as mp:
+            media = json.load(mp)
     else:
         media = dict()
     
     if len(media) == 0:
-        print("No media transport reactions found, model will not grow")
+        click.echo("No media transport reactions found, model will not grow")
    
-    model = load_scrumpy_model(args.model,
-                               atpase_reaction=args.atpase_reaction,
-                               atpase_flux=args.atpase_flux,
+    model = load_scrumpy_model(model,
+                               atpase_reaction=atpase_reaction,
+                               atpase_flux=atpase_flux,
                                media=media, 
-                               objective_reactions=[args.objective_reaction],
-                               obj_dir=args.objective_direction)
+                               objective_reactions=[objective_reaction],
+                               obj_dir=objective_direction)
 
-    cobra.io.save_json_model(model, args.output)
+    cobra.io.save_json_model(model, output)

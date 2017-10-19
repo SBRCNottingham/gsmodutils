@@ -9,6 +9,7 @@ _IAF_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'iAF1260.json')
 _CORE_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'e_coli_core.json')
 
 scrumpy_model_path = os.path.join(os.path.dirname(__file__), 'scrumpy', 'MetaSal.spy')
+scrumpy_biomass_path = os.path.join(os.path.dirname(__file__), 'scrumpy', 'biomass_comp.json')
 
 
 class CleanUpFile(object):
