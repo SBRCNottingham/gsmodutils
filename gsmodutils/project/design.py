@@ -5,6 +5,9 @@ import cobra
 import pandas
 
 from gsmodutils.exceptions import DesignError
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class StrainDesign(object):
@@ -265,7 +268,7 @@ class StrainDesign(object):
             try:
                 self.project.load_conditions(self.conditions, model=model)
             except KeyError:
-                pass
+                logger.warning('Cannot find conditions id {} in project specified by design'.format(self.conditions))
 
         return model
 
