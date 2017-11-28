@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt]{article}
+\documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{fullpage}
 \usepackage{color}
@@ -12,11 +12,6 @@
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
  
-%opening
-% \address{$^{\text{\sf 1}}$Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom and \\
-% $^{\text{\sf 2}}$Intelligent Modelling and Analysis group, School of Computer Science, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
-
-
 
 \title{Gsmodutils: A python based framework for test driven genome scale metabolic model development}
 \author[1]{James Gilbert}
@@ -30,15 +25,17 @@
 \maketitle
 
 \begin{abstract}
-\textbf{Motivation:} Genome scale metabolic models are increasingly important for systems biology and metabolic engineering research, capable of simulating complex steady state phenotypic behaviour.
+\textbf{Motivation:} Genome scale metabolic models are increasingly important for systems biology and metabolic engineering research as they are capable of simulating complex steady state phenotypic behaviour.
 Models of this scale can include thousands of reactions and metabolites, with many crucial pathways that only become activated in specific simulation settings.
-However, despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for the management of continually curated large scale models.\\
+However, despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for the management of continually curated large scale models.
+This is quickly becoming an issue for large scale industrial biotechnology projects, which require good quality reusable models integral to the design, build and test cycle.
+\\
 \textbf{Results:} Taking advantage of python and cobrapy integration, we have developed the \textit{gsmodutils} modelling framework.
 As a fully documented python API and series of command line utilities, gsmodutils places an emphasis on test driven design of models through easy to write test cases in json or python.
-Crucially, different substrate conditions are configurable allowing users to examine how different designs or curation impact a wide range of system behaviours, hopefully, minimising error between model versions. \\
+Crucially, different substrate conditions are configurable allowing users to examine how different designs or curation impact a wide range of system behaviours, hopefully, minimising error between model versions.
 Furthermore, a core feature of the software is to allow users to easily create shareable, self contained, docker images that can be run in cross platform environments.\\
 \textbf{Availability:} The software framework described within this paper is open source and freely available from http://github.com/gsmodutils \\
-\textbf{Contact:}{jamie.twycross@nottingham.ac.uk}
+\textbf{Contact:}{james.gilbert@nottingham.ac.uk}
 \end{abstract}
 
 
@@ -62,14 +59,71 @@ This covers huge variety of software platforms including the COBRA toolbox in Ma
 ScrumPy and CobraPy in Python \cite{poolman2006scrumpy, ebrahim2013cobrapy} with additional tools and libraries such as cameo \cite{cardoso2017cameo}, OptFlux in Java \cite{rocha2010optflux}, SurreyFBA \cite{gevorgyan2010surreyfba}.
 Whilst most of these tools are Open Source and follow standards, such as SBML \cite{finney2003systems}, there are often few options to make analysis easy to replicate.
 
+The archetype design, build and test cycle of synthetic biology heavily relies on the usage of bioinformatics software and modelling to improve the production of natural products \cite{carbonell2016bioinformatics}.
+In order to speed up the use of bioinformatics tools to produce high value platform chemicals, genome scale models are often used to discover methods for process optimisation \textit{in silico}.
+
+For example, many tools such as RetroPath \cite{carbonell2013retropath}, XTMS \cite{carbonell2014xtms} and GEM-Path \cite{campodonico2014generation} suggest thousands of potential hetrologous pathways as well as providing predictions for flux distributions.
+Many of these tools significantly increase the value of genome scale models, for example by coupling commodity production to an organism's growth \cite{feist2010model}.
+However, significant changes to wild-type strains must be tracked and compared to allow models to remain relevant.
+
+Similarly, many conventional applications of genome scale models in systems biology have often suffered from unnecessary replication of work due to a lack of standards.
+For example, there are now three independently developed models of \textit{Clostridium acetobutylicum} \cite{mcanulty2012genome, dash2014capturing, yoo2015quantitative}, an organism used in the production of solvents for over a century.
+These models all exist to solve similar biological problems, however there is disagreement over fundamental biochemical properties of these anaerobic organisms particularly with the focus on redox balancing \cite{dash2014capturing}.
+Indeed, such models also include updates based on improved genome annotations and the inclusion of fluxomic, transcriptomic and metabolomic characterisations \cite{yoo2015quantitative}. 
+
+% Perhaps more worryingly, from an industrial perspective, is that the use of models in bioproduction has not escaped regulatory notice \cite{}.
+Furthermore, as models are often used to explain issues with online production and facilitate the optimisation of bioprocessing, it stands to reason that model correctness should attract oversight.
+Consequently, methods are needed to ensure that the models themselves are tightly version controlled.
+In this paper, we argue for the use of a form of \textit{test driven} model of development, a conceptual approach borrowed from software engineering.
 
 In this paper we present a software framework geared toward \textit{test driven} genome scale model development, a concept that is taken directly from good software development practices.
 By this we mean the notion that, as a model is curated to represent biological phenomena, much of the validation can be turned into specific test cases that can be repeated between model versions.
-Example test cases include the notion that flux must be carried through specific pathways, growth and uptake rates should match experimental evidence and different nutrient sources should be included.
+We provide an example test case for \textit{C. acetobutylicum} an organism that has had considerable focus in terms of genome scale models and how a working methodology using the software presented here can reduce repetition of work and improve the reproducibility of results.
 This article aims to summarise the main objectives of the gsmodutils software and we refer the reader to the software user guide for a more detailed exploration features.
 
+\section{Improving the design phase of industrial biotechnology}
 
-%\enlargethispage{12pt}
+The design phase of industrial synthetic biotechnology, due to historical and regulatory convention, often follows a conventional waterfall model for development of genome scale models.
+This is borne out of a number significant constraints in the development of genome scale models.
+The waterfall approach for model is characterised in Figure \ref{fig:methodology_approaches} where requirements for a model are captured at an early stage and are hard to refine during the production process.
+
+In contrast, an \textit{agile} methodology for the development of models places the focus on adapting work to new requirements \cite{martin2002agile}.
+Such an approach best fits genome scale models because they are rarely created to investigate individual processes and, instead, capture the complexity of large systems.
+This modelling formation costs an in depth understanding of dynamic behaviour. 
+However, capturing steady state phenomena still provides a good understanding of systemic properties \cite{o2015using}.
+
+Constraints based models are intrinsically related to available genome annotations.
+Such annotations rely heavily on automated matches to related species, with the characterisations of individual genes often being left to a few of critical interest \cite{seemann2014prokka}.
+
+Such approaches often leave models with missing reactions \cite{}, incorrect gene-reaction rules \cite{} or with pathways based on gap filling methods that add reactions that may not be present within the organism \cite{benedict2014likelihood}.
+Genome annotation is frequently updated and models are often corrected ``on the fly'' when attempting to understand specific natural phenomena.
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{Waterfall.png}
+\caption{Conventional waterfall methodology for model development.
+Each process is considered to be an isolated aspect of model development.}
+\label{fig:methodology_approaches}
+\end{figure}
+
+Consequently, models undergo significant manual annotation which can lead to errors.
+In this work we advocate a test driven approach to model development highlighted in Figure \ref{fig:test_driven}.
+Here, the model is changed to achieve core research goals that are dynamic in response to the changes of a project.
+In order to achieve this goal, validation criteria for a model such as growth conditions or the impact of gene knock outs, should be formally set.
+When a model is changed, all such validation criteria should be retested to ensure that models do not regress to previous states.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{Testdriven.png}
+\caption{Workflow for model development proposed for gsmodutils.
+The objective of this approach is to simultaneously capture research questions, model validation criteria and minimise the impact of changes on previously completed models.
+}
+\label{fig:test_driven}
+\end{figure}
+
+We feel that while many of the current software tools for genome scale models do an excellent job of facilitating answers to crucial research and design questions, their is a significant gap in terms of the reliability and re-usability of models.
+The following sections provide an overview of the gsmodutils software framework.
+Gsmodutils aims to provide a basis for test driven, version controlled agile model development.
+All software is open source and is designed to be interoperable with platforms widely used in the domain of constraints based modelling.
 
 \section{Software}
 
@@ -89,7 +143,7 @@ In addition, projects are easy to export using portable standardised docker imag
 The idea being to allow users to share models as quickly and easily as possible without concern for custom system configurations.
 
 
-\begin{figure}
+\begin{figure}[ht]
 
 \lstset{language=Python}   
 \begin{lstlisting}
@@ -125,9 +179,20 @@ Figure \ref{fig:strain_hered}
 \subsection{Development workflow}
 In this section we propose a method for the development of genome scale models that integrates gsmodutils with version control systems.
 Figure \ref{fig:test_case} highlights the notion of test cases, taken from test driven development.
-The outlined workflow is that the user writes a formal test case for some modelling goal, perhaps driven by captured experimental data, that fits a specific form of valdiation criteria.
+The outlined workflow is that the user writes a formal test case for some modelling goal, perhaps driven by captured experimental data, that fits a specific form of validation criteria.
 We note that, in principle, this test case should be written \textit{a priori} of changes to a model.
 
+\section{Example usage: Clostridium acetobutylicum models}
+
+% Scientific background
+
+% Prodblems models solve
+
+% Created designs in gsmodutils - start with original model, make changes
+
+% Diffs between existing models
+
+% Conclusions
 
 \section{Related work}
 \textbf{cameo:} Cameo \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
@@ -152,9 +217,10 @@ In an ideal world, we would envision a methodology such as our becoming a pre-re
 As with most software development projects, gsmodutils will see expanded features.
 Initially this will include tighter integration with version control systems such as git and mercurial.
 Furthermore, the objective of the project is to cultivate collaboration by simplifying the process of distributing large models to different users.
+As a consequence, methods for sharing docker containers will be investigated.
 
 \section*{Acknowledgements}
-We would like to thank the Oxford Brookes Cell Systems Modelling group for helpful discussions regarding this work and Rupert Norman for assistance testing and forming the idea of this software.
+We would like to thank the Oxford Brookes Cell Systems Modelling group for helpful discussions regarding this work, Rupert Norman for assistance testing and forming the idea of this software and Thomas Millat for crucial scientific advice.
 
 \section*{Funding}
 This work has been supported by the BBSRC grant XXXXX.
