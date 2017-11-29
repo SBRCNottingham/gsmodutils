@@ -3,6 +3,7 @@ from collections import defaultdict, Counter
 from gsmodutils.utils.io import load_model
 from cobra import Reaction, Metabolite, Model
 from cobra.io import save_json_model
+import sys
 
 
 def parse_db(db_path):
@@ -19,6 +20,30 @@ def parse_db(db_path):
     return database
 
 
+class FileEncodingCtx(object):
+
+    def __init__(self, filename, encoding='latin-1', **kwargs):
+        """
+        Python 2 and 3 context manager for opening latin-1 encoded files
+        Parsing Metacyc .dat files breaks opening files in python 3
+        """
+        self.filename = filename
+        self.encoding = encoding
+        self.kwargs = kwargs
+
+    def __enter__(self):
+        if sys.version_info[0] < 3:
+            self.open_file = open(self.filename, **self.kwargs)
+        else:
+            self.open_file = open(self.filename, encoding=self.encoding, **self.kwargs)
+
+        return self.open_file
+
+    def __exit__(self, exec_type, exec_value, traceback):
+        self.open_file.close()
+        return self.open_file
+
+
 def parse_metacyc_file(fpath, unique_fields):
     """
     Parses a dat file
@@ -28,7 +53,7 @@ def parse_metacyc_file(fpath, unique_fields):
     """
     db = dict()
 
-    with open(fpath) as datfile:
+    with FileEncodingCtx(fpath) as datfile:
         entry = defaultdict(list)
         lprev = None
         for line in datfile:
