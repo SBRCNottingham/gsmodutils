@@ -272,7 +272,11 @@ def diff(model_path, base_model, project_path, parent, output, names):
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--validate/--no-validate', default=True, help='Chose to validate the model before it is added.')
 def add_model(path, project_path, validate):
-    """Add a model to a specified gsm project"""
+    """
+    Add a model to a specified gsm project.
+    If validation is selected, where the model fails to conform to cobra standards, the model will not be added to the
+    project.
+    """
     project = _load_project(project_path)
     try:
         project.add_model(path, validate=validate)

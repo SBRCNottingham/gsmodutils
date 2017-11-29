@@ -17,6 +17,18 @@ However, for many cases a single model with different strain designs matching re
 For example, this can be for the addition of hetrologous pathways, or kockouts that are commonly used to improve the
 productions of desired chemicals.
 
+The Figure below shows the concept of designs in the context of a gsmodutils project.
+
+.. figure:: designs.png
+    :scale: 80 %
+    :alt: Reusable, inheritable designs
+
+    The objective of the gsmodutils framework is to allow the reuse of constraints in an organised fashion.
+    A design is considered to be the delta difference between a wild type model and any production or modified strains.
+    This can be achieved in an inheritable format.
+    For example, the designs for the addition of hetrologous reactions can be combined with reaction knock-outs.
+    In gsmodutils, any changes to constraints between are stored within a json document inside the project.
+
 Adding designs
 --------------
 
