@@ -22,7 +22,7 @@ def load_model(path, file_format=None):
         cobra_model = cobra.io.load_json_model(path)
     elif file_format == "yaml":
         cobra_model = cobra.io.load_yaml_model(path)
-    elif file_format == "sbml":
+    elif file_format in ["sbml", "xml"]:
         cobra_model = cobra.io.read_sbml_model(path)
     elif file_format in ["mat", "m", "matlab"]:
         cobra_model = cobra.io.load_matlab_model(path)
