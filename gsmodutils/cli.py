@@ -175,20 +175,20 @@ def test(project_path, test_id, skip_default, verbose, log_path):
 @click.command()
 @click.argument('project_path', type=click.Path(writable=True))
 @click.argument('model_path', type=str, default=None)
-def init(project_path, model_path):
+@click.option('--name', prompt='Project name')
+@click.option('--description', prompt='Please enter a project description')
+@click.option('--author', prompt='Author name')
+@click.option('--email', prompt='Please enter author email')
+def init(project_path, model_path, name, description, author, email):
     """Create a new gsmodutils project"""
     click.echo('Project creation {}'.format(project_path))
-
     click.echo('Using model {}'.format(model_path))
 
-    description = click.prompt('Please enter a project description', type=str)
-    author = click.prompt('Author name', type=str)
-    author_email = click.prompt('Author email', type=str)
-
     configuration = dict(
+            name=name,
             description=description,
             author=author,
-            author_email=author_email
+            author_email=email
     )
     
     # TODO: find out how to add multiple paths with click

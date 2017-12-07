@@ -22,10 +22,10 @@ class ProjectConfig(object):
     
     _cfg_params = [
         'description', 'author', 'author_email', 'tests_dir', 'design_dir', 'conditions_file',
-        'repository_type', 'default_model', 'models',
+        'repository_type', 'default_model', 'models', 'name',
     ]
     
-    def __init__(self, description, author, author_email, **kwargs):
+    def __init__(self, description, author, author_email, name='Untitled', **kwargs):
         """
         Class for configuration
         Takes configuration arguments and ensures that the required configuration options are included
@@ -44,6 +44,7 @@ class ProjectConfig(object):
         self.author = author
         self.description = description
         self.author_email = author_email
+        self.name = name
 
         # used for the optional config parameters
         for arg, val in kwargs.items():
@@ -212,7 +213,7 @@ class ProjectConfig(object):
                 docker_image_path = self.create_docker_file(project_path)
                 added_files.append(docker_image_path)
 
-        except:
+        except Exception:
             # Cleanup after ourselves upon failure - i.e. don't create a new project
             # This flag is important - the code should never delete an existing user space!
             if created:

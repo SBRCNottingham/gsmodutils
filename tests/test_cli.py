@@ -248,18 +248,18 @@ def test_import_designs():
         assert 'should_fail' not in project.list_designs
 
 
-def test_add_model():
+def test_addmodel():
     with FakeProjectContext() as ctx:
         runner = CliRunner()
 
-        result = runner.invoke(gsmodutils.cli.add_model, [_CORE_MODEL_PATH, '--project_path', ctx.path])
+        result = runner.invoke(gsmodutils.cli.addmodel, [_CORE_MODEL_PATH, '--project_path', ctx.path])
 
         assert result.exit_code == 0
         project = GSMProject(ctx.path)
         assert "e_coli_core.json" in project.config.models
 
         # Should fail when model already exists
-        result = runner.invoke(gsmodutils.cli.add_model, [_CORE_MODEL_PATH, '--project_path', ctx.path])
+        result = runner.invoke(gsmodutils.cli.addmodel, [_CORE_MODEL_PATH, '--project_path', ctx.path])
         assert result.exit_code == -1
 
 
@@ -336,16 +336,18 @@ def test_diff():
 def test_create_project():
     runner = CliRunner()
     with CleanUpDir() as ctx:
+        name = 'Test model'
         description = 'test desc'
         author = 'test author'
         email = 'test@email.com'
 
-        inpt = '{}\n{}\n{}\n'.format(description, author, email)
-        result = runner.invoke(gsmodutils.cli.create_project, [ctx.path, _CORE_MODEL_PATH], input=inpt)
+        inpt = '{}\n{}\n{}\n{}\n'.format(name, description, author, email)
+        result = runner.invoke(gsmodutils.cli.init, [ctx.path, _CORE_MODEL_PATH], input=inpt)
         assert result.exit_code == 0
 
         # shouldn't raise an exception
         project = GSMProject(ctx.path)
+        assert project.config.name == name
         assert project.config.description == description
         assert project.config.author == author
         assert project.config.author_email == email
@@ -353,5 +355,5 @@ def test_create_project():
         assert 'e_coli_core.json' in project.config.models
 
         # attempting rerun will raise exception
-        result = runner.invoke(gsmodutils.cli.create_project, [ctx.path, _CORE_MODEL_PATH], input=inpt)
+        result = runner.invoke(gsmodutils.cli.init, [ctx.path, _CORE_MODEL_PATH], input=inpt)
         assert result.exit_code == -1

@@ -11,7 +11,7 @@ def validate_model_file(model_path):
     """
     Simple wrapper to load a model from a given path (handles JSON and SBML)
     """
-    load_model(model_path)
+    model = load_model(model_path)
     return validate_model(model)
 
 
