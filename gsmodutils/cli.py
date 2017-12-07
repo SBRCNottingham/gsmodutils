@@ -162,7 +162,7 @@ def test(project_path, test_id, skip_default, verbose, log_path):
             click.echo(
                 click.style(barstr + ' End standard output ' + barstr, fg='black', bg='white')
             )
-    percent = round( ((ts - te) / ts) * 100, 3)
+    percent = round(((ts - te) / ts) * 100, 3)
     click.echo('Ran {} test assertions with a total of {} errors ({}% success)'.format(ts, te, percent))
 
     # Save report to json log file
@@ -175,7 +175,7 @@ def test(project_path, test_id, skip_default, verbose, log_path):
 @click.command()
 @click.argument('project_path', type=click.Path(writable=True))
 @click.argument('model_path', type=str, default=None)
-def create_project(project_path, model_path):
+def init(project_path, model_path):
     """Create a new gsmodutils project"""
     click.echo('Project creation {}'.format(project_path))
 
@@ -271,7 +271,7 @@ def diff(model_path, base_model, project_path, parent, output, names):
 @click.argument('path')
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--validate/--no-validate', default=True, help='Chose to validate the model before it is added.')
-def add_model(path, project_path, validate):
+def addmodel(path, project_path, validate):
     """
     Add a model to a specified gsm project.
     If validation is selected, where the model fails to conform to cobra standards, the model will not be added to the
@@ -440,10 +440,10 @@ def docker(project_path, overwrite):
 
 
 cli.add_command(test)
-cli.add_command(add_model)
+cli.add_command(addmodel)
 cli.add_command(export)
 cli.add_command(dimport)
-cli.add_command(create_project)
+cli.add_command(init)
 cli.add_command(info)
 cli.add_command(diff)
 cli.add_command(iconditions)
