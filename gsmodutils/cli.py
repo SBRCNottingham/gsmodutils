@@ -174,15 +174,17 @@ def test(project_path, test_id, skip_default, verbose, log_path):
 
 @click.command()
 @click.argument('project_path', type=click.Path(writable=True))
-@click.argument('model_path', type=str, default=None)
+@click.argument('default_model_path', type=click.Path(exists=True))
 @click.option('--name', prompt='Project name')
-@click.option('--description', prompt='Please enter a project description')
-@click.option('--author', prompt='Author name')
-@click.option('--email', prompt='Please enter author email')
-def init(project_path, model_path, name, description, author, email):
+@click.option('--description', prompt='Please enter a project description', help='Project description')
+@click.option('--author', prompt='Author name', help='Project name')
+@click.option('--email', prompt='Please enter author email', help='Author email')
+@click.option('--add_models', multiple=True, type=click.Path(exists=True), help='paths to additional model files,'
+                                                                                ' separated by space')
+def init(project_path, default_model_path, name, description, author, email, add_models):
     """Create a new gsmodutils project"""
     click.echo('Project creation {}'.format(project_path))
-    click.echo('Using model {}'.format(model_path))
+    click.echo('Using model {}'.format(default_model_path))
 
     configuration = dict(
             name=name,
@@ -190,12 +192,13 @@ def init(project_path, model_path, name, description, author, email):
             author=author,
             author_email=email
     )
-    
-    # TODO: find out how to add multiple paths with click
-    add_models = [model_path]
+
+    # Make sure we only try and add models once. Click confirms valid path, config validates models
+    add_models = list(set([default_model_path] + list(add_models)))
+
     # Actually create the project
     try:
-        click.echo('creating project in {}'.format(os.path.abspath(project_path)))
+        click.echo('Creating project in {}'.format(os.path.abspath(project_path)))
         cfg = ProjectConfig(**configuration)
         cfg.create_project(project_path, addmodels=add_models)
 
@@ -268,7 +271,7 @@ def diff(model_path, base_model, project_path, parent, output, names):
 
 
 @click.command()
-@click.argument('path')
+@click.argument('path', type=click.Path(exists=True))
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--validate/--no-validate', default=True, help='Chose to validate the model before it is added.')
 def addmodel(path, project_path, validate):
