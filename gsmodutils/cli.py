@@ -427,7 +427,9 @@ Tests directory - {tests_dir}
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing dockerfile')
-def docker(project_path, overwrite):
+@click.option('--build/--no-build', default=False, help='build docker container')
+@click.option('--tag', default=None, help='tag name for docker container (appended to project name).')
+def docker(project_path, overwrite, build, tag):
     """ Create a dockerfile for the project """
     project = _load_project(project_path)
     if os.path.exists(os.path.join(project_path, 'Dockerfile')) and not overwrite:
@@ -436,10 +438,40 @@ def docker(project_path, overwrite):
         project.config.create_docker_file(project_path)
         click.echo('**** Created Dockerfile **** \n')
 
-    click.echo('''Use "docker build -t=\'container_name\'" to build a container.
-    and use "docker save container_name -o container_name" to create a shareable image''')
+    # Check to see if docker is installed on the machine
+    import docker
+    client = docker.from_env()
+    try:
+        client.info()
+    except ConnectionError:
+        click.echo(
+            click.style('Error: Docker is either not installed or not configured on your system'
+                        'please consult the documentation at docs.docker.com', fg='red')
+        )
+        exit(-1)
 
-    click.echo('\n\nIf docker is not configured on your system please consult the documentation at docs.docker.com')
+    if not build:
+        click.echo('Build option not specified use "gsmodutils docker --build"'
+                   'or "docker build -t=\'project_name\'" to build a container.')
+    else:
+        tag = project.config.name
+        if tag is not None:
+            tag += "-" + tag
+        click.echo('Running docker build, this may take some time...')
+        try:
+            client.image.build(path=project.project_path, tag=tag)
+            click.echo('Image built')
+            click.echo('Use docker save container_name -o container_name" to create a shareable image')
+
+        except docker.errors.BuildError as e:
+            click.echo(
+                click.style('Error building project:\n{}'.format(e), fg='red')
+            )
+
+        except docker.errors.APIError as e:
+            click.echo(
+                click.style('Docker returned an error:\n{}'.format(e), fg='red')
+            )
 
 
 cli.add_command(test)
