@@ -428,8 +428,10 @@ Tests directory - {tests_dir}
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing dockerfile')
 @click.option('--build/--no-build', default=False, help='build docker container')
+@click.option('--save/--no-save', default=False, help='save docker image of tagged container')
 @click.option('--tag', default=None, help='tag name for docker container (appended to project name).')
-def docker(project_path, overwrite, build, tag):
+@click.option('--save_path', default=None, help='Save path for shared docker image')
+def docker(project_path, overwrite, build, save, tag, save_path):
     """ Create a dockerfile for the project """
     project = _load_project(project_path)
     if os.path.exists(os.path.join(project_path, 'Dockerfile')) and not overwrite:
@@ -450,18 +452,18 @@ def docker(project_path, overwrite, build, tag):
         )
         exit(-1)
 
+    tag = project.config.name
+    if tag is not None:
+        tag += ":" + tag
+
     if not build:
         click.echo('Build option not specified use "gsmodutils docker --build"'
-                   'or "docker build -t=\'project_name\'" to build a container.')
+                   'or "docker build -t=\'{}\'" to build a container.'.format(project.config.name))
     else:
-        tag = project.config.name
-        if tag is not None:
-            tag += "-" + tag
         click.echo('Running docker build, this may take some time...')
         try:
-            client.image.build(path=project.project_path, tag=tag)
+            client.images.build(path=project.project_path, tag=tag)
             click.echo('Image built')
-            click.echo('Use docker save container_name -o container_name" to create a shareable image')
 
         except docker.errors.BuildError as e:
             click.echo(
@@ -472,6 +474,39 @@ def docker(project_path, overwrite, build, tag):
             click.echo(
                 click.style('Docker returned an error:\n{}'.format(e), fg='red')
             )
+            exit(-1)
+
+    if save:
+        # ensure that build has been completed first
+        try:
+            image = client.images.get(tag)
+        except docker.errors.ImageNotFound:
+            click.echo(
+                click.style('Image not found try building image first', fg='red')
+            )
+            exit(-1)
+        except docker.errors.APIError as e:
+            click.echo(
+                click.style('Docker returned an error:\n{}'.format(e), fg='red')
+            )
+            exit(-1)
+
+        if save_path is None:
+            save_path = os.path.join(project.project_path, tag + '.tar')
+
+        click.echo('Writing docker image to path {}. This may take some time...'.format(save_path))
+
+        try:
+            resp = image.save()
+            with open(save_path, 'w+') as image_tar:
+                for chunk in resp.stream():
+                    image_tar.write(chunk)
+
+        except docker.errors.APIError as e:
+            click.echo(
+                click.style('Docker returned an error:\n{}'.format(e), fg='red')
+            )
+            exit(-1)
 
 
 cli.add_command(test)
