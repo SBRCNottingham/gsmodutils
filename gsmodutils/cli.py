@@ -456,6 +456,8 @@ def docker(project_path, overwrite, build, save, tag, save_path):
     if tag is not None:
         tag += ":" + tag
 
+    tag = tag.lower()
+
     if not build:
         click.echo('Build option not specified use "gsmodutils docker --build"'
                    'or "docker build -t=\'{}\'" to build a container.'.format(project.config.name))
