@@ -240,18 +240,28 @@ Several crucial validation criteria were identified from the experimental and th
 We note that this is not an exhaustive set of criteria.
 This section is designed to serve as a use case for the gsmodutils framework, not to comprehensively review the initial publications.
 \\
+
 \textbf{TCA cycle}\\
 \textbf{Proton balanced results}\\
 \textbf{Predictions of knockouts}\\
+The inital publication for iCAC802 included validation of four gene knockout mutant strains.
+$\Delta ack$ acetate kinase.\\
+$\Delta ptb$ phosphotransbutrylase.\\
+$\Delta adc$ acetoacetate decarboxylase. \textbf{This reaction is present and the knock out works as expected but not annotated correctly.}\\
+$\Delta hdb$ hydroxybutyryl-CoA dehydrogenase. \\
+
 \textbf{Flux validation against 13C data}\\
 \textbf{Under acidogenic stress (H inhibited conditions) } \\
 \textbf{Solvent formation Cell recycling in solventogenic phase}\\
 
 
-% Conclusions
+% Discuss these results
 \subsection{Remarks} 
-\textbf{To fill in when validation is complete.}
-
+Reproducing the results of the initial publication of the iCAC802 model \cite{dash2014capturing} was possible.
+However, it is notworthy to point out that there were a number of inconsistencies between the annotation in the published model and the publication.
+Notably, the gene ``adc'', which codes for acetoacetate decarboxylase was missing from the initial annotation.
+We would stress that these did not significantly impact the results of the model or the claims made in the publication.
+ 
 \section{Related work}
 \textbf{cameo:} Cameo \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
 strategies, as well as other flux balance analysis utilities. Written in python and part of the cobrapy suite of applications,
