@@ -11,7 +11,7 @@ import json
 import cobra
 
 
-def test_docker_info():
+def test_docker():
 
     with FakeProjectContext() as ctx:
         # Add some conditions and a design with a parent
@@ -34,6 +34,10 @@ def test_docker_info():
         result = runner.invoke(gsmodutils.cli.docker, ['--project_path', ctx.path, '--overwrite'])
         assert result.exit_code == 0
 
+
+def test_info():
+    with FakeProjectContext() as ctx:
+        runner = CliRunner()
         result = runner.invoke(gsmodutils.cli.info, ['--project_path', ctx.path])
         assert result.exit_code == 0
 

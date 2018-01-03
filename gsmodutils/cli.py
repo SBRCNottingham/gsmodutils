@@ -407,7 +407,6 @@ Tests directory - {tests_dir}
         model = project.load_model(mdl_path)
         click.echo("\t* {}".format(mdl_path))
         click.echo("\t\t {}".format(model.id))
-        click.echo("\t\t {}".format(model.description))
 
     click.echo("Designs:")
     for d in project.designs:
