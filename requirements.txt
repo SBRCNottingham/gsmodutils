@@ -11,3 +11,4 @@ six>=1.10.0
 plotly>=2.0.14
 sphinx-click>=1.0.3
 docker>=2.6.1
+lxml>=4.1.1

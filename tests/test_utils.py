@@ -33,11 +33,11 @@ def test_validator():
         result = validate_model(model)
         assert len(result['errors']) == 1
 
-        with pytest.warns(UserWarning):
-            # model without constraints
-            model = cobra.Model()
-            result = validate_model(model)
-            assert len(result['warnings']) == 1
+        # model without constraints
+        model = cobra.Model()
+        result = validate_model(model)
+        # Should issue warning, this assertion makes sure
+        assert len(result['warnings']) == 1
 
 
 def test_forzen_dict():

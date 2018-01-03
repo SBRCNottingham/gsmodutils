@@ -442,6 +442,7 @@ def docker(project_path, overwrite, build, save, tag, save_path):
 
     # Check to see if docker is installed on the machine
     import docker
+    from docker.errors import APIError, BuildError, ImageNotFound
     client = docker.from_env()
     try:
         client.info()
@@ -452,11 +453,11 @@ def docker(project_path, overwrite, build, save, tag, save_path):
         )
         exit(-1)
 
-    tag = project.config.name
+    ttag = project.config.name
     if tag is not None:
-        tag += ":" + tag
+        ttag += ":" + tag
 
-    tag = tag.lower()
+    ttag = ttag.lower()
 
     if not build:
         click.echo('Build option not specified use "gsmodutils docker --build"'
@@ -464,15 +465,15 @@ def docker(project_path, overwrite, build, save, tag, save_path):
     else:
         click.echo('Running docker build, this may take some time...')
         try:
-            client.images.build(path=project.project_path, tag=tag)
+            client.images.build(path=project.project_path, tag=ttag)
             click.echo('Image built')
 
-        except docker.errors.BuildError as e:
+        except BuildError as e:
             click.echo(
                 click.style('Error building project:\n{}'.format(e), fg='red')
             )
 
-        except docker.errors.APIError as e:
+        except APIError as e:
             click.echo(
                 click.style('Docker returned an error:\n{}'.format(e), fg='red')
             )
@@ -480,21 +481,22 @@ def docker(project_path, overwrite, build, save, tag, save_path):
 
     if save:
         # ensure that build has been completed first
+        image = None
         try:
-            image = client.images.get(tag)
-        except docker.errors.ImageNotFound:
+            image = client.images.get(ttag)
+        except ImageNotFound:
             click.echo(
                 click.style('Image not found try building image first', fg='red')
             )
             exit(-1)
-        except docker.errors.APIError as e:
+        except APIError as e:
             click.echo(
                 click.style('Docker returned an error:\n{}'.format(e), fg='red')
             )
             exit(-1)
 
         if save_path is None:
-            save_path = os.path.join(project.project_path, tag + '.tar')
+            save_path = os.path.join(project.project_path, ttag + '.tar')
 
         click.echo('Writing docker image to path {}. This may take some time...'.format(save_path))
 
@@ -504,7 +506,7 @@ def docker(project_path, overwrite, build, save, tag, save_path):
                 for chunk in resp.stream():
                     image_tar.write(chunk)
 
-        except docker.errors.APIError as e:
+        except APIError as e:
             click.echo(
                 click.style('Docker returned an error:\n{}'.format(e), fg='red')
             )

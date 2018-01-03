@@ -25,7 +25,7 @@ def test_docker_info():
         model.remove_reactions(["EX_glc__D_e"])
 
         project.save_design(model, 'tt1', 'tt1')
-        model.add_reaction(nr)
+        model.add_reactions([nr])
         project.save_design(model, 'tt2', 'tt2', parent='tt1')
 
         runner = CliRunner()
@@ -179,7 +179,7 @@ def test_import_designs():
 
         rubisco = cobra.Reaction(id="RBPC", lower_bound=0, upper_bound=1000.0, name="Ribulose-bisphosphate carboxylase")
 
-        mdl.add_reaction(rubisco)
+        mdl.add_reactions([rubisco])
 
         stoich = {
             "3pg_c": 2.0,
@@ -272,7 +272,7 @@ def test_diff():
 
         rubisco = cobra.Reaction(id="RBPC", lower_bound=0, upper_bound=1000.0, name="Ribulose-bisphosphate carboxylase")
 
-        mdl.add_reaction(rubisco)
+        mdl.add_reactions([rubisco])
 
         rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2')
         mdl.add_metabolites(rb15bp)

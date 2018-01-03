@@ -27,7 +27,7 @@ def test_cli_tool():
     model = load_model(output_file_path)
     assert isinstance(model, cobra.Model)
     solution = model.optimize()
-    assert solution.f != 0.0
+    assert solution.objective_value != 0.0
     os.remove(output_file_path)
 
     # Check the number of reactions is correct
