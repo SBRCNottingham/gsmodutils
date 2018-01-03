@@ -106,7 +106,7 @@ def biomass_debug(model, objective_reaction):
 
         try:
             sol = mtest.optimize()
-            if sol.f == 0.0:
+            if sol.objective_value == 0.0:
                 non_products.append(target.id)
         # Some versions of cobra seem to throw exceptions some don't
         except Infeasible:

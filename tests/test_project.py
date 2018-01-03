@@ -64,7 +64,7 @@ def test_create_design():
         reaction.lower_bound = -1000.0
         reaction.upper_bound = 1000.0
         
-        model.add_reaction(reaction)
+        model.add_reactions([reaction])
         
         reaction.add_metabolites({
             'h2o_c': -1,
@@ -141,7 +141,7 @@ def test_design_parent():
         model.add_metabolites(rb15bp)
 
         pruk = cobra.Reaction(id="PRUK", name="Phosphoribulokinase reaction", lower_bound=-1000, upper_bound=1000)
-        model.add_reaction(pruk)
+        model.add_reactions([pruk])
         pruk.add_metabolites(stoich)
 
         # Rubisco reaction (Ribulose-bisphosphate carboxylase)
@@ -155,7 +155,7 @@ def test_design_parent():
 
         rubisco = cobra.Reaction(id="RBPC", lower_bound=0, upper_bound=1000.0, name="Ribulose-bisphosphate carboxylase")
 
-        model.add_reaction(rubisco)
+        model.add_reactions([rubisco])
         rubisco.add_metabolites(stoich)
 
         model.genes.get_by_id("b3916").knock_out()
@@ -190,7 +190,7 @@ def test_design_parent():
             hmgcoa_c=1.0,
         )
 
-        model.add_reaction(reaction)
+        model.add_reactions([reaction])
         reaction.add_metabolites(stoich)
         reaction.lower_bound = -1000.0
         reaction.upper_bound = 1000.0
@@ -211,7 +211,7 @@ def test_design_parent():
             mev__R_c=-1.0
         )
 
-        model.add_reaction(reaction)
+        model.add_reactions([reaction])
 
         reaction.add_metabolites(stoich)
 

@@ -291,7 +291,7 @@ class GSMTester(object):
             return False
 
         solution = get_solution(model)
-        if solution.f != 0:
+        if solution.objective_value != 0:
             return True
         return False
 

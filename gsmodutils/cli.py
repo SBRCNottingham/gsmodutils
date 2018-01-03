@@ -407,7 +407,6 @@ Tests directory - {tests_dir}
         model = project.load_model(mdl_path)
         click.echo("\t* {}".format(mdl_path))
         click.echo("\t\t {}".format(model.id))
-        click.echo("\t\t {}".format(model.description))
 
     click.echo("Designs:")
     for d in project.designs:
@@ -427,7 +426,11 @@ Tests directory - {tests_dir}
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing dockerfile')
-def docker(project_path, overwrite):
+@click.option('--build/--no-build', default=False, help='build docker container')
+@click.option('--save/--no-save', default=False, help='save docker image of tagged container')
+@click.option('--tag', default=None, help='tag name for docker container (appended to project name).')
+@click.option('--save_path', default=None, help='Save path for shared docker image')
+def docker(project_path, overwrite, build, save, tag, save_path):
     """ Create a dockerfile for the project """
     project = _load_project(project_path)
     if os.path.exists(os.path.join(project_path, 'Dockerfile')) and not overwrite:
@@ -436,10 +439,77 @@ def docker(project_path, overwrite):
         project.config.create_docker_file(project_path)
         click.echo('**** Created Dockerfile **** \n')
 
-    click.echo('''Use "docker build -t=\'container_name\'" to build a container.
-    and use "docker save container_name -o container_name" to create a shareable image''')
+    # Check to see if docker is installed on the machine
+    import docker
+    from docker.errors import APIError, BuildError, ImageNotFound
+    client = docker.from_env()
+    try:
+        client.info()
+    except ConnectionError:
+        click.echo(
+            click.style('Error: Docker is either not installed or not configured on your system'
+                        'please consult the documentation at docs.docker.com', fg='red')
+        )
+        exit(-1)
 
-    click.echo('\n\nIf docker is not configured on your system please consult the documentation at docs.docker.com')
+    ttag = project.config.name
+    if tag is not None:
+        ttag += ":" + tag
+
+    ttag = ttag.lower()
+
+    if not build:
+        click.echo('Build option not specified use "gsmodutils docker --build"'
+                   'or "docker build -t=\'{}\'" to build a container.'.format(project.config.name))
+    else:
+        click.echo('Running docker build, this may take some time...')
+        try:
+            client.images.build(path=project.project_path, tag=ttag)
+            click.echo('Image built')
+
+        except BuildError as e:
+            click.echo(
+                click.style('Error building project:\n{}'.format(e), fg='red')
+            )
+
+        except APIError as e:
+            click.echo(
+                click.style('Docker returned an error:\n{}'.format(e), fg='red')
+            )
+            exit(-1)
+
+    if save:
+        # ensure that build has been completed first
+        image = None
+        try:
+            image = client.images.get(ttag)
+        except ImageNotFound:
+            click.echo(
+                click.style('Image not found try building image first', fg='red')
+            )
+            exit(-1)
+        except APIError as e:
+            click.echo(
+                click.style('Docker returned an error:\n{}'.format(e), fg='red')
+            )
+            exit(-1)
+
+        if save_path is None:
+            save_path = os.path.join(project.project_path, ttag + '.tar')
+
+        click.echo('Writing docker image to path {}. This may take some time...'.format(save_path))
+
+        try:
+            resp = image.save()
+            with open(save_path, 'w+') as image_tar:
+                for chunk in resp.stream():
+                    image_tar.write(chunk)
+
+        except APIError as e:
+            click.echo(
+                click.style('Docker returned an error:\n{}'.format(e), fg='red')
+            )
+            exit(-1)
 
 
 cli.add_command(test)
