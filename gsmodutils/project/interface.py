@@ -3,10 +3,10 @@ from __future__ import print_function, absolute_import, division
 import glob
 import json
 import os
+import fasteners
 
 from cameo.core.utils import load_medium
 from cobra.exceptions import Infeasible
-from lockfile import LockFile
 from six import string_types
 
 from gsmodutils.exceptions import ProjectNotFound, DesignError
@@ -60,7 +60,7 @@ class GSMProject(object):
         some degree of protection for the user against modifying the same files
         """
         lock_path = os.path.join(self._project_path, '.gsmodultils_project_lock')
-        return LockFile(lock_path)
+        return fasteners.InterProcessLock(lock_path)
 
     def update(self):
         """
@@ -529,30 +529,3 @@ class GSMProject(object):
         cfg.create_project(project_path, addmodels=models)
 
         return cls(project_path)
-
-    def clean_project(self, auto_remove=False):
-        """
-        Check all design and condition settings to see if they contain orphans or links to non-existing models
-        If auto_remove is true applied, any orphan files are automatically deleted and entries to missing models are
-        also removed.
-        :return: tuple(list, list) of all orphan designs and conditions (ones removed if auto_remove is set to true)
-        """
-        # TODO: remove bad designs
-        with self._project_context_lock:
-            bad_entries = []
-            models = self.config.models
-            conditions_store = self.conditions
-            for ck, conditions in conditions_store['growth_conditions'].items():
-                # check all models
-                for mdl in conditions['models']:
-                    if mdl not in models:
-                        bad_entries.append(mdl)
-
-                        # delete the conditions file
-                        if auto_remove and len(bad_entries) == len(conditions['models'])\
-                                and len(conditions['models']) > 0:
-                            del conditions_store[ck]
-                            self._write_conditions(conditions_store)
-                        elif auto_remove and len(bad_entries):
-                            conditions['models'] = [x for x in conditions['models'] if x not in bad_entries]
-                            self._write_conditions(conditions_store)
