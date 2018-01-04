@@ -16,7 +16,7 @@ import cameo
 
 from gsmodutils import GSMProject
 from gsmodutils.project.design import StrainDesign
-from gsmodutils.exceptions import DesignError
+from gsmodutils.exceptions import DesignError, ProjectNotFound
 
 
 def test_load_project():
@@ -122,8 +122,22 @@ def test_load_conditions():
         assert new_model.reactions.EX_glc__D_e.lower_bound == 0.0
 
 
+def test_project_update():
+    with FakeProjectContext() as ctx:
+        project = GSMProject(ctx.path)
+        assert len(project.models)
+        project.update()
+        with pytest.raises(ProjectNotFound):
+            project._project_path = 'NOT_REAL_PATH'
+            project.update()
+
+        # Test non existent designs
+        with pytest.raises(DesignError):
+            project.get_design("fooooo")
+
+
 def test_design_parent():
-    ''' Design class should throw errors for cyclical parent designs, but accept valid hierarchy'''
+    """ Design class should throw errors for cyclical parent designs, but accept valid hierarchy"""
     with FakeProjectContext() as ctx:
         project = GSMProject(ctx.path)
         # Create a design
@@ -290,3 +304,11 @@ def test_design_class():
     with pytest.raises(DesignError):
         assert not StrainDesign.validate_dict({}, throw_exceptions=False)
         StrainDesign.validate_dict({})
+
+
+def test_no_model_to_add():
+    with FakeProjectContext() as ctx:
+        with pytest.raises(IOError):
+            project = GSMProject(ctx.path)
+            project.add_model('/does/not/exist')
+

@@ -9,7 +9,7 @@ import os
 import click
 import cobra
 
-from gsmodutils.exceptions import ProjectNotFound
+from gsmodutils.exceptions import ProjectNotFound, ValidationError
 from gsmodutils.model_diff import model_diff
 from gsmodutils import GSMProject, load_model
 from gsmodutils.project.project_config import ProjectConfig
@@ -283,6 +283,10 @@ def addmodel(path, project_path, validate):
     project = _load_project(project_path)
     try:
         project.add_model(path, validate=validate)
+    except ValidationError:
+        click.echo(click.style('Model does not appear to be valid, use no-validate option if you would'
+                               'still like to continue', fg='red'))
+        exit(-1)
     except KeyError:
         click.echo(click.style('Model of the same name already included in project', fg='red'))
         exit(-1)

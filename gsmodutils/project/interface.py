@@ -9,11 +9,12 @@ from cameo.core.utils import load_medium
 from cobra.exceptions import Infeasible
 from six import string_types
 
-from gsmodutils.exceptions import ProjectNotFound, DesignError
+from gsmodutils.exceptions import ProjectNotFound, DesignError, ValidationError
 from gsmodutils.model_diff import model_diff
 from gsmodutils.project.design import StrainDesign
 from gsmodutils.project.project_config import ProjectConfig, default_project_file
 from gsmodutils.test.tester import GSMTester
+from gsmodutils.utils import validator
 
 
 class GSMProject(object):
@@ -143,7 +144,9 @@ class GSMProject(object):
         model_path = os.path.abspath(model_path)
 
         if validate:
-            pass  # TODO validate models
+            result = validator.validate_model_file(model_path)
+            if len(result["errors"]):
+                raise ValidationError("Model contains errors, will not add to project")
 
         # check model isn't in the project already
         npath = os.path.basename(model_path)
@@ -157,16 +160,6 @@ class GSMProject(object):
     @property
     def design_path(self):
         return os.path.join(self._project_path, self.config.design_dir)
-
-    @staticmethod
-    def _validate_design(ft):
-        """ validates design dictionaries for required fields"""
-        required_fields = ["id", "name", "description", "metabolites", "reactions", "genes"]
-        for field in required_fields:
-            if field not in ft:
-                return False
-
-        return True
 
     @property
     def list_designs(self):
@@ -185,20 +178,6 @@ class GSMProject(object):
             self.get_design(design)
 
         return self._designs_store
-
-    def _construct_design(self, design_id):
-        """
-        Loads an existing design
-        """
-        if design_id not in self.designs:
-            raise KeyError('Design {} not found'.format(design_id))
-        
-        des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design_id))
-    
-        with open(des_path) as dsn_ctx:
-            design_dict = json.load(dsn_ctx)
-        
-        return design_dict
 
     def get_design(self, design):
         """

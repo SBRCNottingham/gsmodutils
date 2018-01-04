@@ -15,7 +15,7 @@ def test_load_model():
     with pytest.raises(TypeError):
         # Create a fake file, format is not valid
         with tempfile.TemporaryFile() as fp:
-            load_model(fp)
+            load_model(fp, file_format="foo")
 
 
 def test_validator():
