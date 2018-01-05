@@ -398,8 +398,8 @@ class GSMProject(object):
                     raise KeyError('Model {} not found'.format(mid))
 
         if conditions != 'all':
-            for cid in models:
-                if cid not in self.conditions:
+            for cid in conditions:
+                if cid not in self.conditions['growth_conditions']:
                     raise KeyError('Conditions {} not found'.format(cid))
 
         # Save the json test file to disk.
@@ -438,13 +438,12 @@ class GSMProject(object):
 
         if apply_to is None:
             apply_to = []
-        else:
-            if not isinstance(apply_to, list):
-                apply_to = [apply_to]
+        elif not isinstance(apply_to, list):
+            apply_to = [apply_to]
 
-            for mdl_path in apply_to:
-                if mdl_path not in self.config.models:
-                    raise KeyError("Model {} not in current project".format(mdl_path))
+        for mdl_path in apply_to:
+            if mdl_path not in self.config.models:
+                raise KeyError("Model {} not in current project".format(mdl_path))
 
         # List all transport reactions in to the cell
         def is_exchange(rr):
