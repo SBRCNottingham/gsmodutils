@@ -47,6 +47,16 @@ To run the tests for this project, install pytest and, from the project root dir
 gsmodutils is fully compatible with python 2.7+ and python 3.5+.
 (TODO) Software has been tested on linux (Ubuntut, manjaro/arch), windows and MacOSX. 
 
+### Install and using the docker image
+
+The simplest method of installation is probably with docker. 
+Follow the install instructions for docker found at docker.io clone the git repository found here and then run
+
+    docker build . -t gsmoduitls
+
+This will create a gsmodutils docker image that can be resused for prjects.
+When this software is fully released a project will be created in docker hub so this step will not be needed.
+
 ## Usage
 Please read the user guide in the docs!
 
