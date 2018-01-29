@@ -267,6 +267,27 @@ def test_addmodel():
         assert result.exit_code == -1
 
 
+def test_addmodel_validation():
+    # Test adding a model that fails validation
+    with FakeProjectContext() as ctx:
+        runner = CliRunner()
+        # Create a fake model which can't grow
+        npath = os.path.join(ctx.path, 'tmodel.xml')
+        model = load_model(_CORE_MODEL_PATH)
+
+        for media in model.medium:
+            reaction = model.reactions.get_by_id(media)
+            reaction.lower_bound = 0
+            reaction.upper_bound = 0
+
+        cobra.io.write_sbml_model(model, npath)
+        # Try adding it to the project, it should fail with validation on
+        result = runner.invoke(gsmodutils.cli.addmodel, [npath, '--project_path', ctx.path])
+        assert result.exit_code == -1
+        # Pass with validation off
+        result = runner.invoke(gsmodutils.cli.addmodel, [npath, '--project_path', ctx.path, '--no-validate'])
+        assert result.exit_code == 0
+
 def test_diff():
     with FakeProjectContext() as ctx:
         runner = CliRunner()

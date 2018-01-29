@@ -7,6 +7,7 @@ Taken from https://github.com/aebrahim/cobra_sbml_validator
 from cobra.core import get_solution
 from gsmodutils.utils.io import load_model
 
+
 def validate_model_file(model_path):
     """
     Simple wrapper to load a model from a given path (handles JSON and SBML)

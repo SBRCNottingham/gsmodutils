@@ -16,7 +16,9 @@ import cameo
 
 from gsmodutils import GSMProject
 from gsmodutils.project.design import StrainDesign
-from gsmodutils.exceptions import DesignError
+from gsmodutils.exceptions import DesignError, ProjectNotFound
+
+from cobra.exceptions import Infeasible
 
 
 def test_load_project():
@@ -77,6 +79,15 @@ def test_create_design():
         
         # Add transporter for hetrologous metabolite
         project.save_design(model, 'test_design', 'test design 01', 'This is a test', conditions='xylose_growth')
+
+        # Can't save a design twice
+        with pytest.raises(IOError):
+            project.save_design(model, 'test_design', 'test design 01', 'This is a test', conditions='xylose_growth')
+
+        # Invalid base model
+        with pytest.raises(KeyError):
+            project.save_design(model, 'test_design22', 'test design 0221', 'This is a test', base_model='NONE')
+
         del model
     
         # assert design has been saved 
@@ -112,18 +123,53 @@ def test_load_conditions():
         model.reactions.EX_xyl__D_e.lower_bound = -8.00
         model.reactions.EX_glc__D_e.lower_bound = 0.0 
 
-        project.save_conditions(model, 'xylose_growth')
+        project.save_conditions(model, 'xylose_growth', carbon_source="EX_xyl__D_e")
         
         # The model should be reloaded so it isn't the same reference
         del model
         new_model = project.load_conditions('xylose_growth')
         
         assert new_model.reactions.EX_xyl__D_e.lower_bound == -8.00
+        assert new_model.reactions.EX_xyl__D_e.upper_bound == -8.00
         assert new_model.reactions.EX_glc__D_e.lower_bound == 0.0
+
+        del new_model
+        model = project.model
+        # test using a copy of the model
+        too_model = project.load_conditions('xylose_growth', model=model, copy=True)
+
+        model.reactions.EX_xyl__D_e.lower_bound = 0.00
+        assert model.reactions.EX_xyl__D_e.lower_bound != too_model.reactions.EX_xyl__D_e.lower_bound
+
+        # Model growth when it shouldn't
+        with pytest.raises(AssertionError):
+            project.save_conditions(too_model, 'xylose_growth2', carbon_source="EX_xyl__D_e", observe_growth=False)
+
+        # Bad "apply_to" model
+        with pytest.raises(KeyError):
+            project.save_conditions(too_model, 'xylose_growth3', carbon_source="EX_xyl__D_e", apply_to=["FOO"])
+
+        # Bad growth target
+        with pytest.raises(KeyError):
+            project.save_conditions(too_model, 'xylose_growth3', carbon_source="EX_foo")
+
+
+def test_project_update():
+    with FakeProjectContext() as ctx:
+        project = GSMProject(ctx.path)
+        assert len(project.models)
+        project.update()
+        with pytest.raises(ProjectNotFound):
+            project._project_path = 'NOT_REAL_PATH'
+            project.update()
+
+        # Test non existent designs
+        with pytest.raises(DesignError):
+            project.get_design("fooooo")
 
 
 def test_design_parent():
-    ''' Design class should throw errors for cyclical parent designs, but accept valid hierarchy'''
+    """ Design class should throw errors for cyclical parent designs, but accept valid hierarchy"""
     with FakeProjectContext() as ctx:
         project = GSMProject(ctx.path)
         # Create a design
@@ -244,6 +290,23 @@ def test_design_parent():
             path = os.path.join(project._project_path, project.config.design_dir, '{}.json'.format(des.id))
             des.to_json(path, overwrite=False)
 
+        # Try to save a design with a bad parent
+        with pytest.raises(DesignError):
+            des.id = 'fuuuu'
+            project.save_design(model, 'mevalonate_cbbd', 'mevalonate production', parent=des,
+                                description='Reactions for the production of mevalonate')
+
+
+def test_save_infeasible_design():
+
+    with FakeProjectContext() as fp:
+        model = fp.project.model
+        with pytest.raises(Infeasible):
+            for m in model.medium:
+                model.reactions.get_by_id(m).lower_bound = 0
+
+            fp.project.save_design(model, 'foo', 'test')
+
 
 def test_design_removals():
 
@@ -290,3 +353,42 @@ def test_design_class():
     with pytest.raises(DesignError):
         assert not StrainDesign.validate_dict({}, throw_exceptions=False)
         StrainDesign.validate_dict({})
+
+
+def test_no_model_to_add():
+    with FakeProjectContext() as ctx:
+        with pytest.raises(IOError):
+            project = GSMProject(ctx.path)
+            project.add_model('/does/not/exist')
+
+
+def test_add_essential_pathways():
+    """
+    Test adding of json test utility
+    reactions, description = '', reaction_fluxes = None,
+    models = None, designs = None, conditions = None, overwrite = False
+    """
+    with FakeProjectContext() as fp:
+
+        reactions = ['PYK']
+        # Test bad id
+        with pytest.raises(TypeError):
+            fp.project.add_essential_pathway(1, reactions=reactions)
+
+        with pytest.raises(TypeError):
+            fp.project.add_essential_pathway("foo", reactions=reactions, models="String")
+
+        # Should work without exception
+        fp.project.add_essential_pathway("foo", reactions=reactions)
+        # Can't add the same design twice
+        with pytest.raises(IOError):
+            fp.project.add_essential_pathway("foo", reactions=reactions)
+
+        with pytest.raises(KeyError):
+            fp.project.add_essential_pathway("foo2", reactions=reactions, designs=["foo"])
+
+        with pytest.raises(KeyError):
+            fp.project.add_essential_pathway("foo3", reactions=reactions, conditions=["foo"])
+
+        with pytest.raises(KeyError):
+            fp.project.add_essential_pathway("foo4", reactions=reactions, models=["foo"])

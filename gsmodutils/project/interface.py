@@ -3,17 +3,18 @@ from __future__ import print_function, absolute_import, division
 import glob
 import json
 import os
+import fasteners
 
 from cameo.core.utils import load_medium
 from cobra.exceptions import Infeasible
-from lockfile import LockFile
 from six import string_types
 
-from gsmodutils.exceptions import ProjectNotFound, DesignError
+from gsmodutils.exceptions import ProjectNotFound, DesignError, ValidationError
 from gsmodutils.model_diff import model_diff
 from gsmodutils.project.design import StrainDesign
 from gsmodutils.project.project_config import ProjectConfig, default_project_file
 from gsmodutils.test.tester import GSMTester
+from gsmodutils.utils import validator
 
 
 class GSMProject(object):
@@ -60,7 +61,7 @@ class GSMProject(object):
         some degree of protection for the user against modifying the same files
         """
         lock_path = os.path.join(self._project_path, '.gsmodultils_project_lock')
-        return LockFile(lock_path)
+        return fasteners.InterProcessLock(lock_path)
 
     def update(self):
         """
@@ -143,7 +144,9 @@ class GSMProject(object):
         model_path = os.path.abspath(model_path)
 
         if validate:
-            pass  # TODO validate models
+            result = validator.validate_model_file(model_path)
+            if len(result["errors"]):
+                raise ValidationError("Model contains errors, will not add to project")
 
         # check model isn't in the project already
         npath = os.path.basename(model_path)
@@ -157,16 +160,6 @@ class GSMProject(object):
     @property
     def design_path(self):
         return os.path.join(self._project_path, self.config.design_dir)
-
-    @staticmethod
-    def _validate_design(ft):
-        """ validates design dictionaries for required fields"""
-        required_fields = ["id", "name", "description", "metabolites", "reactions", "genes"]
-        for field in required_fields:
-            if field not in ft:
-                return False
-
-        return True
 
     @property
     def list_designs(self):
@@ -185,20 +178,6 @@ class GSMProject(object):
             self.get_design(design)
 
         return self._designs_store
-
-    def _construct_design(self, design_id):
-        """
-        Loads an existing design
-        """
-        if design_id not in self.designs:
-            raise KeyError('Design {} not found'.format(design_id))
-        
-        des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design_id))
-    
-        with open(des_path) as dsn_ctx:
-            design_dict = json.load(dsn_ctx)
-        
-        return design_dict
 
     def get_design(self, design):
         """
@@ -419,8 +398,8 @@ class GSMProject(object):
                     raise KeyError('Model {} not found'.format(mid))
 
         if conditions != 'all':
-            for cid in models:
-                if cid not in self.conditions:
+            for cid in conditions:
+                if cid not in self.conditions['growth_conditions']:
                     raise KeyError('Conditions {} not found'.format(cid))
 
         # Save the json test file to disk.
@@ -459,13 +438,12 @@ class GSMProject(object):
 
         if apply_to is None:
             apply_to = []
-        else:
-            if not isinstance(apply_to, list):
-                apply_to = [apply_to]
+        elif not isinstance(apply_to, list):
+            apply_to = [apply_to]
 
-            for mdl_path in apply_to:
-                if mdl_path not in self.config.models:
-                    raise KeyError("Model {} not in current project".format(mdl_path))
+        for mdl_path in apply_to:
+            if mdl_path not in self.config.models:
+                raise KeyError("Model {} not in current project".format(mdl_path))
 
         # List all transport reactions in to the cell
         def is_exchange(rr):
@@ -529,30 +507,3 @@ class GSMProject(object):
         cfg.create_project(project_path, addmodels=models)
 
         return cls(project_path)
-
-    def clean_project(self, auto_remove=False):
-        """
-        Check all design and condition settings to see if they contain orphans or links to non-existing models
-        If auto_remove is true applied, any orphan files are automatically deleted and entries to missing models are
-        also removed.
-        :return: tuple(list, list) of all orphan designs and conditions (ones removed if auto_remove is set to true)
-        """
-        # TODO: remove bad designs
-        with self._project_context_lock:
-            bad_entries = []
-            models = self.config.models
-            conditions_store = self.conditions
-            for ck, conditions in conditions_store['growth_conditions'].items():
-                # check all models
-                for mdl in conditions['models']:
-                    if mdl not in models:
-                        bad_entries.append(mdl)
-
-                        # delete the conditions file
-                        if auto_remove and len(bad_entries) == len(conditions['models'])\
-                                and len(conditions['models']) > 0:
-                            del conditions_store[ck]
-                            self._write_conditions(conditions_store)
-                        elif auto_remove and len(bad_entries):
-                            conditions['models'] = [x for x in conditions['models'] if x not in bad_entries]
-                            self._write_conditions(conditions_store)

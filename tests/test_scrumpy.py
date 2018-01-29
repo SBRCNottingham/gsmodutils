@@ -13,6 +13,11 @@ def test_cli_tool():
     """ Test the command line interface parser of scrumpy files """
     output_file = ''.join(random.choice(string.ascii_uppercase + string.digits) for n in range(10)) + '.json'
     output_file_path = os.path.join(tempfile.gettempdir(), output_file)
+
+    # Test loading of scrumpy models
+    model = load_model(scrumpy_model_path)
+    assert isinstance(model, cobra.Model)
+
     runner = CliRunner()
     result = runner.invoke(gsmodutils.utils.scrumpy.scrumpy_to_cobra, [
         scrumpy_model_path,

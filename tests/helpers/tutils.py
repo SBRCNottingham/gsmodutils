@@ -150,7 +150,7 @@ class FakeProjectContext(object):
         model.reactions.EX_nh4_e.lower_bound = -1000.0
 
         project.save_design(model, 'cbb_cycle', 'calvin cycle',
-                                     description='Reactions necissary for the calvin cycle in ecoli', overwrite=True)
+                            description='Reactions necissary for the calvin cycle in ecoli', overwrite=True)
 
         # Create a child of this design
         model = project.load_design('cbb_cycle')
