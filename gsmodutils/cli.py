@@ -181,7 +181,8 @@ def test(project_path, test_id, skip_default, verbose, log_path):
 @click.option('--email', prompt='Please enter author email', help='Author email')
 @click.option('--add_models', multiple=True, type=click.Path(exists=True), help='paths to additional model files,'
                                                                                 ' separated by space')
-def init(project_path, default_model_path, name, description, author, email, add_models):
+@click.option('--validate/--skip_validation', default=True, help='Require the model to be validated')
+def init(project_path, default_model_path, name, description, author, email, add_models, validate):
     """Create a new gsmodutils project"""
     click.echo('Project creation {}'.format(project_path))
     click.echo('Using model {}'.format(default_model_path))
@@ -200,7 +201,7 @@ def init(project_path, default_model_path, name, description, author, email, add
     try:
         click.echo('Creating project in {}'.format(os.path.abspath(project_path)))
         cfg = ProjectConfig(**configuration)
-        cfg.create_project(project_path, addmodels=add_models)
+        cfg.create_project(project_path, addmodels=add_models, validate=validate)
 
         click.echo(
             click.style('Project created succesfully', fg='green')
