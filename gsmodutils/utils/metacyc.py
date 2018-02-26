@@ -155,6 +155,9 @@ def get_enzyme_reactions(eid, db):
     """
     erids = []
 
+    if eid[:3] != "EC-":
+        eid = "EC-{}".format(eid)
+
     for rid, react in db['reactions'].items():
         if 'EC-NUMBER' in react and eid in react['EC-NUMBER']:
             erids.append(rid)
@@ -186,9 +189,15 @@ def add_reaction(model, reaction_id, db):
     added_metabolites = []
     for mid in metabolites:
         if mid not in model.metabolites:
+            try:
+                cpd = db['compounds'][mid]
+            except KeyError:
+                # Handles missing metabolites
+                cpd = {"COMMON-NAME": mid}
+
             m = Metabolite(id=mid)
-            m.name = db['compounds'][mid]['COMMON-NAME']
-            m.annotation = dict(metacyc_data=db['compounds'][mid])
+            m.name =cpd['COMMON-NAME']
+            m.annotation = dict(metacyc_data=cpd)
             model.add_metabolites([m])
             added_metabolites.append(mid)
 

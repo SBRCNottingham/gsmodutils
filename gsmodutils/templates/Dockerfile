@@ -2,6 +2,6 @@
 FROM gsmodutils
 
 RUN mkdir /model
-COPY . /model
+ADD . /model
 WORKDIR /model
 RUN pip install -r requirements.txt

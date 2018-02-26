@@ -312,16 +312,17 @@ class GSMProject(object):
         :param copy: return copy of model or modify inplace
         :return:
         """
+
+        conditions_store = self.get_conditions(update=True)
+        cx = conditions_store['growth_conditions'][conditions_id]
+
         if model is None or isinstance(model, string_types):
             mdl = self.load_model(model)
         elif copy:
             mdl = model.copy()
         else:
             mdl = model
-        
-        conditions_store = self.get_conditions(update=True)
 
-        cx = conditions_store['growth_conditions'][conditions_id]
         load_medium(mdl, cx['media'])
         if "carbon_source" in cx and cx["carbon_source"] is not None:
             # Will throw error if invalid transporter
@@ -425,7 +426,7 @@ class GSMProject(object):
         :param model: cobrapy or cameo model
         :param conditions_id: identifier for the conditions should be unique
         :param carbon_source: name of carbon source in the media that has a fixed uptake rate
-        :param apply_to: iterable of models that this set of conditions applies to
+        :param apply_to: iterable of models that this set of designs applies to
         :param observe_growth: bool or list.
         :return:
         """
@@ -467,7 +468,7 @@ class GSMProject(object):
 
         conditions_store['growth_conditions'][conditions_id] = dict(
             media=media,
-            models=apply_to,
+            designs=apply_to,
             observe_growth=observe_growth,
             carbon_source=carbon_source,
         )
