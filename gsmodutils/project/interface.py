@@ -15,6 +15,7 @@ from gsmodutils.project.design import StrainDesign
 from gsmodutils.project.project_config import ProjectConfig, default_project_file
 from gsmodutils.test.tester import GSMTester
 from gsmodutils.utils import validator
+from gsmodutils.utils import io
 
 
 class GSMProject(object):
@@ -54,7 +55,7 @@ class GSMProject(object):
         return GSMTester(self)
 
     @property
-    def _project_context_lock(self):
+    def project_context_lock(self):
         """
         Returns a gloab project lock to stop multiple operations on files.
         This software is not designed to be used in multiple user environments, so this is slow. However, it provides
@@ -120,10 +121,8 @@ class GSMProject(object):
         if mpath not in self.config.models:
             raise IOError('Model file {} not found in project, maybe you need to add it'.format(mpath))
         
-        import cameo
-        
         load_path = os.path.join(self._project_path, mpath)
-        mdl = cameo.load_model(load_path)
+        mdl = io.load_model(load_path)
         mdl._gsm_model_path = mpath
         return mdl
 
@@ -482,7 +481,7 @@ class GSMProject(object):
         :param conditions_store:
         :return:
         """
-        with self._project_context_lock:
+        with self.project_context_lock:
             with open(self._conditions_file, 'w+') as cf:
                 json.dump(conditions_store, cf, indent=4)
 

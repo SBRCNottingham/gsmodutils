@@ -96,7 +96,7 @@
         <span class="k">return</span> <span class="n">GSMTester</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_project_context_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">project_context_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a gloab project lock to stop multiple operations on files.</span>
 <span class="sd">        This software is not designed to be used in multiple user environments, so this is slow. However, it provides</span>
@@ -546,7 +546,7 @@
 <span class="sd">        :param conditions_store:</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project_context_lock</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_context_lock</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_conditions_file</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cf</span><span class="p">:</span>
                 <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">conditions_store</span><span class="p">,</span> <span class="n">cf</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
@@ -581,7 +581,7 @@
 <span class="sd">        :return: tuple(list, list) of all orphan designs and conditions (ones removed if auto_remove is set to true)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: remove bad designs</span>
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project_context_lock</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_context_lock</span><span class="p">:</span>
             <span class="n">bad_entries</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">models</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">models</span>
             <span class="n">conditions_store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span>
