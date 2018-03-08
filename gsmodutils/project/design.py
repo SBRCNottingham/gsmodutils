@@ -5,6 +5,7 @@ import cobra
 import pandas
 
 from gsmodutils.exceptions import DesignError
+import gsmodutils
 import logging
 
 logger = logging.getLogger(__name__)
@@ -307,6 +308,9 @@ class StrainDesign(object):
         mdl = model
         if copy:
             mdl = model.copy()
+
+        if isinstance(mdl, gsmodutils.GSModutilsModel):
+            mdl.set_design(self)
 
         # Load parent design first
         if self.parent is not None:

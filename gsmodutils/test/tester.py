@@ -339,7 +339,7 @@ class GSMTester(object):
         for ckey, cdf in self.project.conditions['growth_conditions'].items():
             # Load model that conditions applies to (default is all models in project)
             cmodels = self.project.config.models
-            if len(cdf['models']):
+            if 'models' in cdf and len(cdf['models']):
                 cmodels = cdf['models']
 
             for model_path in cmodels:

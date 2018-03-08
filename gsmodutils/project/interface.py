@@ -12,6 +12,7 @@ from six import string_types
 from gsmodutils.exceptions import ProjectNotFound, DesignError, ValidationError
 from gsmodutils.model_diff import model_diff
 from gsmodutils.project.design import StrainDesign
+from gsmodutils.project.model import GSModutilsModel
 from gsmodutils.project.project_config import ProjectConfig, default_project_file
 from gsmodutils.test.tester import GSMTester
 from gsmodutils.utils import validator
@@ -120,9 +121,8 @@ class GSMProject(object):
         
         if mpath not in self.config.models:
             raise IOError('Model file {} not found in project, maybe you need to add it'.format(mpath))
-        
-        load_path = os.path.join(self._project_path, mpath)
-        mdl = io.load_model(load_path)
+
+        mdl = GSModutilsModel(self, mpath)
         mdl._gsm_model_path = mpath
         return mdl
 
