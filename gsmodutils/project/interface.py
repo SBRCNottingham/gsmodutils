@@ -16,7 +16,9 @@ from gsmodutils.project.model import GSModutilsModel
 from gsmodutils.project.project_config import ProjectConfig, default_project_file
 from gsmodutils.test.tester import GSMTester
 from gsmodutils.utils import validator
-from gsmodutils.utils import io
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class GSMProject(object):

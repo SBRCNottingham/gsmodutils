@@ -9,6 +9,9 @@ import cobra
 import gsmodutils
 from gsmodutils.exceptions import ProjectConfigurationError
 from gsmodutils.utils.validator import validate_model_file
+import logging
+
+logger = logging.getLogger(__name__)
 
 default_project_file = '.gsmod_project.json'
 default_model_conditionsfp = 'model_conditions.json'
