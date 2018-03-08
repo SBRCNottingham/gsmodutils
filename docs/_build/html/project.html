@@ -137,7 +137,7 @@ This setting can then be saved and reloaded at a later time.</p>
 <dl class="class">
 <dt id="gsmodutils.project.interface.GSMProject">
 <em class="property">class </em><code class="descclassname">gsmodutils.project.interface.</code><code class="descname">GSMProject</code><span class="sig-paren">(</span><em>path='.'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <dl class="method">
 <dt id="gsmodutils.project.interface.GSMProject.add_essential_pathway">
 <code class="descname">add_essential_pathway</code><span class="sig-paren">(</span><em>tid</em>, <em>reactions</em>, <em>description=''</em>, <em>reaction_fluxes=None</em>, <em>models=None</em>, <em>designs=None</em>, <em>conditions=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.add_essential_pathway"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.add_essential_pathway" title="Permalink to this definition">¶</a></dt>
@@ -172,15 +172,6 @@ information.</p>
 <dt id="gsmodutils.project.interface.GSMProject.add_model">
 <code class="descname">add_model</code><span class="sig-paren">(</span><em>model_path</em>, <em>validate=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.add_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.add_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a model given a path to it copy it to model directory unless its in the project path already.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="gsmodutils.project.interface.GSMProject.clean_project">
-<code class="descname">clean_project</code><span class="sig-paren">(</span><em>auto_remove=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.clean_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.clean_project" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check all design and condition settings to see if they contain orphans or links to non-existing models
-If auto_remove is true applied, any orphan files are automatically deleted and entries to missing models are
-also removed.
-:return: tuple(list, list) of all orphan designs and conditions (ones removed if auto_remove is set to true)</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -314,6 +305,14 @@ mpath refers to the relative path of the model</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="gsmodutils.project.interface.GSMProject.project_context_lock">
+<code class="descname">project_context_lock</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.project_context_lock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a gloab project lock to stop multiple operations on files.
+This software is not designed to be used in multiple user environments, so this is slow. However, it provides
+some degree of protection for the user against modifying the same files</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="gsmodutils.project.interface.GSMProject.project_path">
 <code class="descname">project_path</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.project_path" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -342,7 +341,7 @@ the project. All models specified must be contained within the project.</p>
 <li><strong>model</strong> – cobrapy or cameo model</li>
 <li><strong>conditions_id</strong> – identifier for the conditions should be unique</li>
 <li><strong>carbon_source</strong> – name of carbon source in the media that has a fixed uptake rate</li>
-<li><strong>apply_to</strong> – iterable of models that this set of conditions applies to</li>
+<li><strong>apply_to</strong> – iterable of models that this set of designs applies to</li>
 <li><strong>observe_growth</strong> – bool or list.</li>
 </ul>
 </td>
@@ -426,6 +425,7 @@ the project. All models specified must be contained within the project.</p>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="about.html">About project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff.html">Model diffs</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
@@ -460,7 +460,7 @@ the project. All models specified must be contained within the project.</p>
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

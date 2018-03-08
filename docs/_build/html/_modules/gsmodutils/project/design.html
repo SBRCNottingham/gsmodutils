@@ -48,6 +48,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span>
 
 <span class="kn">from</span> <span class="nn">gsmodutils.exceptions</span> <span class="k">import</span> <span class="n">DesignError</span>
+<span class="kn">import</span> <span class="nn">gsmodutils</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -351,6 +352,9 @@
         <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
             <span class="n">mdl</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">gsmodutils</span><span class="o">.</span><span class="n">GSModutilsModel</span><span class="p">):</span>
+            <span class="n">mdl</span><span class="o">.</span><span class="n">set_design</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
         <span class="c1"># Load parent design first</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">add_to_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -515,6 +519,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tests.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../docker.html">Docker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../diff.html">Model diffs</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
@@ -549,7 +554,7 @@
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

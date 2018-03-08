@@ -46,17 +46,22 @@
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">fasteners</span>
 
 <span class="kn">from</span> <span class="nn">cameo.core.utils</span> <span class="k">import</span> <span class="n">load_medium</span>
 <span class="kn">from</span> <span class="nn">cobra.exceptions</span> <span class="k">import</span> <span class="n">Infeasible</span>
-<span class="kn">from</span> <span class="nn">lockfile</span> <span class="k">import</span> <span class="n">LockFile</span>
 <span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">string_types</span>
 
-<span class="kn">from</span> <span class="nn">gsmodutils.exceptions</span> <span class="k">import</span> <span class="n">ProjectNotFound</span><span class="p">,</span> <span class="n">DesignError</span>
+<span class="kn">from</span> <span class="nn">gsmodutils.exceptions</span> <span class="k">import</span> <span class="n">ProjectNotFound</span><span class="p">,</span> <span class="n">DesignError</span><span class="p">,</span> <span class="n">ValidationError</span>
 <span class="kn">from</span> <span class="nn">gsmodutils.model_diff</span> <span class="k">import</span> <span class="n">model_diff</span>
 <span class="kn">from</span> <span class="nn">gsmodutils.project.design</span> <span class="k">import</span> <span class="n">StrainDesign</span>
+<span class="kn">from</span> <span class="nn">gsmodutils.project.model</span> <span class="k">import</span> <span class="n">GSModutilsModel</span>
 <span class="kn">from</span> <span class="nn">gsmodutils.project.project_config</span> <span class="k">import</span> <span class="n">ProjectConfig</span><span class="p">,</span> <span class="n">default_project_file</span>
 <span class="kn">from</span> <span class="nn">gsmodutils.test.tester</span> <span class="k">import</span> <span class="n">GSMTester</span>
+<span class="kn">from</span> <span class="nn">gsmodutils.utils</span> <span class="k">import</span> <span class="n">validator</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GSMProject"><a class="viewcode-back" href="../../../project.html#gsmodutils.project.interface.GSMProject">[docs]</a><span class="k">class</span> <span class="nc">GSMProject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -103,7 +108,7 @@
 <span class="sd">        some degree of protection for the user against modifying the same files</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">lock_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="s1">&#39;.gsmodultils_project_lock&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">LockFile</span><span class="p">(</span><span class="n">lock_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fasteners</span><span class="o">.</span><span class="n">InterProcessLock</span><span class="p">(</span><span class="n">lock_path</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GSMProject.update"><a class="viewcode-back" href="../../../project.html#gsmodutils.project.interface.GSMProject.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -161,11 +166,8 @@
         
         <span class="k">if</span> <span class="n">mpath</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Model file </span><span class="si">{}</span><span class="s1"> not found in project, maybe you need to add it&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mpath</span><span class="p">))</span>
-        
-        <span class="kn">import</span> <span class="nn">cameo</span>
-        
-        <span class="n">load_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="n">mpath</span><span class="p">)</span>
-        <span class="n">mdl</span> <span class="o">=</span> <span class="n">cameo</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">load_path</span><span class="p">)</span>
+
+        <span class="n">mdl</span> <span class="o">=</span> <span class="n">GSModutilsModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpath</span><span class="p">)</span>
         <span class="n">mdl</span><span class="o">.</span><span class="n">_gsm_model_path</span> <span class="o">=</span> <span class="n">mpath</span>
         <span class="k">return</span> <span class="n">mdl</span></div>
 
@@ -186,7 +188,9 @@
         <span class="n">model_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">validate</span><span class="p">:</span>
-            <span class="k">pass</span>  <span class="c1"># TODO validate models</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">validate_model_file</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Model contains errors, will not add to project&quot;</span><span class="p">)</span>
 
         <span class="c1"># check model isn&#39;t in the project already</span>
         <span class="n">npath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
@@ -200,16 +204,6 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">design_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">design_dir</span><span class="p">)</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_validate_design</span><span class="p">(</span><span class="n">ft</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; validates design dictionaries for required fields&quot;&quot;&quot;</span>
-        <span class="n">required_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;metabolites&quot;</span><span class="p">,</span> <span class="s2">&quot;reactions&quot;</span><span class="p">,</span> <span class="s2">&quot;genes&quot;</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ft</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">list_designs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -228,20 +222,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">get_design</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span>
-
-    <span class="k">def</span> <span class="nf">_construct_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads an existing design</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">design_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">designs</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Design </span><span class="si">{}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">design_id</span><span class="p">))</span>
-        
-        <span class="n">des_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">design_dir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">design_id</span><span class="p">))</span>
-    
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">des_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">dsn_ctx</span><span class="p">:</span>
-            <span class="n">design_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">dsn_ctx</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="n">design_dict</span>
 
 <div class="viewcode-block" id="GSMProject.get_design"><a class="viewcode-back" href="../../../project.html#gsmodutils.project.interface.GSMProject.get_design">[docs]</a>    <span class="k">def</span> <span class="nf">get_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -376,16 +356,17 @@
 <span class="sd">        :param copy: return copy of model or modify inplace</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">conditions_store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conditions</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="n">conditions_store</span><span class="p">[</span><span class="s1">&#39;growth_conditions&#39;</span><span class="p">][</span><span class="n">conditions_id</span><span class="p">]</span>
+
         <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
             <span class="n">mdl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">copy</span><span class="p">:</span>
             <span class="n">mdl</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">mdl</span> <span class="o">=</span> <span class="n">model</span>
-        
-        <span class="n">conditions_store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conditions</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">cx</span> <span class="o">=</span> <span class="n">conditions_store</span><span class="p">[</span><span class="s1">&#39;growth_conditions&#39;</span><span class="p">][</span><span class="n">conditions_id</span><span class="p">]</span>
         <span class="n">load_medium</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">cx</span><span class="p">[</span><span class="s1">&#39;media&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="s2">&quot;carbon_source&quot;</span> <span class="ow">in</span> <span class="n">cx</span> <span class="ow">and</span> <span class="n">cx</span><span class="p">[</span><span class="s2">&quot;carbon_source&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Will throw error if invalid transporter</span>
@@ -462,8 +443,8 @@
                     <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Model </span><span class="si">{}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mid</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">conditions</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">cid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">conditions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="p">[</span><span class="s1">&#39;growth_conditions&#39;</span><span class="p">]:</span>
                     <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Conditions </span><span class="si">{}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cid</span><span class="p">))</span>
 
         <span class="c1"># Save the json test file to disk.</span>
@@ -489,7 +470,7 @@
 <span class="sd">        :param model: cobrapy or cameo model</span>
 <span class="sd">        :param conditions_id: identifier for the conditions should be unique</span>
 <span class="sd">        :param carbon_source: name of carbon source in the media that has a fixed uptake rate</span>
-<span class="sd">        :param apply_to: iterable of models that this set of conditions applies to</span>
+<span class="sd">        :param apply_to: iterable of models that this set of designs applies to</span>
 <span class="sd">        :param observe_growth: bool or list.</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -502,13 +483,12 @@
 
         <span class="k">if</span> <span class="n">apply_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">apply_to</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apply_to</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">apply_to</span> <span class="o">=</span> <span class="p">[</span><span class="n">apply_to</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apply_to</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">apply_to</span> <span class="o">=</span> <span class="p">[</span><span class="n">apply_to</span><span class="p">]</span>
 
-            <span class="k">for</span> <span class="n">mdl_path</span> <span class="ow">in</span> <span class="n">apply_to</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">mdl_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Model </span><span class="si">{}</span><span class="s2"> not in current project&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mdl_path</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">mdl_path</span> <span class="ow">in</span> <span class="n">apply_to</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mdl_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Model </span><span class="si">{}</span><span class="s2"> not in current project&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mdl_path</span><span class="p">))</span>
 
         <span class="c1"># List all transport reactions in to the cell</span>
         <span class="k">def</span> <span class="nf">is_exchange</span><span class="p">(</span><span class="n">rr</span><span class="p">):</span>
@@ -532,7 +512,7 @@
 
         <span class="n">conditions_store</span><span class="p">[</span><span class="s1">&#39;growth_conditions&#39;</span><span class="p">][</span><span class="n">conditions_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">media</span><span class="o">=</span><span class="n">media</span><span class="p">,</span>
-            <span class="n">models</span><span class="o">=</span><span class="n">apply_to</span><span class="p">,</span>
+            <span class="n">designs</span><span class="o">=</span><span class="n">apply_to</span><span class="p">,</span>
             <span class="n">observe_growth</span><span class="o">=</span><span class="n">observe_growth</span><span class="p">,</span>
             <span class="n">carbon_source</span><span class="o">=</span><span class="n">carbon_source</span><span class="p">,</span>
         <span class="p">)</span>
@@ -571,34 +551,7 @@
         <span class="n">cfg</span> <span class="o">=</span> <span class="n">ProjectConfig</span><span class="p">(</span><span class="o">**</span><span class="n">configuration</span><span class="p">)</span>
         <span class="n">cfg</span><span class="o">.</span><span class="n">create_project</span><span class="p">(</span><span class="n">project_path</span><span class="p">,</span> <span class="n">addmodels</span><span class="o">=</span><span class="n">models</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">project_path</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="GSMProject.clean_project"><a class="viewcode-back" href="../../../project.html#gsmodutils.project.interface.GSMProject.clean_project">[docs]</a>    <span class="k">def</span> <span class="nf">clean_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auto_remove</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check all design and condition settings to see if they contain orphans or links to non-existing models</span>
-<span class="sd">        If auto_remove is true applied, any orphan files are automatically deleted and entries to missing models are</span>
-<span class="sd">        also removed.</span>
-<span class="sd">        :return: tuple(list, list) of all orphan designs and conditions (ones removed if auto_remove is set to true)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># TODO: remove bad designs</span>
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_context_lock</span><span class="p">:</span>
-            <span class="n">bad_entries</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">models</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">models</span>
-            <span class="n">conditions_store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span>
-            <span class="k">for</span> <span class="n">ck</span><span class="p">,</span> <span class="n">conditions</span> <span class="ow">in</span> <span class="n">conditions_store</span><span class="p">[</span><span class="s1">&#39;growth_conditions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="c1"># check all models</span>
-                <span class="k">for</span> <span class="n">mdl</span> <span class="ow">in</span> <span class="n">conditions</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">]:</span>
-                    <span class="k">if</span> <span class="n">mdl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-                        <span class="n">bad_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mdl</span><span class="p">)</span>
-
-                        <span class="c1"># delete the conditions file</span>
-                        <span class="k">if</span> <span class="n">auto_remove</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">bad_entries</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">conditions</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">])</span>\
-                                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">conditions</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="k">del</span> <span class="n">conditions_store</span><span class="p">[</span><span class="n">ck</span><span class="p">]</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_write_conditions</span><span class="p">(</span><span class="n">conditions_store</span><span class="p">)</span>
-                        <span class="k">elif</span> <span class="n">auto_remove</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">bad_entries</span><span class="p">):</span>
-                            <span class="n">conditions</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">conditions</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bad_entries</span><span class="p">]</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_write_conditions</span><span class="p">(</span><span class="n">conditions_store</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">project_path</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -624,6 +577,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tests.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../docker.html">Docker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../diff.html">Model diffs</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
@@ -658,7 +612,7 @@
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

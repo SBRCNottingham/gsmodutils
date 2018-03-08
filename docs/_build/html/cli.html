@@ -52,51 +52,31 @@ This section gives a brief overview of these tools, with simple examples that sh
 <div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils <span class="o">[</span>OPTIONS<span class="o">]</span> COMMAND <span class="o">[</span>ARGS<span class="o">]</span>...
 </pre></div>
 </div>
-<div class="section" id="gsmodutils-add-model">
-<h3>add_model<a class="headerlink" href="#gsmodutils-add-model" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="gsmodutils-addmodel">
+<h3>addmodel<a class="headerlink" href="#gsmodutils-addmodel" title="Permalink to this headline">¶</a></h3>
 <p>Add a model to a specified gsm project.
 If validation is selected, where the model fails to conform to cobra standards, the model will not be added to the
 project.</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils add_model <span class="o">[</span>OPTIONS<span class="o">]</span> PATH
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils addmodel <span class="o">[</span>OPTIONS<span class="o">]</span> PATH
 </pre></div>
 </div>
 <p class="rubric">Options</p>
 <dl class="option">
-<dt id="cmdoption-gsmodutils-add-model-project-path">
-<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-add-model-project-path" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-gsmodutils-addmodel-project-path">
+<code class="descname">--project_path</code><code class="descclassname"> &lt;project_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-addmodel-project-path" title="Permalink to this definition">¶</a></dt>
 <dd><p>gsmodutils project path</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-gsmodutils-add-model-validate">
-<code class="descname">--validate</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-validate</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-add-model-validate" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-gsmodutils-addmodel-validate">
+<code class="descname">--validate</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-validate</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-addmodel-validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Chose to validate the model before it is added.</p>
 </dd></dl>
 
 <p class="rubric">Arguments</p>
 <dl class="option">
-<dt id="cmdoption-gsmodutils-add-model-arg-path">
-<code class="descname">PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-add-model-arg-path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Required argument</p>
-</dd></dl>
-
-</div>
-<div class="section" id="gsmodutils-create-project">
-<h3>create_project<a class="headerlink" href="#gsmodutils-create-project" title="Permalink to this headline">¶</a></h3>
-<p>Create a new gsmodutils project</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils create_project <span class="o">[</span>OPTIONS<span class="o">]</span> PROJECT_PATH MODEL_PATH
-</pre></div>
-</div>
-<p class="rubric">Arguments</p>
-<dl class="option">
-<dt id="cmdoption-gsmodutils-create-project-arg-project-path">
-<code class="descname">PROJECT_PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-create-project-arg-project-path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Required argument</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption-gsmodutils-create-project-arg-model-path">
-<code class="descname">MODEL_PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-create-project-arg-model-path" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-gsmodutils-addmodel-arg-path">
+<code class="descname">PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-addmodel-arg-path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Required argument</p>
 </dd></dl>
 
@@ -228,6 +208,30 @@ project.</p>
 <dd><p>overwrite existing dockerfile</p>
 </dd></dl>
 
+<dl class="option">
+<dt id="cmdoption-gsmodutils-docker-build">
+<code class="descname">--build</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-build</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-docker-build" title="Permalink to this definition">¶</a></dt>
+<dd><p>build docker container</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-docker-save">
+<code class="descname">--save</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-save</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-docker-save" title="Permalink to this definition">¶</a></dt>
+<dd><p>save docker image of tagged container</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-docker-tag">
+<code class="descname">--tag</code><code class="descclassname"> &lt;tag&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-docker-tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>tag name for docker container (appended to project name).</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-docker-save-path">
+<code class="descname">--save_path</code><code class="descclassname"> &lt;save_path&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-docker-save-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save path for shared docker image</p>
+</dd></dl>
+
 </div>
 <div class="section" id="gsmodutils-export">
 <h3>export<a class="headerlink" href="#gsmodutils-export" title="Permalink to this headline">¶</a></h3>
@@ -333,6 +337,62 @@ project.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="gsmodutils-init">
+<h3>init<a class="headerlink" href="#gsmodutils-init" title="Permalink to this headline">¶</a></h3>
+<p>Create a new gsmodutils project</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>gsmodutils init <span class="o">[</span>OPTIONS<span class="o">]</span> PROJECT_PATH DEFAULT_MODEL_PATH
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-init-name">
+<code class="descname">--name</code><code class="descclassname"> &lt;name&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-init-name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-init-description">
+<code class="descname">--description</code><code class="descclassname"> &lt;description&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-init-description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project description</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-init-author">
+<code class="descname">--author</code><code class="descclassname"> &lt;author&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-init-author" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project name</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-init-email">
+<code class="descname">--email</code><code class="descclassname"> &lt;email&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-init-email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Author email</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-init-add-models">
+<code class="descname">--add_models</code><code class="descclassname"> &lt;add_models&gt;</code><a class="headerlink" href="#cmdoption-gsmodutils-init-add-models" title="Permalink to this definition">¶</a></dt>
+<dd><p>paths to additional model files, separated by space</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-init-validate">
+<code class="descname">--validate</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--skip_validation</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-init-validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Require the model to be validated</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="option">
+<dt id="cmdoption-gsmodutils-init-arg-project-path">
+<code class="descname">PROJECT_PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-init-arg-project-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-gsmodutils-init-arg-default-model-path">
+<code class="descname">DEFAULT_MODEL_PATH</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-gsmodutils-init-arg-default-model-path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</div>
 <div class="section" id="gsmodutils-test">
 <h3>test<a class="headerlink" href="#gsmodutils-test" title="Permalink to this headline">¶</a></h3>
 <p>Run tests for a project</p>
@@ -401,6 +461,7 @@ project.</p>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="about.html">About project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff.html">Model diffs</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
@@ -435,7 +496,7 @@ project.</p>
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

@@ -149,6 +149,7 @@ and use sourch control, such as `git` or `mercurial`, and learn how to use it.
     tests
     docker
     about
+    diff
     :maxdepth: 2
     :caption: User Guide:
 

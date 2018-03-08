@@ -1,0 +1,239 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Model diffs &#8212; gsmodutils 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="MetaCyc" href="metacyc.html" />
+    <link rel="prev" title="About project" href="about.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="model-diffs">
+<h1>Model diffs<a class="headerlink" href="#model-diffs" title="Permalink to this headline">¶</a></h1>
+<p>When making changes to a model within <code class="docutils literal"><span class="pre">gsmodutils</span></code> the <code class="docutils literal"><span class="pre">gsmodutils.GSModuitlsModel</span></code> instances (which is subclass
+of <code class="docutils literal"><span class="pre">cobra.Model</span></code>) allows you to track the differences between the in memory model and the model or design saved
+on disk.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gsmodutils</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">gsmodutils</span><span class="o">.</span><span class="n">GSMProject</span><span class="p">()</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">remove_reactions</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">RXN_01</span><span class="p">])</span>
+
+<span class="n">diff</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+<span class="n">diff</span>
+</pre></div>
+</div>
+<p>Diff is gsmodutils.model_diff.ModelDiff object which is just a subclass of a python dictionary.
+If working within an jupyter notebook diff will display the model changes in HTML.</p>
+<p>If working outside of as gsmodutils project with cobra models use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gsmodutils.model_diff</span> <span class="kn">import</span> <span class="n">ModelDiff</span>
+<span class="n">diff</span> <span class="o">=</span> <span class="n">ModelDiff</span><span class="o">.</span><span class="n">model_diff</span><span class="p">(</span><span class="n">model_a</span><span class="p">,</span> <span class="n">model_b</span><span class="p">)</span>
+<span class="n">diff</span>
+</pre></div>
+</div>
+<div class="section" id="module-gsmodutils.model_diff">
+<span id="modeldiff-class"></span><h2>ModelDiff class<a class="headerlink" href="#module-gsmodutils.model_diff" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gsmodutils.model_diff.ModelDiff">
+<em class="property">class </em><code class="descclassname">gsmodutils.model_diff.</code><code class="descname">ModelDiff</code><span class="sig-paren">(</span><em>model_a=None</em>, <em>model_b=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/model_diff.html#ModelDiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.model_diff.ModelDiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a></p>
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None.  Remove all items from D.<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; a shallow copy of D<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.fromkeys">
+<code class="descname">fromkeys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.fromkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new dict with keys from iterable and values equal to value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>k</em><span class="optional">[</span>, <em>d</em><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; D[k] if k in D, else d.  d defaults to None.<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.items">
+<code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; a set-like object providing a view on D's items<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.keys">
+<code class="descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; a set-like object providing a view on D's keys<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="gsmodutils.model_diff.ModelDiff.model_diff">
+<em class="property">static </em><code class="descname">model_diff</code><span class="sig-paren">(</span><em>model_a</em>, <em>model_b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/model_diff.html#ModelDiff.model_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.model_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary that contains all of the changed reactions between model a and model b
+This includes any reactions or metabolites removed, or any reactions or metabolites added/changed
+This does not say HOW a model has changed if reactions or metabolites are changed they are just included
+with their new values</p>
+<p>Diff assumes l -&gt; r (i.e. model_a is the base model)
+:param cobra.Model model_a:
+:param cobra.Model model_b:
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><em>k</em><span class="optional">[</span>, <em>d</em><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; v, remove specified key and return the corresponding value.<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.popitem">
+<code class="descname">popitem</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; (k, v), remove and return some (key, value) pair as a<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.popitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-tuple; but raise KeyError if D is empty.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.setdefault">
+<code class="descname">setdefault</code><span class="sig-paren">(</span><em>k</em><span class="optional">[</span>, <em>d</em><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; D.get(k,d), also set D[k]=d if k not in D<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.setdefault" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="optional">[</span><em>E</em>, <span class="optional">]</span><em>**F</em><span class="sig-paren">)</span> &#x2192; None.  Update D from dict/iterable E and F.<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+In either case, this is followed by: for k in F:  D[k] = F[k]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gsmodutils.model_diff.ModelDiff.values">
+<code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; an object providing a view on D's values<a class="headerlink" href="#gsmodutils.model_diff.ModelDiff.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="gsmodutils.model_diff.model_diff">
+<code class="descclassname">gsmodutils.model_diff.</code><code class="descname">model_diff</code><span class="sig-paren">(</span><em>model_a</em>, <em>model_b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/model_diff.html#model_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.model_diff.model_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;depricated - use ModelDiff.model_diff(model_a, model_b)
+Returns a ModelDiff dictionary that contains all of the changed reactions between model a and model b
+This includes any reactions or metabolites removed, or any reactions or metabolites added/changed
+This does not say HOW a model has changed if reactions or metabolites are changed they are just included with their
+new values
+Diff assumes l -&gt; r (i.e. model_a is the base model)</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gsmodutils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="project.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="designs.html">Designs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About project</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Model diffs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-gsmodutils.model_diff">ModelDiff class</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="metacyc.html">MetaCyc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrumpy.html">ScrumPy</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="about.html" title="previous chapter">About project</a></li>
+      <li>Next: <a href="metacyc.html" title="next chapter">MetaCyc</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, James Gilbert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/diff.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -53,6 +53,7 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#P"><strong>P</strong></a>
@@ -68,10 +69,24 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
+    --add_models &lt;add_models&gt;
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-add-models">gsmodutils-init command line option</a>
+</li>
+      </ul></li>
+      <li>
     --apply_to &lt;apply_to&gt;
 
       <ul>
         <li><a href="cli.html#cmdoption-gsmodutils-iconditions-apply-to">gsmodutils-iconditions command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --author &lt;author&gt;
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-author">gsmodutils-init command line option</a>
 </li>
       </ul></li>
       <li>
@@ -81,6 +96,13 @@
         <li><a href="cli.html#cmdoption-gsmodutils-diff-base-model">gsmodutils-diff command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-gsmodutils-dimport-base-model">gsmodutils-dimport command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --build, --no-build
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-docker-build">gsmodutils-docker command line option</a>
 </li>
       </ul></li>
       <li>
@@ -96,12 +118,21 @@
       <ul>
         <li><a href="cli.html#cmdoption-gsmodutils-dimport-description">gsmodutils-dimport command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-description">gsmodutils-init command line option</a>
+</li>
       </ul></li>
       <li>
     --design &lt;design&gt;
 
       <ul>
         <li><a href="cli.html#cmdoption-gsmodutils-export-design">gsmodutils-export command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --email &lt;email&gt;
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-email">gsmodutils-init command line option</a>
 </li>
       </ul></li>
       <li>
@@ -138,6 +169,8 @@
       <ul>
         <li><a href="cli.html#cmdoption-gsmodutils-dimport-name">gsmodutils-dimport command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-name">gsmodutils-init command line option</a>
+</li>
       </ul></li>
       <li>
     --names, --no-names
@@ -146,6 +179,8 @@
         <li><a href="cli.html#cmdoption-gsmodutils-diff-names">gsmodutils-diff command line option</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     --output &lt;output&gt;
 
@@ -153,8 +188,6 @@
         <li><a href="cli.html#cmdoption-gsmodutils-diff-output">gsmodutils-diff command line option</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     --overwrite, --no-overwrite
 
@@ -179,7 +212,7 @@
     --project_path &lt;project_path&gt;
 
       <ul>
-        <li><a href="cli.html#cmdoption-gsmodutils-add-model-project-path">gsmodutils-add_model command line option</a>
+        <li><a href="cli.html#cmdoption-gsmodutils-addmodel-project-path">gsmodutils-addmodel command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-gsmodutils-diff-project-path">gsmodutils-diff command line option</a>
 </li>
@@ -197,10 +230,31 @@
 </li>
       </ul></li>
       <li>
+    --save, --no-save
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-docker-save">gsmodutils-docker command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --save_path &lt;save_path&gt;
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-docker-save-path">gsmodutils-docker command line option</a>
+</li>
+      </ul></li>
+      <li>
     --skip_default, --no_skip_default
 
       <ul>
         <li><a href="cli.html#cmdoption-gsmodutils-test-skip-default">gsmodutils-test command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --tag &lt;tag&gt;
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-docker-tag">gsmodutils-docker command line option</a>
 </li>
       </ul></li>
       <li>
@@ -214,7 +268,14 @@
     --validate, --no-validate
 
       <ul>
-        <li><a href="cli.html#cmdoption-gsmodutils-add-model-validate">gsmodutils-add_model command line option</a>
+        <li><a href="cli.html#cmdoption-gsmodutils-addmodel-validate">gsmodutils-addmodel command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --validate, --skip_validation
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-validate">gsmodutils-init command line option</a>
 </li>
       </ul></li>
       <li>
@@ -266,13 +327,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="strain_design.html#gsmodutils.project.design.StrainDesign.check_parents">check_parents() (gsmodutils.project.design.StrainDesign method)</a>
 </li>
-      <li><a href="project.html#gsmodutils.project.interface.GSMProject.clean_project">clean_project() (gsmodutils.project.interface.GSMProject method)</a>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.clear">clear() (gsmodutils.model_diff.ModelDiff method)</a>
 </li>
       <li><a href="tester_class.html#gsmodutils.test.tester.GSMTester.collect_tests">collect_tests() (gsmodutils.test.tester.GSMTester method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="project.html#gsmodutils.project.interface.GSMProject.conditions">conditions (gsmodutils.project.interface.GSMProject attribute)</a>
+</li>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.copy">copy() (gsmodutils.model_diff.ModelDiff method)</a>
 </li>
       <li><a href="test_utilities.html#gsmodutils.test.utils.TestRecord.create_child">create_child() (gsmodutils.test.utils.TestRecord method)</a>
 </li>
@@ -284,10 +347,17 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="project.html#gsmodutils.project.interface.GSMProject.design_path">design_path (gsmodutils.project.interface.GSMProject attribute)</a>
+      <li>
+    DEFAULT_MODEL_PATH
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-arg-default-model-path">gsmodutils-init command line option</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="project.html#gsmodutils.project.interface.GSMProject.design_path">design_path (gsmodutils.project.interface.GSMProject attribute)</a>
+</li>
       <li><a href="project.html#gsmodutils.project.interface.GSMProject.designs">designs (gsmodutils.project.interface.GSMProject attribute)</a>
 </li>
   </ul></td>
@@ -303,6 +373,8 @@
         <li><a href="cli.html#cmdoption-gsmodutils-export-arg-file-format">gsmodutils-export command line option</a>
 </li>
       </ul></li>
+      <li><a href="metacyc.html#gsmodutils.utils.metacyc.FileEncodingCtx">FileEncodingCtx (class in gsmodutils.utils.metacyc)</a>
+</li>
       <li>
     FILEPATH
 
@@ -316,6 +388,8 @@
 </li>
       <li><a href="strain_design.html#gsmodutils.project.design.StrainDesign.from_json">from_json() (gsmodutils.project.design.StrainDesign class method)</a>
 </li>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.fromkeys">fromkeys() (gsmodutils.model_diff.ModelDiff method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -325,6 +399,8 @@
       <li><a href="strain_design.html#gsmodutils.project.design.StrainDesign.genes">genes (gsmodutils.project.design.StrainDesign attribute)</a>
 </li>
       <li><a href="strain_design.html#gsmodutils.project.design.StrainDesign.genes_dataframe">genes_dataframe() (gsmodutils.project.design.StrainDesign method)</a>
+</li>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.get">get() (gsmodutils.model_diff.ModelDiff method)</a>
 </li>
       <li><a href="project.html#gsmodutils.project.interface.GSMProject.get_conditions">get_conditions() (gsmodutils.project.interface.GSMProject method)</a>
 </li>
@@ -337,23 +413,14 @@
       <li><a href="project.html#gsmodutils.project.interface.GSMProject.growth_condition">growth_condition() (gsmodutils.project.interface.GSMProject method)</a>
 </li>
       <li>
-    gsmodutils-add_model command line option
+    gsmodutils-addmodel command line option
 
       <ul>
-        <li><a href="cli.html#cmdoption-gsmodutils-add-model-project-path">--project_path &lt;project_path&gt;</a>
+        <li><a href="cli.html#cmdoption-gsmodutils-addmodel-project-path">--project_path &lt;project_path&gt;</a>
 </li>
-        <li><a href="cli.html#cmdoption-gsmodutils-add-model-validate">--validate, --no-validate</a>
+        <li><a href="cli.html#cmdoption-gsmodutils-addmodel-validate">--validate, --no-validate</a>
 </li>
-        <li><a href="cli.html#cmdoption-gsmodutils-add-model-arg-path">PATH</a>
-</li>
-      </ul></li>
-      <li>
-    gsmodutils-create_project command line option
-
-      <ul>
-        <li><a href="cli.html#cmdoption-gsmodutils-create-project-arg-model-path">MODEL_PATH</a>
-</li>
-        <li><a href="cli.html#cmdoption-gsmodutils-create-project-arg-project-path">PROJECT_PATH</a>
+        <li><a href="cli.html#cmdoption-gsmodutils-addmodel-arg-path">PATH</a>
 </li>
       </ul></li>
       <li>
@@ -400,13 +467,19 @@
     gsmodutils-docker command line option
 
       <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-docker-build">--build, --no-build</a>
+</li>
         <li><a href="cli.html#cmdoption-gsmodutils-docker-overwrite">--overwrite, --no-overwrite</a>
 </li>
         <li><a href="cli.html#cmdoption-gsmodutils-docker-project-path">--project_path &lt;project_path&gt;</a>
 </li>
+        <li><a href="cli.html#cmdoption-gsmodutils-docker-save">--save, --no-save</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-docker-save-path">--save_path &lt;save_path&gt;</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-docker-tag">--tag &lt;tag&gt;</a>
+</li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     gsmodutils-export command line option
 
@@ -426,6 +499,8 @@
         <li><a href="cli.html#cmdoption-gsmodutils-export-arg-file-format">FILE_FORMAT</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     gsmodutils-iconditions command line option
 
@@ -449,6 +524,27 @@
 </li>
       </ul></li>
       <li>
+    gsmodutils-init command line option
+
+      <ul>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-add-models">--add_models &lt;add_models&gt;</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-author">--author &lt;author&gt;</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-description">--description &lt;description&gt;</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-email">--email &lt;email&gt;</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-name">--name &lt;name&gt;</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-validate">--validate, --skip_validation</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-arg-default-model-path">DEFAULT_MODEL_PATH</a>
+</li>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-arg-project-path">PROJECT_PATH</a>
+</li>
+      </ul></li>
+      <li>
     gsmodutils-test command line option
 
       <ul>
@@ -463,6 +559,8 @@
         <li><a href="cli.html#cmdoption-gsmodutils-test-verbose">--verbose, --no_verbose</a>
 </li>
       </ul></li>
+      <li><a href="diff.html#module-gsmodutils.model_diff">gsmodutils.model_diff (module)</a>
+</li>
       <li><a href="strain_design.html#module-gsmodutils.project.design">gsmodutils.project.design (module)</a>
 </li>
       <li><a href="project.html#module-gsmodutils.project.interface">gsmodutils.project.interface (module)</a>
@@ -499,17 +597,27 @@
         <li><a href="cli.html#cmdoption-gsmodutils-dimport-arg-identifier">gsmodutils-dimport command line option</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="strain_design.html#gsmodutils.project.design.StrainDesign.info">info (gsmodutils.project.design.StrainDesign attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="test_utilities.html#gsmodutils.test.utils.TestRecord.is_success">is_success (gsmodutils.test.utils.TestRecord attribute)</a>
+</li>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.items">items() (gsmodutils.model_diff.ModelDiff method)</a>
 </li>
       <li><a href="tester_class.html#gsmodutils.test.tester.GSMTester.iter_basetf">iter_basetf() (gsmodutils.test.tester.GSMTester method)</a>
 </li>
       <li><a href="project.html#gsmodutils.project.interface.GSMProject.iter_models">iter_models() (gsmodutils.project.interface.GSMProject method)</a>
 </li>
       <li><a href="tester_class.html#gsmodutils.test.tester.GSMTester.iter_tests">iter_tests() (gsmodutils.test.tester.GSMTester method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.keys">keys() (gsmodutils.model_diff.ModelDiff method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -547,19 +655,25 @@
 </li>
       <li><a href="project.html#gsmodutils.project.interface.GSMProject.model">model (gsmodutils.project.interface.GSMProject attribute)</a>
 </li>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.model_diff">model_diff() (gsmodutils.model_diff.ModelDiff static method)</a>
+
+      <ul>
+        <li><a href="diff.html#gsmodutils.model_diff.model_diff">(in module gsmodutils.model_diff)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     MODEL_PATH
 
       <ul>
-        <li><a href="cli.html#cmdoption-gsmodutils-create-project-arg-model-path">gsmodutils-create_project command line option</a>
-</li>
         <li><a href="cli.html#cmdoption-gsmodutils-diff-arg-model-path">gsmodutils-diff command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-gsmodutils-dimport-arg-model-path">gsmodutils-dimport command line option</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff">ModelDiff (class in gsmodutils.model_diff)</a>
+</li>
       <li><a href="project.html#gsmodutils.project.interface.GSMProject.models">models (gsmodutils.project.interface.GSMProject attribute)</a>
 </li>
       <li><a href="test_utilities.html#gsmodutils.test.utils.ModelTestSelector">ModelTestSelector (class in gsmodutils.test.utils)</a>
@@ -582,18 +696,24 @@
     PATH
 
       <ul>
-        <li><a href="cli.html#cmdoption-gsmodutils-add-model-arg-path">gsmodutils-add_model command line option</a>
+        <li><a href="cli.html#cmdoption-gsmodutils-addmodel-arg-path">gsmodutils-addmodel command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-gsmodutils-iconditions-arg-path">gsmodutils-iconditions command line option</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.pop">pop() (gsmodutils.model_diff.ModelDiff method)</a>
+</li>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.popitem">popitem() (gsmodutils.model_diff.ModelDiff method)</a>
+</li>
+      <li><a href="project.html#gsmodutils.project.interface.GSMProject.project_context_lock">project_context_lock (gsmodutils.project.interface.GSMProject attribute)</a>
+</li>
       <li>
     PROJECT_PATH
 
       <ul>
-        <li><a href="cli.html#cmdoption-gsmodutils-create-project-arg-project-path">gsmodutils-create_project command line option</a>
+        <li><a href="cli.html#cmdoption-gsmodutils-init-arg-project-path">gsmodutils-init command line option</a>
 </li>
       </ul></li>
       <li><a href="project.html#gsmodutils.project.interface.GSMProject.project_path">project_path (gsmodutils.project.interface.GSMProject attribute)</a>
@@ -634,6 +754,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.setdefault">setdefault() (gsmodutils.model_diff.ModelDiff method)</a>
+</li>
       <li><a href="tester_class.html#gsmodutils.test.tester.stdout_ctx">stdout_ctx() (in module gsmodutils.test.tester)</a>
 </li>
       <li><a href="strain_design.html#gsmodutils.project.design.StrainDesign">StrainDesign (class in gsmodutils.project.design)</a>
@@ -668,8 +790,12 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="project.html#gsmodutils.project.interface.GSMProject.update">update() (gsmodutils.project.interface.GSMProject method)</a>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.update">update() (gsmodutils.model_diff.ModelDiff method)</a>
+
+      <ul>
+        <li><a href="project.html#gsmodutils.project.interface.GSMProject.update">(gsmodutils.project.interface.GSMProject method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -677,6 +803,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="strain_design.html#gsmodutils.project.design.StrainDesign.validate_dict">validate_dict() (gsmodutils.project.design.StrainDesign static method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="diff.html#gsmodutils.model_diff.ModelDiff.values">values() (gsmodutils.model_diff.ModelDiff method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -714,6 +844,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="about.html">About project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff.html">Model diffs</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utilities:</span></p>
 <ul>
@@ -746,7 +877,7 @@
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
