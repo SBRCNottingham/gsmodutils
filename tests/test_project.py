@@ -1,7 +1,5 @@
 """
 Tests for GSMProject class
-
-TODO: tests for command line interface
 """
 
 
