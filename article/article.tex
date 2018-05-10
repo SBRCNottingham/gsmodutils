@@ -34,7 +34,7 @@
 \maketitle
 
 \begin{abstract}
-\textbf{Motivation:} Genome scale metabolic models are increasingly important for systems biology and metabolic engineering research as they are capable of simulating complex steady state phenotypic behaviour.
+\textbf{Motivation:} Genome scale metabolic models (GSMMs) are increasingly important for systems biology and metabolic engineering research as they are capable of simulating complex steady state phenotypic behaviour.
 Constraints based models of this form can include thousands of reactions and metabolites, with many crucial pathways that only become activated in specific simulation settings.
 However, despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models little methodology is suggested for the management of continually curated large scale models.
 This is quickly becoming an issue for industrial systems and synthetic biotechnology applications, which require good quality reusable models integral to the design, build and test cycle.
@@ -51,10 +51,11 @@ Crucially, different substrate conditions are configurable allowing users to exa
 \section{Introduction}
 Stoichiometric constraints based modelling for biological systems has been a mainstay of systems biology for several decades \cite{fell1986fat, varma1994stoichiometric}.
 Given its flexibility, low barrier to entry and requirement only on minimal knowledge regarding the stoichiometry of metabolic networks this structural approach has become an extremely popular method for modelling steady state behaviour of large, biochemical networks \cite{kauffman2003advances}.
-Such large scale reconstructions are often refereed to as genome scale models (GSMs), as the processes is significantly aided through the advent of relatively inexpensive genome sequencing \cite{o2015using, land2015insights}.
+Such large scale reconstructions are often refereed to as genome scale metabolic models (GSMMs), as the processes is significantly aided through the advent of relatively inexpensive genome sequencing \cite{o2015using, land2015insights}.
+Indeed, owing to their ability to model complex aspects of metabolism, GSMMs have been widely adopted as a standard to elucidate and optimise of industrial biotechnology processes \cite{kim2017current}.
 
-The reconstruction of GSMs is an arduous process that follows a complex protocol to ensure model validity \cite{thiele2010protocol}.
-Whilst many popular automated methods exists to construct GSMs from reference genomes \cite{henry2010high, poolman2006scrumpy}, there is a still a significant amount of manual curation.
+The reconstruction of GSMMs is an arduous process that follows a complex protocol to ensure model validity \cite{thiele2010protocol}.
+Whilst many popular automated methods exists to construct GSMMs from reference genomes \cite{henry2010high, poolman2006scrumpy}, there is a still a significant amount of manual curation.
 However, treating the creation of models as an isolated ``one-off'' event ignores the significant amount of curation that is required for applications such as biotechnology.
 
 As a consequence, a significant amount of work has gone into the management of genome scale models.
@@ -281,13 +282,13 @@ The cornerstone of this is the use of test cases, which formalise modelling vali
 In order to facilitate the sharing and dissemination of research good standards and software are required \cite{}.
 Naturally a great deal of effort has gone in to producing high quality systems and synthetic biology standards \cite{}.
 Furthermore, when research projects end it all to is common for important large models to be published and become relics lost within the literature forgotten to all but the most dedicated of individuals.
-As GSMs grow in terms of the metabolism the contain as well as the biological problems they are used to solve, problems with annotation and curation naturally accumulate as a product of human error.
+As GSMMs grow in terms of the metabolism the contain as well as the biological problems they are used to solve, problems with annotation and curation naturally accumulate as a product of human error.
 Software that facilitates actively improving how researchers develop and apply models to new phenomena is required.
 
 We have presented a framework with a number of features taken from the software development world specifically designed to improve collaboration and minimise such error.
 However, it is important to stress the difference between defined behaviour expected from pre-written test cases and novel predictions made by a model.
 Indeed, a core objective of this framework is to ensure that good practices are followed in model development that help scientists to better trust the results discovered by their models.
-In an ideal world, we would envision a methodology such as our becoming a pre-requisite for GSMs to pass peer review.
+In an ideal world, we would envision a methodology such as our becoming a pre-requisite for GSMMs to pass peer review.
 
 % Furthermore, several methods for the automated construction of gsms exist.
 % However, to our knowledge no methods include a fully automated pipeline for updating existing manually created models once constructed.

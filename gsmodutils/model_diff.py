@@ -75,9 +75,9 @@ class ModelDiff(dict):
     def _reaction_table(self):
         info_str = ""
         if len(self["reactions"]):
+            info_str += "<strong> Added/Changed reactions: </strong>"
             for reaction in self["reactions"]:
                 info_str += """
-                <strong> Added or changed reactions: </strong>
                 <table>
                 <th> Reaction id</th>
                 <th>name</th>
@@ -86,7 +86,6 @@ class ModelDiff(dict):
                 <th>upper_bound</th>
                 <th>lower_bound</th>
                 <th>objective_coefficient</th>
-                <th>rstr</th>
                 <tr>
                     <td>{id}</td>
                     <td>{name}</td>
@@ -95,18 +94,10 @@ class ModelDiff(dict):
                     <td>{upper_bound}</td>
                     <td>{lower_bound}</td>
                     <td>{objective_coefficient}</td>
-                    <td>{rstr}</td>
                 </tr>
-                <tr>
-                    <td>
-                        <table>
-                            <th> Metabolite </th>
-                            <th> Coef </th>
+                <tr> <td colspan=7 > {rstr} </td> </tr>
+                <tr> <td colspan=7> {rstr_names} </td> </tr>
                 """.format(**reaction)
-
-                for s, v in reaction["metabolites"]:
-                    info_str += "<tr> <td> {} </td> <td> {} </td> </tr>".format(s, v)
-                info_str += "</table></td> </tr>"
 
             info_str += "</table>"
         return info_str
@@ -293,7 +284,8 @@ class ModelDiff(dict):
                         name=rb.name,
                         variable_kind=rb.variable_kind,
                         metabolites=dict(convert_stoich(rb.metabolites)),
-                        rstr=repr(rb),
+                        rstr=rb.build_reaction_string(use_metabolite_names=False),
+                        rstr_names=rb.build_reaction_string(use_metabolite_names=True)
                     )
                 )
         # Gene reaction rules are stored in reactions, however models also contains metadata for genes
