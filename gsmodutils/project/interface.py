@@ -23,12 +23,13 @@ logger = logging.getLogger(__name__)
 
 class GSMProject(object):
 
-    def __init__(self, path='.'):
+    def __init__(self, path="."):
         """
         Project class finds a gsmodutlils.json file in a given path and creates a project which allows a user to load:
             Models included within the project
             Designs that the model uses
         """
+        logger.info("Attempting to load project in path {}".format(path))
         self._project_path = os.path.abspath(path)
         self.update()
         self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
@@ -72,10 +73,11 @@ class GSMProject(object):
         Updates this class from configuration file
         """
         if not os.path.exists(self._project_path):
-            
+            logger.error("Failed to find project path {}".format(self._project_path))
             raise ProjectNotFound('Project path {} does not exist'.format(self._project_path))
         
         if not os.path.exists(self._context_file):
+            logger.error("Failed to find project config file {}".format(self._context_file))
             raise ProjectNotFound(
                 'Project settings file {} in {} does not exist'.format(default_project_file, self._project_path))
         
@@ -97,6 +99,10 @@ class GSMProject(object):
     
     @property
     def conditions(self):
+        """
+        Different model conditions
+        :return: dict of model conditions
+        """
         return self.get_conditions()
 
     def iter_models(self):
