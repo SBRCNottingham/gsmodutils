@@ -10,7 +10,7 @@ from tutils import FakeProjectContext
 import os
 import pytest
 from cobra.exceptions import Infeasible
-from cameo.core.utils import load_medium
+from gsmodutils.utils.io import load_medium
 from click.testing import CliRunner
 import gsmodutils.cli
 from gsmodutils.test.tester import stdout_ctx

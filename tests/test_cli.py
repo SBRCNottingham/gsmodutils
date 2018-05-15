@@ -99,6 +99,7 @@ def test_export(fmt, excode):
                 assert "EX_glc__D_e" not in l_model.reactions
 
                 os.remove(opt)
+                assert not os.path.exists(opt)
 
                 # The same applies for exporting conditions
                 result = runner.invoke(gsmodutils.cli.export, [fmt, opt, '--project_path', ctx.path, '--conditions',
@@ -287,6 +288,7 @@ def test_addmodel_validation():
         # Pass with validation off
         result = runner.invoke(gsmodutils.cli.addmodel, [npath, '--project_path', ctx.path, '--no-validate'])
         assert result.exit_code == 0
+
 
 def test_diff():
     with FakeProjectContext() as ctx:

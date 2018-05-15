@@ -2,7 +2,7 @@ import os
 import shutil
 import tempfile
 from gsmodutils import GSMProject, load_model
-from cameo.core.utils import load_medium
+from gsmodutils.utils.io import load_medium
 import cobra
 
 _IAF_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'iAF1260.json')

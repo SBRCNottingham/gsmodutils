@@ -19,3 +19,8 @@ class DesignError(Exception):
 class ValidationError(Exception):
     """ Errors in validation of model """
     pass
+
+
+class MediumError(Exception):
+    """ Model medium incorrect. Model likely misses reaction """
+    pass

@@ -1,14 +1,14 @@
 import cobra
 import os
 from gsmodutils.utils.scrumpy import load_scrumpy_model
+from gsmodutils.exceptions import MediumError
 
 
 def load_model(path, file_format=None):
     """
-    Model loading that accepts multiple formats. Implemented to move away from dependency on cameo.load_model which,
-    while good for users, created problems in testing.
+    Model loading that accepts multiple formats, including scrumpy.
     :str path: path to model
-    :str or None file_format: format model is imported in if None, attemps to guess
+    :str or None file_format: format model is imported in if None, attempts to guess
     :return: cobra_model
     """
     if not os.path.exists(path):
@@ -32,3 +32,27 @@ def load_model(path, file_format=None):
         raise TypeError('Cannot load file format {}'.format(file_format))
 
     return cobra_model
+
+
+def load_medium(model, medium_dict, copy=False):
+    """
+    Load the medium of a model
+    :param model: cobra.Model instance
+    :param medium_dict: dictionary
+    :param copy: Boolean: return copy of model
+    :return: cobra.Model
+    """
+
+    if not isinstance(medium_dict, dict):
+        raise TypeError("Expected python dictionary, got {} instead".format(type(medium_dict)))
+
+    if not isinstance(model, cobra.Model):
+        raise TypeError("Expected cobra model, got {} instead".format(type(model)))
+
+    if copy:
+        model = model.copy()
+
+    for ex_reaction in model.exchanges:
+        ex_reaction.lower_bound = medium_dict.get(ex_reaction.id, 0)
+
+    return model

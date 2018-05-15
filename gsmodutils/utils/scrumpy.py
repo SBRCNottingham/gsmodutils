@@ -5,7 +5,7 @@ import json
 import os
 
 import cobra
-from cameo.core.utils import load_medium
+#from gsmodutils.utils.io import load_medium
 import re
 
 
@@ -16,7 +16,7 @@ class ParseError(Exception):
 def load_scrumpy_model(filepath, name=None, model_id=None, media=None, objective_reactions=None, obj_dir='min',
                        fixed_fluxes=None):
     """
-    Specify a base scrumpy structural model file and returns a cameo model.
+    Specify a base scrumpy structural model file and returns a cobra model.
     This hasn't be thoroughly tested so expect there to be bugs
 
     To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media

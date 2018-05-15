@@ -5,7 +5,6 @@ import json
 import os
 import fasteners
 
-from cameo.core.utils import load_medium
 from cobra.exceptions import Infeasible
 from six import string_types
 
@@ -16,6 +15,7 @@ from gsmodutils.project.model import GSModutilsModel
 from gsmodutils.project.project_config import ProjectConfig, default_project_file
 from gsmodutils.test.tester import GSMTester
 from gsmodutils.utils import validator
+from gsmodutils.utils.io import load_medium
 import logging
 
 logger = logging.getLogger(__name__)
@@ -240,7 +240,7 @@ class GSMProject(object):
         
         Returns the saved design diff
 
-        :param model: cobrapy/cameo model
+        :param model: cobrapy model
         :param did: design identifier
         :param name: name of the design
         :param description: text description of what it does
@@ -315,7 +315,7 @@ class GSMProject(object):
         """
         Load a model with a given set of pre-saved media conditions
         :param conditions_id: identifier of conditions file
-        :param model: string or cobrapy/cameo model
+        :param model: string or cobrapy model
         :param copy: return copy of model or modify inplace
         :return:
         """
@@ -430,7 +430,7 @@ class GSMProject(object):
         If certain models should grow, specify this with a a tuple where the entries refer to the model files tracked by
         the project. All models specified must be contained within the project.
 
-        :param model: cobrapy or cameo model
+        :param model: cobrapy model
         :param conditions_id: identifier for the conditions should be unique
         :param carbon_source: name of carbon source in the media that has a fixed uptake rate
         :param apply_to: iterable of models that this set of designs applies to

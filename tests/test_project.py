@@ -10,8 +10,7 @@ import os
 import cobra
 import pytest
 from tutils import FakeProjectContext
-import cameo
-
+from gsmodutils.utils.io import load_model
 from gsmodutils import GSMProject
 from gsmodutils.project.design import StrainDesign
 from gsmodutils.exceptions import DesignError, ProjectNotFound
@@ -308,7 +307,7 @@ def test_save_infeasible_design():
 
 def test_design_removals():
 
-    with FakeProjectContext(model=cameo.load_model('e_coli_core')) as ctx:
+    with FakeProjectContext() as ctx:
         # Design with removal of reactions, metabolites, genes
         project = GSMProject(ctx.path)
         mdl = project.load_model()
