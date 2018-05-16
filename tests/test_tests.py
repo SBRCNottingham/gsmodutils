@@ -107,6 +107,7 @@ def test_func_cove(model, project, log):
 def test_model(model, project, log):
     solution = model.solver.optimize()
     print('This is the end')
+    log.warning(True, "this is a warning")
     log.assertion(True, "Model grows", "Model does not grow")
     log.assertion(False, "Model grows", "Model does not grow")
     

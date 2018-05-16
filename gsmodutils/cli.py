@@ -52,11 +52,16 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
             click.echo(
                 click.style(idt + "Asserion error: " + msg, fg='red')
             )
-            
+
+        for msg, desc in clog.warnings:
+            click.echo(
+                click.style(idt + "Warning: " + msg, fg='yellow')
+            )
+
         if verbose:
             for msg, desc in clog.success:
                 click.echo(
-                    click.style(idt + "Asserion success: " + msg, fg='green')
+                    click.style(idt + "Assertion success: " + msg, fg='green')
                 )
             
         _output_child_logs(clog, verbose=verbose, indent=indent+baseindent)
@@ -129,9 +134,9 @@ def test(project_path, test_id, skip_default, verbose, log_path):
         click.echo("verbose mode, showing successes and failures")
         click.echo()
 
-    print('Running tests: ', end='')
+    click.echo('Running tests: ')
     for _ in tqdm(tester.iter_tests(skip_default=skip_default)):
-        print('.', end='')
+        pass
     click.echo()
     ts = 0
     te = 0

@@ -126,6 +126,7 @@ class TestRecord(object):
         self.parent = parent
         self.success = []
         self.error = []
+        self.warnings = []
         self.std_out = None  # Reserved for messages
         self.run_time = time.time()
         self.children = {}
@@ -145,6 +146,14 @@ class TestRecord(object):
             self.success.append((success_msg, desc))
         else:
             self.error.append((error_msg, desc))
+
+    def warning(self, statement, message, desc=''):
+        """
+        Called within test functions to capture warnings about the status of models.
+        If statement is true, the warning message will be stored.
+        """
+        if statement:
+            self.warnings.append((message, desc))
     
     def add_error(self, msg, desc=''):
         """
