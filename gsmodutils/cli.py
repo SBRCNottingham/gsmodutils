@@ -130,13 +130,13 @@ def test(project_path, test_id, skip_default, verbose, log_path):
         click.echo()
 
     print('Running tests: ', end='')
-    for _ in tester.iter_tests(skip_default=skip_default):
+    for _ in tqdm(tester.iter_tests(skip_default=skip_default)):
         print('.', end='')
     click.echo()
     ts = 0
     te = 0
 
-    for tf, log in tqdm(tester.log.items()):
+    for tf, log in tester.log.items():
 
         if tf == 'default_tests':
             click.echo('Default project file tests (models, designs, conditions):')
