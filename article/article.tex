@@ -22,6 +22,7 @@
 \title{Gsmodutils: A python based framework for test driven genome scale metabolic model development}
 \author[1]{James Gilbert}
 \author[1]{Nicole Pearcy}
+\author[1]{Rupert Norman}
 \author[2]{Jamie Twycross}
 \author[3]{John King}
 \author[1]{Nigel Minton}
@@ -200,73 +201,90 @@ Figure \ref{fig:test_case} highlights the notion of test cases, taken from test 
 The outlined workflow is that the user writes a formal test case for some modelling goal, perhaps driven by captured experimental data, that fits a specific form of validation criteria.
 We note that, in principle, this test case should be written \textit{a priori} of changes to a model.
 
-\section{Example usage Clostridium acetobutylicum models}
+% \section{Example usage Clostridium acetobutylicum models}
+% \subsection{Scientific background}
+% \textit{C. acetobutylicum} ATCC 824 is a widely researched organism that has found use in the production of solvents for decades.
+% More recently, \textit{C. acetobutylicum} has been applied for the production of alcohols such as ethanol and n-butanols.
+% The industrial relevance and strong background of experimental data has led to the application of many genome scale models \cite{}.
+% Whilst increasingly informative when combined with experimental data, the history of the management of models for \textit{C. acetobutylicum} tells a different story.
+% 
+% Initially, two rival models were published containing a similar number of genes \cite{lee2008genome, senger2008genome}.
+% % \textbf{TODO: describe in more detail}.
+% %Discuss limitations of rival models
+% This led to the further development of subsequent models, iCaC 490 \cite{mcanulty2012genome} and an automatically generated model from  the Model SEED  pipeline \cite{}.
+% 
+% In this example we focus on the more recent contributions of iCac802 \cite{dash2014capturing} and iCac967 \cite{yoo2015quantitative}.
+% iCac802 combines a significantly updated set of annotations from previously curated model versions, an improved TCA cycle, full proton balancing in reactions and reactions for more complete coverage of hexadecanoyl-acp, hexadecanoyl-CoA, crotonyl-CoA pathways as well as pathways for the uptake and biosynthesis of more compounds.
+% Crucially, the model itself received significant validation against fluxonomic data from 13C-metabolic flux analysis ($13$C-MFA).
+% This additional validation set considerable flux bounds upon pathways, leading to improved curation.
+% 
+% Whilst iCac802 was informed by previous models, critically, it was started as a new curation project, a significant undertaking of work.
+% Such an approach may be necessary to uncover errors or oversights in construction processes.
+% However, this naturally adds a significant time burden for model curators and may be due to a lack of adaptability from previous models.
+% 
+% The iCac 967 model presents a smaller set of changes to the annotation of the \textit{C. acetobutylicum} model.
+% While the number of genes increased from 802 to 967 manual annotation actually reduced the number of reactions and metabolites from 1462 to 1137 and 1231 to 1058, respectively.
+% The annotation ane experimental evidence from iCac802 \cite{dash2014capturing} to iCac967 \cite{yoo2015quantitative} is greatly expanded.
+% However, it is not entirely clear, from the initial publication, the extent to which the expanded iCaC967 model preserves crucial experimental validation.
+% The following sections aim to check the later model against previous validation criteria.
+
+% \subsection{Model integration}
+% \textbf{Project construction:}
+% An initial project of the \textit{C. acetobutylicum} model was created in gsmodutils.
+% This is based around the iCac802 base model.
+% Included are also knockout strains $\Delta adc, \Delta ack, \Delta ptb$ and $\Delta hbd$ (TODO: describe knockouts).
+% 
+% In addition, a design listing the constraints changed in model version iCaC967 
+% \footnote{We would like to note that such a significant change to a model, in many practical cases, would not be considered a design but, rather, a separate model.
+% Separate models within the same project is a feature supported by gsmodutils.}.
+% \\
+% \textbf{Model comparison: TODO Diffs between existing models - use (and further develop) gsmodutils diff for model stats}.
+% 
+% \subsection{Evaluation of model validation criteria}
+% Several crucial validation criteria were identified from the experimental and theoretical analysis of the models found in the original publications.
+% We note that this is not an exhaustive set of criteria.
+% This section is designed to serve as a use case for the gsmodutils framework, not to comprehensively review the initial publications.
+% \\
+% 
+% \textbf{TCA cycle}\\
+% \textbf{Proton balanced results}\\
+% \textbf{Predictions of knockouts}\\
+% The inital publication for iCAC802 included validation of four gene knockout mutant strains.
+% $\Delta ack$ acetate kinase.\\
+% $\Delta ptb$ phosphotransbutrylase.\\
+% $\Delta adc$ acetoacetate decarboxylase. \textbf{This reaction is present and the knock out works as expected but not annotated correctly.}\\
+% $\Delta hdb$ hydroxybutyryl-CoA dehydrogenase. \\
+% 
+% \textbf{Flux validation against 13C data}\\
+% \textbf{Under acidogenic stress (H inhibited conditions) } \\
+% \textbf{Solvent formation Cell recycling in solventogenic phase}\\
+
+
+\section{Example usage Clostridium autoethanogenum}
+\textit{Clostridium autoethanogenum} is an anaerobic, gram positive spore forming acetogenic bacteria that is of industrial relevance \cite{}.
+In this section we describe how gsmodutils has been utilised to ensure that future versions of a genome scale model CLAU--- will remain functionally relevant, from the perspective of industrial biotechnology.
+
 \subsection{Scientific background}
-\textit{C. acetobutylicum} ATCC 824 is a widely researched organism that has found use in the production of solvents for decades.
-More recently, \textit{C. acetobutylicum} has been applied for the production of alcohols such as ethanol and n-butanols.
-The industrial relevance and strong background of experimental data has led to the application of many genome scale models \cite{}.
-Whilst increasingly informative when combined with experimental data, the history of the management of models for \textit{C. acetobutylicum} tells a different story.
 
-Initially, two rival models were published containing a similar number of genes \cite{lee2008genome, senger2008genome}.
-% \textbf{TODO: describe in more detail}.
-%Discuss limitations of rival models
-This led to the further development of subsequent models, iCaC 490 \cite{mcanulty2012genome} and an automatically generated model from  the Model SEED  pipeline \cite{}.
-
-In this example we focus on the more recent contributions of iCac802 \cite{dash2014capturing} and iCac967 \cite{yoo2015quantitative}.
-iCac802 combines a significantly updated set of annotations from previously curated model versions, an improved TCA cycle, full proton balancing in reactions and reactions for more complete coverage of hexadecanoyl-acp, hexadecanoyl-CoA, crotonyl-CoA pathways as well as pathways for the uptake and biosynthesis of more compounds.
-Crucially, the model itself received significant validation against fluxonomic data from 13C-metabolic flux analysis ($13$C-MFA).
-This additional validation set considerable flux bounds upon pathways, leading to improved curation.
-
-Whilst iCac802 was informed by previous models, critically, it was started as a new curation project, a significant undertaking of work.
-Such an approach may be necessary to uncover errors or oversights in construction processes.
-However, this naturally adds a significant time burden for model curators and may be due to a lack of adaptability from previous models.
-
-The iCac 967 model presents a smaller set of changes to the annotation of the \textit{C. acetobutylicum} model.
-While the number of genes increased from 802 to 967 manual annotation actually reduced the number of reactions and metabolites from 1462 to 1137 and 1231 to 1058, respectively.
-The annotation ane experimental evidence from iCac802 \cite{dash2014capturing} to iCac967 \cite{yoo2015quantitative} is greatly expanded.
-However, it is not entirely clear, from the initial publication, the extent to which the expanded iCaC967 model preserves crucial experimental validation.
-The following sections aim to check the later model against previous validation criteria.
+\subsection{}
 
 \subsection{Model integration}
 \textbf{Project construction:}
-An initial project of the \textit{C. acetobutylicum} model was created in gsmodutils.
-This is based around the iCac802 base model.
-Included are also knockout strains $\Delta adc, \Delta ack, \Delta ptb$ and $\Delta hbd$ (TODO: describe knockouts).
 
-In addition, a design listing the constraints changed in model version iCaC967 
-\footnote{We would like to note that such a significant change to a model, in many practical cases, would not be considered a design but, rather, a separate model.
-Separate models within the same project is a feature supported by gsmodutils.}.
-\\
 \textbf{Model comparison: TODO Diffs between existing models - use (and further develop) gsmodutils diff for model stats}.
 
 \subsection{Evaluation of model validation criteria}
-Several crucial validation criteria were identified from the experimental and theoretical analysis of the models found in the original publications.
-We note that this is not an exhaustive set of criteria.
-This section is designed to serve as a use case for the gsmodutils framework, not to comprehensively review the initial publications.
-\\
-
-\textbf{TCA cycle}\\
-\textbf{Proton balanced results}\\
-\textbf{Predictions of knockouts}\\
-The inital publication for iCAC802 included validation of four gene knockout mutant strains.
-$\Delta ack$ acetate kinase.\\
-$\Delta ptb$ phosphotransbutrylase.\\
-$\Delta adc$ acetoacetate decarboxylase. \textbf{This reaction is present and the knock out works as expected but not annotated correctly.}\\
-$\Delta hdb$ hydroxybutyryl-CoA dehydrogenase. \\
-
-\textbf{Flux validation against 13C data}\\
-\textbf{Under acidogenic stress (H inhibited conditions) } \\
-\textbf{Solvent formation Cell recycling in solventogenic phase}\\
-
 
 % Discuss these results
-\subsection{Remarks} 
-Reproducing the results of the initial publication of the iCAC802 model \cite{dash2014capturing} was possible.
-However, it is notworthy to point out that there were a number of inconsistencies between the annotation in the published model and the publication.
-Notably, the gene ``adc'', which codes for acetoacetate decarboxylase was missing from the initial annotation.
-We would stress that these did not significantly impact the results of the model or the claims made in the publication.
+\subsection{Remarks}
  
 \section{Related work}
+\textbf{Memote:} \cite{lieven2017memote} is tool set that has very similar ambitions to gsmodutils.
+It features a fully specified set of tests, including custom test cases and has strong version control integration with git.
+A core difference between these projects is that gsmodutils has a stronger focus on reducing the redundancy in model storage through the usage of \textit{design deltas}, as described above.
+Similarly, a core goal of gsmodutils is to allow easy import and export outside of the framework for compatibility with other modelling suites.
+It should be noted that, as memote is written in python and utilises cobrapy, it is fully compatible with gsmodutils.
+
 \textbf{cameo:} Cameo \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
 strategies, as well as other flux balance analysis utilities. Written in python and part of the cobrapy suite of applications,
 gsmodutils integrates easily with cameo.
@@ -279,8 +297,8 @@ The cornerstone of this is the use of test cases, which formalise modelling vali
 
 
 \section{Discussion}
-In order to facilitate the sharing and dissemination of research good standards and software are required \cite{}.
-Naturally a great deal of effort has gone in to producing high quality systems and synthetic biology standards \cite{}.
+In order to facilitate the sharing and dissemination of high quality computational research, good standards and software are required \cite{jimenez2017four}.
+Naturally a great deal of effort has gone in to producing high quality systems and synthetic biology standards \cite{hucka2003systems, cox2018synthetic}.
 Furthermore, when research projects end it all to is common for important large models to be published and become relics lost within the literature forgotten to all but the most dedicated of individuals.
 As GSMMs grow in terms of the metabolism the contain as well as the biological problems they are used to solve, problems with annotation and curation naturally accumulate as a product of human error.
 Software that facilitates actively improving how researchers develop and apply models to new phenomena is required.
@@ -290,21 +308,14 @@ However, it is important to stress the difference between defined behaviour expe
 Indeed, a core objective of this framework is to ensure that good practices are followed in model development that help scientists to better trust the results discovered by their models.
 In an ideal world, we would envision a methodology such as our becoming a pre-requisite for GSMMs to pass peer review.
 
-% Furthermore, several methods for the automated construction of gsms exist.
-% However, to our knowledge no methods include a fully automated pipeline for updating existing manually created models once constructed.
-% We would like to note that the collection of data for the validation of models and the construction of tests could be used to allow automated updates to take place.
-% For example, as GPR are curated models could automatically be updated with the inclusion of new information whilst being validated against existing criteria.
-
 As with most software development projects, gsmodutils will see expanded features.
 Initially this will include tighter integration with version control systems such as git and mercurial.
 Furthermore, the objective of the project is to cultivate collaboration by simplifying the process of distributing large models to different users.
 As a consequence, methods for sharing docker containers will be investigated.
 
 \section*{Acknowledgements}
-We would like to thank the Oxford Brookes Cell Systems Modelling group for helpful discussions regarding this work, Rupert Norman for assistance testing and forming the idea of this software, Thomas Millat for crucial scientific advice and Phillipe Soucaille for assistance reconstructing the iCac967
-
-\section*{Funding}
-This work has been supported by the BBSRC grant XXXXX.
+We would like to thank the Oxford Brookes Cell Systems Modelling group for helpful discussions regarding this work and Thomas Millat for scientific advice.
+This work was supported by the UK Biotechnology and Biological Sciences Research Council (BBSRC) grant BB/L013940/1.
 
 
 \bibliographystyle{unsrt}
