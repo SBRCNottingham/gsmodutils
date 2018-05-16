@@ -50,18 +50,18 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
         )
         for msg, desc in clog.error:
             click.echo(
-                click.style(idt + "Asserion error: " + msg, fg='red')
+                click.style(idt + "Asserion error: {}".format(msg), fg='red')
             )
 
         for msg, desc in clog.warnings:
             click.echo(
-                click.style(idt + "Warning: " + msg, fg='yellow')
+                click.style(idt + "Warning: {}".format(msg), fg='yellow')
             )
 
         if verbose:
             for msg, desc in clog.success:
                 click.echo(
-                    click.style(idt + "Assertion success: " + msg, fg='green')
+                    click.style(idt + "Assertion success: {}".format(msg), fg='green')
                 )
             
         _output_child_logs(clog, verbose=verbose, indent=indent+baseindent)
