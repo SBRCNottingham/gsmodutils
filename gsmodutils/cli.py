@@ -15,6 +15,8 @@ from gsmodutils import GSMProject, load_model
 from gsmodutils.project.project_config import ProjectConfig
 from sys import exit
 
+from tqdm import tqdm
+
 
 def _load_project(project_path):
     project = None
@@ -118,7 +120,7 @@ def test(project_path, test_id, skip_default, verbose, log_path):
         exit(0)
     
     barstr = "-"*25
-    # TODO Progress bar as tests are run
+
     click.echo(
         click.style(barstr + ' gsmodutils test results ' + barstr, bg='green', bold=True)
     )
@@ -133,7 +135,8 @@ def test(project_path, test_id, skip_default, verbose, log_path):
     click.echo()
     ts = 0
     te = 0
-    for tf, log in tester.log.items():
+
+    for tf, log in tqdm(tester.log.items()):
 
         if tf == 'default_tests':
             click.echo('Default project file tests (models, designs, conditions):')
