@@ -177,7 +177,9 @@ information.</p>
 <dl class="attribute">
 <dt id="gsmodutils.project.interface.GSMProject.conditions">
 <code class="descname">conditions</code><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.conditions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Different model conditions
+:return: dict of model conditions</p>
+</dd></dl>
 
 <dl class="classmethod">
 <dt id="gsmodutils.project.interface.GSMProject.create_project">
@@ -250,7 +252,7 @@ information.</p>
 <code class="descname">load_conditions</code><span class="sig-paren">(</span><em>conditions_id</em>, <em>model=None</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gsmodutils/project/interface.html#GSMProject.load_conditions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gsmodutils.project.interface.GSMProject.load_conditions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a model with a given set of pre-saved media conditions
 :param conditions_id: identifier of conditions file
-:param model: string or cobrapy/cameo model
+:param model: string or cobrapy model
 :param copy: return copy of model or modify inplace
 :return:</p>
 </dd></dl>
@@ -338,7 +340,7 @@ the project. All models specified must be contained within the project.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>model</strong> – cobrapy or cameo model</li>
+<li><strong>model</strong> – cobrapy model</li>
 <li><strong>conditions_id</strong> – identifier for the conditions should be unique</li>
 <li><strong>carbon_source</strong> – name of carbon source in the media that has a fixed uptake rate</li>
 <li><strong>apply_to</strong> – iterable of models that this set of designs applies to</li>
@@ -364,7 +366,7 @@ the project. All models specified must be contained within the project.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> – cobrapy/cameo model</li>
+<li><strong>model</strong> – cobrapy model</li>
 <li><strong>did</strong> – design identifier</li>
 <li><strong>name</strong> – name of the design</li>
 <li><strong>description</strong> – text description of what it does</li>
@@ -460,7 +462,7 @@ the project. All models specified must be contained within the project.</p>
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

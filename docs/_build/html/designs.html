@@ -316,6 +316,34 @@ making it part of the wild type ecoli core model.</p>
     </tr>
   </table></div>
 </div>
+<div class="section" id="python-functions-as-designs">
+<h2>Python functions as designs<a class="headerlink" href="#python-functions-as-designs" title="Permalink to this headline">¶</a></h2>
+<p>Designs can also be programmatically defined.
+The use case for this is if there is a specific set of changes to constraints that are done programmatically.
+For example, changing the stoichiometry of all reactions by some caluculated amount.</p>
+<p>To do this create a file in the <cite>designs/</cite> subdirectory of the project called <cite>design_some_name.py</cite>.
+Only files with the name prefix <cite>design_</cite> will be collected.
+Then, any functions defined as <cite>design_</cite> will be collected, they must have the function prototype:</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">gsmdesign_NAME</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; docstrings are used as design descriptions &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">model</span>
+</pre></div>
+</div>
+<p>The designs must return a cobra.Model instance (and preferably a gsmodutils.project.Model instance).
+To, optionally, set parent designs set the attributes of the design by modifying the function attributes, as follows.</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">design_NAME</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;name your design&quot;</span>
+<span class="n">design_NAME</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Alternatively you can use this field as a description&quot;</span>
+<span class="n">design_NAME</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="s2">&quot;SOME_VALID_PARENT_ID&quot;</span>
+<span class="n">design_NAME</span><span class="o">.</span><span class="n">conditions</span> <span class="o">=</span> <span class="s2">&quot;SOME_VALID_CONDITIONS_ID&quot;</span>
+</pre></div>
+</div>
+<p>When loading a design in python or exporting it, the id will be based on the filename and the function prototype,
+omitting <cite>design</cite> and <cite>.py</cite>. For the example above in the file <cite>designs/design_some_name.py</cite> the resulting design id
+is <cite>some_name_NAME</cite>.
+Be careful to ensure that you do not have clashing namespaces.</p>
+<p>Please note, that when doing this make sure that your development environment is secure as gsmodutils will execute the code in
+these functions.</p>
+</div>
 <div class="section" id="accessing-designs-as-models">
 <h2>Accessing designs as models<a class="headerlink" href="#accessing-designs-as-models" title="Permalink to this headline">¶</a></h2>
 <p>By default a design can be accessed as a model with</p>
@@ -507,6 +535,7 @@ mercurial) to ensure that changes to existing designs are tracked.</strong></p>
 <li class="toctree-l1"><a class="reference internal" href="project.html">Projects</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Designs</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#adding-designs">Adding designs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-functions-as-designs">Python functions as designs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#accessing-designs-as-models">Accessing designs as models</a></li>
 </ul>
 </li>
@@ -549,7 +578,7 @@ mercurial) to ensure that changes to existing designs are tracked.</strong></p>
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

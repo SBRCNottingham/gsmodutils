@@ -169,6 +169,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">success</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">std_out</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Reserved for messages</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">{}</span>
@@ -188,6 +189,14 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">success</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">success_msg</span><span class="p">,</span> <span class="n">desc</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">error_msg</span><span class="p">,</span> <span class="n">desc</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TestRecord.warning"><a class="viewcode-back" href="../../../test_utilities.html#gsmodutils.test.utils.TestRecord.warning">[docs]</a>    <span class="k">def</span> <span class="nf">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called within test functions to capture warnings about the status of models.</span>
+<span class="sd">        If statement is true, the warning message will be stored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">statement</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">message</span><span class="p">,</span> <span class="n">desc</span><span class="p">))</span></div>
     
 <div class="viewcode-block" id="TestRecord.add_error"><a class="viewcode-back" href="../../../test_utilities.html#gsmodutils.test.utils.TestRecord.add_error">[docs]</a>    <span class="k">def</span> <span class="nf">add_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -316,7 +325,7 @@
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

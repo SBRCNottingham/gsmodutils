@@ -356,6 +356,39 @@ First, we want to start from the parent calvin cycle design as a base.
               </table>
 
 
+Python functions as designs
+---------------------------
+Designs can also be programmatically defined.
+The use case for this is if there is a specific set of changes to constraints that are done programmatically.
+For example, changing the stoichiometry of all reactions by some caluculated amount.
+
+To do this create a file in the `designs/` subdirectory of the project called `design_some_name.py`.
+Only files with the name prefix `design_` will be collected.
+Then, any functions defined as `design_` will be collected, they must have the function prototype:
+
+.. code:: ipython3
+
+    def gsmdesign_NAME(model, project):
+        """ docstrings are used as design descriptions """
+        return model
+
+The designs must return a cobra.Model instance (and preferably a gsmodutils.project.Model instance).
+To, optionally, set parent designs set the attributes of the design by modifying the function attributes, as follows.
+
+.. code:: ipython3
+
+    design_NAME.name = "name your design"
+    design_NAME.description = "Alternatively you can use this field as a description"
+    design_NAME.parent = "SOME_VALID_PARENT_ID"
+    design_NAME.conditions = "SOME_VALID_CONDITIONS_ID"
+
+When loading a design in python or exporting it, the id will be based on the filename and the function prototype,
+omitting `design` and `.py`. For the example above in the file `designs/design_some_name.py` the resulting design id
+is `some_name_NAME`.
+Be careful to ensure that you do not have clashing namespaces.
+
+Please note, that when doing this make sure that your development environment is secure as gsmodutils will execute the code in
+these functions.
 
 Accessing designs as models
 ---------------------------

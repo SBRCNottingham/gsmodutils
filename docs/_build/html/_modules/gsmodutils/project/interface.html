@@ -48,7 +48,6 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">fasteners</span>
 
-<span class="kn">from</span> <span class="nn">cameo.core.utils</span> <span class="k">import</span> <span class="n">load_medium</span>
 <span class="kn">from</span> <span class="nn">cobra.exceptions</span> <span class="k">import</span> <span class="n">Infeasible</span>
 <span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">string_types</span>
 
@@ -59,6 +58,7 @@
 <span class="kn">from</span> <span class="nn">gsmodutils.project.project_config</span> <span class="k">import</span> <span class="n">ProjectConfig</span><span class="p">,</span> <span class="n">default_project_file</span>
 <span class="kn">from</span> <span class="nn">gsmodutils.test.tester</span> <span class="k">import</span> <span class="n">GSMTester</span>
 <span class="kn">from</span> <span class="nn">gsmodutils.utils</span> <span class="k">import</span> <span class="n">validator</span>
+<span class="kn">from</span> <span class="nn">gsmodutils.utils.io</span> <span class="k">import</span> <span class="n">load_medium</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -66,16 +66,19 @@
 
 <div class="viewcode-block" id="GSMProject"><a class="viewcode-back" href="../../../project.html#gsmodutils.project.interface.GSMProject">[docs]</a><span class="k">class</span> <span class="nc">GSMProject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Project class finds a gsmodutlils.json file in a given path and creates a project which allows a user to load:</span>
 <span class="sd">            Models included within the project</span>
 <span class="sd">            Designs that the model uses</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Attempting to load project in path </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_conditions_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">conditions_file</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># In memory store for designs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_py_compiled_designs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_py_func_mapper</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">project_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -115,10 +118,11 @@
 <span class="sd">        Updates this class from configuration file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">):</span>
-            
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to find project path </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">))</span>
             <span class="k">raise</span> <span class="n">ProjectNotFound</span><span class="p">(</span><span class="s1">&#39;Project path </span><span class="si">{}</span><span class="s1"> does not exist&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">))</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context_file</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to find project config file </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context_file</span><span class="p">))</span>
             <span class="k">raise</span> <span class="n">ProjectNotFound</span><span class="p">(</span>
                 <span class="s1">&#39;Project settings file </span><span class="si">{}</span><span class="s1"> in </span><span class="si">{}</span><span class="s1"> does not exist&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">default_project_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">))</span>
         
@@ -140,6 +144,10 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Different model conditions</span>
+<span class="sd">        :return: dict of model conditions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conditions</span><span class="p">()</span>
 
 <div class="viewcode-block" id="GSMProject.iter_models"><a class="viewcode-back" href="../../../project.html#gsmodutils.project.interface.GSMProject.iter_models">[docs]</a>    <span class="k">def</span> <span class="nf">iter_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -206,12 +214,41 @@
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">design_dir</span><span class="p">)</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_py_designs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compile python designs and list them</span>
+<span class="sd">        :return: list of python designs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">py_designs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">designs_direct</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design_path</span><span class="p">,</span> <span class="s1">&#39;design_*.py&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Read the python file for design functions</span>
+        <span class="k">for</span> <span class="n">pyfile</span> <span class="ow">in</span> <span class="n">designs_direct</span><span class="p">:</span>
+            <span class="n">mtime</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">pyfile</span><span class="p">)</span>
+            <span class="c1"># Only recompile if its been modified</span>
+            <span class="k">if</span> <span class="n">pyfile</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_py_compiled_designs</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_py_compiled_designs</span><span class="p">[</span><span class="n">pyfile</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mtime</span><span class="p">:</span>
+                <span class="n">dnames</span><span class="p">,</span> <span class="n">compiled_code</span> <span class="o">=</span> <span class="n">StrainDesign</span><span class="o">.</span><span class="n">compile_pydesign</span><span class="p">(</span><span class="n">pyfile</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_py_compiled_designs</span><span class="p">[</span><span class="n">pyfile</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">mtime</span><span class="p">,</span> <span class="n">dnames</span><span class="p">,</span> <span class="n">compiled_code</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">dn</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">dnames</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_py_func_mapper</span><span class="p">[</span><span class="n">dn</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">pyfile</span><span class="p">)</span>
+
+            <span class="n">py_designs</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_py_compiled_designs</span><span class="p">[</span><span class="n">pyfile</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">py_designs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_json_designs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">designs_direct</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design_path</span><span class="p">,</span> <span class="s1">&#39;*.json&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dpath</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">dpath</span> <span class="ow">in</span> <span class="n">designs_direct</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">list_designs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; List designs stored in design dir &quot;&quot;&quot;</span>
-        <span class="n">designs_direct</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">design_dir</span><span class="p">,</span> <span class="s1">&#39;*.json&#39;</span><span class="p">))</span>
+        <span class="n">json_designs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_json_designs</span>
+        <span class="n">py_designs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_py_designs</span>
 
-        <span class="k">return</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dpath</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">dpath</span> <span class="ow">in</span> <span class="n">designs_direct</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">json_designs</span> <span class="o">+</span> <span class="n">py_designs</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">designs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -223,6 +260,12 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span>
 
+    <span class="k">def</span> <span class="nf">_load_py_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Load a python design &quot;&quot;&quot;</span>
+        <span class="c1"># Map to correct pyfile</span>
+        <span class="n">func_name</span><span class="p">,</span> <span class="n">pyfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_py_func_mapper</span><span class="p">[</span><span class="n">dname</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">StrainDesign</span><span class="o">.</span><span class="n">from_pydesign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dname</span><span class="p">,</span> <span class="n">func_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_py_compiled_designs</span><span class="p">[</span><span class="n">pyfile</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+
 <div class="viewcode-block" id="GSMProject.get_design"><a class="viewcode-back" href="../../../project.html#gsmodutils.project.interface.GSMProject.get_design">[docs]</a>    <span class="k">def</span> <span class="nf">get_design</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the StrainDesign object (not resulting model) of a design</span>
@@ -233,8 +276,12 @@
             <span class="k">raise</span> <span class="n">DesignError</span><span class="p">(</span><span class="s2">&quot;Design of name </span><span class="si">{}</span><span class="s2"> not found in project&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">design</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">design</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span><span class="p">:</span>
-            <span class="n">des_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">design_dir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">design</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span><span class="p">[</span><span class="n">design</span><span class="p">]</span> <span class="o">=</span> <span class="n">StrainDesign</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">des_path</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">design</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_json_designs</span><span class="p">:</span>
+                <span class="n">des_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">design_dir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">design</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span><span class="p">[</span><span class="n">design</span><span class="p">]</span> <span class="o">=</span> <span class="n">StrainDesign</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">des_path</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span><span class="p">[</span><span class="n">design</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_py_design</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_designs_store</span><span class="p">[</span><span class="n">design</span><span class="p">]</span></div>
 
@@ -277,7 +324,7 @@
 <span class="sd">        </span>
 <span class="sd">        Returns the saved design diff</span>
 
-<span class="sd">        :param model: cobrapy/cameo model</span>
+<span class="sd">        :param model: cobrapy model</span>
 <span class="sd">        :param did: design identifier</span>
 <span class="sd">        :param name: name of the design</span>
 <span class="sd">        :param description: text description of what it does</span>
@@ -352,7 +399,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a model with a given set of pre-saved media conditions</span>
 <span class="sd">        :param conditions_id: identifier of conditions file</span>
-<span class="sd">        :param model: string or cobrapy/cameo model</span>
+<span class="sd">        :param model: string or cobrapy model</span>
 <span class="sd">        :param copy: return copy of model or modify inplace</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -467,7 +514,7 @@
 <span class="sd">        If certain models should grow, specify this with a a tuple where the entries refer to the model files tracked by</span>
 <span class="sd">        the project. All models specified must be contained within the project.</span>
 
-<span class="sd">        :param model: cobrapy or cameo model</span>
+<span class="sd">        :param model: cobrapy model</span>
 <span class="sd">        :param conditions_id: identifier for the conditions should be unique</span>
 <span class="sd">        :param carbon_source: name of carbon source in the media that has a fixed uptake rate</span>
 <span class="sd">        :param apply_to: iterable of models that this set of designs applies to</span>
@@ -612,7 +659,7 @@
       &copy;2017, James Gilbert.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
