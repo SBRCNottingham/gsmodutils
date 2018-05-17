@@ -6,7 +6,9 @@ import pandas
 
 from gsmodutils.exceptions import DesignError
 import gsmodutils
+from gsmodutils.model_diff import model_diff
 import logging
+from six import exec_
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,7 @@ logger = logging.getLogger(__name__)
 class StrainDesign(object):
     def __init__(self, did, name, description, project, parent=None, reactions=None, metabolites=None, genes=None,
                  removed_metabolites=None, removed_reactions=None, removed_genes=None, base_model=None,
-                 conditions=None):
+                 conditions=None, is_pydesign=False, design_func=None):
         """
         Class for handling strain designs created by the project
 
@@ -62,6 +64,13 @@ class StrainDesign(object):
         self.check_parents()
 
         self._p_model = None
+
+        self.is_pydesign = is_pydesign
+        self.design_func = design_func
+
+        if self.is_pydesign and not hasattr(self.design_func, '__call__'):
+            raise DesignError("Python designs require a design function to be passed, got  type {}".format(
+                type(design_func)))
 
     def check_parents(self, p_stack=None):
         """ Tests to see if their is a loop in parental inheritance"""
@@ -199,6 +208,107 @@ class StrainDesign(object):
         )
         return rdict
 
+    @staticmethod
+    def compile_pydesign(pyfile):
+        """
+        Compile a python file and load any gsmodutil design names
+        :param pyfile:
+        :return:
+        """
+        logger.info("Loading python design file {}".format(pyfile))
+        des_prefix = os.path.basename(pyfile).replace("design_", "").replace(".py", "")
+        dnames = {}
+        with open(pyfile) as codestr:
+            try:
+                compiled_code = compile(codestr.read(), '', 'exec')
+            except SyntaxError as ex:
+                # syntax error for user written code
+                # ex.lineno, ex.msg, ex.filename, ex.text, ex.offset
+                logger.error("Cannot load designs in pyfile {} due to synatx error\n{}".format(pyfile, ex))
+                return [], None
+
+        f_prefix = "gsmdesign_"
+        df = lambda f: f[:len(f_prefix)] == f_prefix
+        # filter for specific design functions
+        for func in filter(df, compiled_code.co_names):
+            dname = "{}_{}".format(des_prefix, func.replace(f_prefix, ""))
+            dnames[dname] = func
+
+        return dnames, compiled_code
+
+    @staticmethod
+    def _exec_pydesign(func_name, compiled_code):
+        """
+        :param project:
+        :param func_name:
+        :param compiled_code:
+        :return: function
+        """
+        global_namespace = dict(
+            __name__='__gsmodutils_design_loader__',
+        )
+        # Get the function from the file
+        try:
+            exec_(compiled_code, global_namespace)
+        except Exception as ex:
+            print(compiled_code)
+            raise DesignError("Code execution error in file for {} {}".format(func_name, ex))
+
+        if func_name not in global_namespace:
+            raise DesignError("function {} not found in python file".format(func_name))
+
+        func = global_namespace[func_name]
+
+        if not hasattr(func, '__call__'):
+            raise DesignError("Design function must be callable, got type {}".format(type(func)))
+
+        return func
+
+    @classmethod
+    def from_pydesign(cls, project, did, func_name, compiled_code):
+        """ Load a pydesign function as a proper design """
+        func = cls._exec_pydesign(func_name, compiled_code)
+
+        # Set default variables
+        func.name = getattr(func, 'name', "")
+        func.parent = getattr(func, 'parent', None)
+        func.description = getattr(func, 'description', func.__doc__)
+        func.base_model = getattr(func, 'base_model', None)
+        func.conditions = getattr(func, 'conditions', None)
+
+        # Will throw error if parent is not a valid design
+        parent = None
+        if func.parent is not None:
+            parent = project.get_design(func.parent)
+
+        base_model = project.load_model(func.base_model)
+
+        try:
+            tmodel = func(base_model.copy(), project)
+        except Exception as ex:
+            raise  DesignError("Error executing design function {} {}".format(did, ex))
+
+        if not isinstance(tmodel, cobra.Model):
+            raise DesignError("Design does not return a cobra Model instance")
+
+        # We use the loaded model diff as the remaining patameters for the design
+        # This is the only reason the model has to be loaded here
+        diff = model_diff(base_model, tmodel)
+
+        this = cls(
+            did=did,
+            name=func.name,
+            description=func.description,
+            project=project,
+            parent=parent,
+            base_model=func.base_model,
+            conditions=func.conditions,
+            is_pydesign=True,
+            design_func=func,
+            **diff
+        )
+        return this
+
     @classmethod
     def from_json(cls, did, file_path, project):
         """
@@ -278,7 +388,6 @@ class StrainDesign(object):
         Loads a cobra model with just the reactions present in this design
         Can be useful for the cobra.Model methods
 
-
         # TODO: add full metabolite info from parent model (optional, as it will be slower)
         :return: mdl instance of cobra.Model
         """
@@ -301,7 +410,6 @@ class StrainDesign(object):
         :param add_missing: add missing metabolites to the model
         :return:
         """
-
         if not isinstance(model, cobra.Model):
             raise TypeError('Expected cobra model')
 
@@ -315,6 +423,18 @@ class StrainDesign(object):
         # Load parent design first
         if self.parent is not None:
             self.parent.add_to_model(model)
+
+        if self.is_pydesign:
+            try:
+                model = self.design_func(model, self.project)
+            except Exception as ex:
+                raise DesignError("Function execution error {}".format(ex))
+
+            if not isinstance(model, cobra.Model):
+                raise DesignError(
+                    "Function does not return cobra.Model instance. Got {} type instead".format(type(model)))
+
+            return model
 
         # Add new or changed metabolites to model
         for metabolite in self.metabolites:
@@ -427,6 +547,7 @@ class StrainDesign(object):
         pid = None
         if self.parent is not None:
             pid = self.parent.id
+
         info = dict(
             name=self.name,
             id=self.id,

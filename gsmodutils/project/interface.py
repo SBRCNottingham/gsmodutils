@@ -34,6 +34,8 @@ class GSMProject(object):
         self.update()
         self._conditions_file = os.path.join(self._project_path, self.config.conditions_file)
         self._designs_store = dict()  # In memory store for designs
+        self._py_compiled_designs = dict()
+        self._py_func_mapper = dict()
 
     @property
     def project_path(self):
@@ -169,12 +171,41 @@ class GSMProject(object):
         return os.path.join(self._project_path, self.config.design_dir)
 
     @property
+    def _py_designs(self):
+        """
+        Compile python designs and list them
+        :return: list of python designs
+        """
+        py_designs = []
+        designs_direct = glob.glob(os.path.join(self.design_path, 'design_*.py'))
+
+        # Read the python file for design functions
+        for pyfile in designs_direct:
+            mtime = os.path.getmtime(pyfile)
+            # Only recompile if its been modified
+            if pyfile not in self._py_compiled_designs or self._py_compiled_designs[pyfile][0] != mtime:
+                dnames, compiled_code = StrainDesign.compile_pydesign(pyfile)
+                self._py_compiled_designs[pyfile] = (mtime, dnames, compiled_code)
+
+                for dn, func in dnames.items():
+                    self._py_func_mapper[dn] = (func, pyfile)
+
+            py_designs += list(self._py_compiled_designs[pyfile][1].keys())
+
+        return py_designs
+
+    @property
+    def _json_designs(self):
+        designs_direct = glob.glob(os.path.join(self.design_path, '*.json'))
+        return [os.path.basename(dpath).split(".json")[0] for dpath in designs_direct]
+
+    @property
     def list_designs(self):
         """ List designs stored in design dir """
-        designs_direct = glob.glob(
-            os.path.join(self._project_path, self.config.design_dir, '*.json'))
+        json_designs = self._json_designs
+        py_designs = self._py_designs
 
-        return [os.path.basename(dpath).split(".json")[0] for dpath in designs_direct]
+        return json_designs + py_designs
 
     @property
     def designs(self):
@@ -186,6 +217,12 @@ class GSMProject(object):
 
         return self._designs_store
 
+    def _load_py_design(self, dname):
+        """ Load a python design """
+        # Map to correct pyfile
+        func_name, pyfile = self._py_func_mapper[dname]
+        return StrainDesign.from_pydesign(self, dname, func_name, self._py_compiled_designs[pyfile][2])
+
     def get_design(self, design):
         """
         Get the StrainDesign object (not resulting model) of a design
@@ -196,8 +233,12 @@ class GSMProject(object):
             raise DesignError("Design of name {} not found in project".format(design))
 
         if design not in self._designs_store:
-            des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design))
-            self._designs_store[design] = StrainDesign.from_json(design, des_path, self)
+
+            if design in self._json_designs:
+                des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design))
+                self._designs_store[design] = StrainDesign.from_json(design, des_path, self)
+            else:
+                self._designs_store[design] = self._load_py_design(design)
 
         return self._designs_store[design]
 
