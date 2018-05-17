@@ -7,7 +7,6 @@ import cobra
 import gsmodutils
 from gsmodutils.utils.io import load_model
 from gsmodutils.model_diff import model_diff
-from gsmodutils.exceptions import ProjectNotFound
 import os
 import logging
 
