@@ -6,9 +6,9 @@ from tutils import _CORE_MODEL_PATH
 
 
 def test_model_ident():
-    '''
+    """
     Tests that an identical model does not produce any differences
-    '''
+    """
     model_a = load_model(_CORE_MODEL_PATH)
     diff = gsmodutils.model_diff.model_diff(model_a, model_a.copy())
     
@@ -19,10 +19,10 @@ def test_model_ident():
 
 
 def test_reaction_lb_change():
-    '''
+    """
     Tests that changing the lower bound on a reaction causes it to be included in the diff
     The example also checks that the change goes from L -> R
-    '''
+    """
     model_a = load_model(_CORE_MODEL_PATH)
     model_b = load_model(_CORE_MODEL_PATH)
     model_b.reactions.ATPM.lower_bound = 8.0
@@ -37,11 +37,11 @@ def test_reaction_lb_change():
 
 
 def test_metabolite_formula_change():
-    '''
+    """
     This tests that a small (but important) forumla change to a metabolite is picked up
     
     Note the test also makes sure that the metabolite included in the change goes from L -> R
-    '''
+    """
     model_a = load_model(_CORE_MODEL_PATH)
     model_b = load_model(_CORE_MODEL_PATH)
     
