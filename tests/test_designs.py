@@ -36,7 +36,7 @@ gsmdesign_uses_conditions.description = "overridden description"
 def gsmdesign_uses_base_model(model, project):
     return model
 
-gsmdesign_uses_base_model.base_model = ""
+gsmdesign_uses_base_model.base_model = "e_coli_core"
 
     """
 
@@ -44,7 +44,7 @@ gsmdesign_uses_base_model.base_model = ""
 THIS IS CLEARLY BROKEN PYTHON SYNTAX
 """
 
-    with FakeProjectContext() as ctx:
+    with FakeProjectContext(use_second_model=True) as ctx:
         project = GSMProject(ctx.path)
 
         ndpath = os.path.join(project.design_path, 'design_t1.py')
@@ -91,3 +91,81 @@ THIS IS CLEARLY BROKEN PYTHON SYNTAX
 
         with pytest.raises(DesignError):
             design = project.get_design("t1_bad_prototype")
+
+
+def test_parantage():
+    """ Tests for child and parent designs. Take a breath, this is some pretty confusing logic. """
+
+    py_design = """
+def gsmdesign_thanos(model, project):
+    reaction = model.reactions.get_by_id("ATPM")
+    reaction.bounds = (-999, 999)
+    return model
+
+gsmdesign_thanos.parent = "mevalonate_cbb"
+
+def gsmdesign_child_of_thanos(model, project):
+    reaction = model.reactions.get_by_id("ATPM")
+    reaction.lower_bound  = 0
+    return model     
+
+gsmdesign_child_of_thanos.parent = "t1_thanos"
+
+
+def gsmdesign_invalid_parent_id(model, project):
+    reaction = model.reactions.get_by_id("ATPM")
+    reaction.lower_bound  = 0
+    return model
+
+gsmdesign_invalid_parent_id.parent = "thanos"
+
+"""
+    with FakeProjectContext() as ctx:
+        project = GSMProject(ctx.path)
+        # Create existing json designs
+        ctx.add_fake_designs()
+
+        ndpath = os.path.join(project.design_path, 'design_t1.py')
+        # Write the design
+        with open(ndpath, 'w+') as desf:
+            desf.write(py_design)
+
+        d1 = project.get_design("t1_thanos")
+        assert d1.id == "t1_thanos"
+        assert d1.parent.id == "mevalonate_cbb"
+        m1 = d1.load()
+        assert m1.reactions.get_by_id("RBPC").lower_bound == 0
+
+        design = project.get_design("t1_child_of_thanos")
+        assert design.parent.id == "t1_thanos"
+        assert design.parent.parent.id == "mevalonate_cbb"
+
+        mdl = design.load()  # t1_child_of_thanos
+        reaction = mdl.reactions.get_by_id("ATPM")
+        assert reaction.lower_bound == 0
+
+        mdl2 = design.parent.load()  # should be t1_thanos
+        assert mdl2.design.id == "t1_thanos"
+        assert mdl2.design.parent.id == "mevalonate_cbb"
+        reaction = mdl2.reactions.get_by_id("ATPM")
+        assert reaction.lower_bound == -999
+
+        mdl2.reactions.EX_xyl__D_e.lower_bound = -8.00
+        mdl2.save_as_design("json_child_of_thanos", "jsonchild", "json_child_of_thanos")
+
+        design2 = project.get_design("json_child_of_thanos")
+        assert design2.parent.id == "t1_thanos"
+        assert design2.id == design2.load().design.id
+        assert design2.parent.parent.parent.id == "cbb_cycle"
+
+        mdl3 = design2.load()
+        reaction = mdl3.reactions.get_by_id("ATPM")
+        assert reaction.lower_bound == -999
+        assert mdl3.reactions.EX_xyl__D_e.lower_bound == -8.00
+
+        # shows that the very top level json design is still working
+        assert mdl3.reactions.get_by_id("RBPC").lower_bound == 0
+
+        # This design shouldn't load as the parent id ref is wrong
+        with pytest.raises(DesignError):
+            project.get_design("t1_invalid_parent_id")

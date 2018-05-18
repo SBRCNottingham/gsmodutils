@@ -417,16 +417,15 @@ class StrainDesign(object):
         if copy:
             mdl = model.copy()
 
-        if isinstance(mdl, gsmodutils.GSModutilsModel):
-            mdl.set_design(self)
-
         # Load parent design first
         if self.parent is not None:
-            self.parent.add_to_model(model)
+            self.parent.add_to_model(mdl)
+
+        mdl.design = self
 
         if self.is_pydesign:
             try:
-                model = self.design_func(model, self.project)
+                mdl = self.design_func(mdl, self.project)
             except Exception as ex:
                 raise DesignError("Function execution error {}".format(ex))
 
@@ -434,7 +433,7 @@ class StrainDesign(object):
                 raise DesignError(
                     "Function does not return cobra.Model instance. Got {} type instead".format(type(model)))
 
-            return model
+            return mdl
 
         # Add new or changed metabolites to model
         for metabolite in self.metabolites:

@@ -26,21 +26,3 @@ def test_copy():
         for gene in copied.genes:
             assert gene is not model.genes.get_by_id(gene.id)
             assert gene.model is not model
-
-
-def test_design():
-    """
-    Test loading a design
-    :return:
-    """
-    pass
-
-
-def test_save():
-    """
-    change model, save changes
-    change design, save changes
-    save changes as a design
-    :return:
-    """
-    pass

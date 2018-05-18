@@ -48,7 +48,7 @@ class CleanUpDir(object):
 
 class FakeProjectContext(object):
     
-    def __init__(self, model=None, path=None):
+    def __init__(self, model=None, path=None, use_second_model=False):
         """
         Assumes projectConfig class works correctly
         """
@@ -61,11 +61,18 @@ class FakeProjectContext(object):
         if self.model is None:
             self.model = load_model(_IAF_MODEL_PATH)
 
+        self.second_model = None
+        if use_second_model:
+            self.second_model = load_model(_CORE_MODEL_PATH)
+
     def __enter__(self):
         """
         Create a temporary gsmodutils project folder
         """
         add_models = [self.model]
+
+        if self.second_model is not None:
+            add_models += [self.second_model]
 
         self.project = GSMProject.create_project(add_models, 'TEST PROJECT ONLY', 'test', '123@abc.com', self.path)
         return self
