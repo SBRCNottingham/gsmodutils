@@ -4,8 +4,7 @@ import os
 import cobra
 import pandas
 
-from gsmodutils.exceptions import DesignError
-import gsmodutils
+from gsmodutils.exceptions import DesignError, DesignOrphanError, DesignNotFoundError
 from gsmodutils.model_diff import model_diff
 import logging
 from six import exec_
@@ -279,14 +278,22 @@ class StrainDesign(object):
         # Will throw error if parent is not a valid design
         parent = None
         if func.parent is not None:
-            parent = project.get_design(func.parent)
+            try:
+                parent = project.get_design(func.parent)
+            except DesignError:
+                raise DesignOrphanError("Design parent appears to be invalid {} --> {}".format(func.parent, did))
+            except DesignNotFoundError:
+                raise DesignOrphanError("Design parent not found {} --> {}".format(func.parent, did))
 
-        base_model = project.load_model(func.base_model)
+        try:
+            base_model = project.load_model(func.base_model)
+        except IOError:
+            raise DesignError("Base model {} does not appear to be valid".format(func.base_model))
 
         try:
             tmodel = func(base_model.copy(), project)
         except Exception as ex:
-            raise  DesignError("Error executing design function {} {}".format(did, ex))
+            raise DesignError("Error executing design function {} {}".format(did, ex))
 
         if not isinstance(tmodel, cobra.Model):
             raise DesignError("Design does not return a cobra Model instance")

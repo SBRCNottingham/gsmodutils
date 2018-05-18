@@ -1,5 +1,5 @@
 from gsmodutils import GSMProject
-from gsmodutils.exceptions import DesignError
+from gsmodutils.exceptions import DesignError, DesignOrphanError
 from tutils import FakeProjectContext
 import os
 import pytest
@@ -36,7 +36,13 @@ gsmdesign_uses_conditions.description = "overridden description"
 def gsmdesign_uses_base_model(model, project):
     return model
 
-gsmdesign_uses_base_model.base_model = "e_coli_core"
+gsmdesign_uses_base_model.base_model = "e_coli_core.json"
+
+
+def gsmdesign_bad_base_model(model, project):
+    return model
+
+gsmdesign_bad_base_model.base_model = "e_coli_core"
 
     """
 
@@ -87,10 +93,17 @@ THIS IS CLEARLY BROKEN PYTHON SYNTAX
         assert mdl.reactions.EX_xyl__D_e.lower_bound == -8.00
 
         with pytest.raises(DesignError):
-            design = project.get_design("t1_no_return")
+            project.get_design("t1_no_return")
 
         with pytest.raises(DesignError):
-            design = project.get_design("t1_bad_prototype")
+            project.get_design("t1_bad_prototype")
+
+        design = project.get_design("t1_uses_base_model")
+        assert design.base_model == "e_coli_core.json"
+        assert len(design.load().reactions) == 95   # Make sure the base model is loaded
+
+        with pytest.raises(DesignError):
+            project.get_design("t1_bad_base_model")
 
 
 def test_parantage():
@@ -167,5 +180,5 @@ gsmdesign_invalid_parent_id.parent = "thanos"
         assert mdl3.reactions.get_by_id("RBPC").lower_bound == 0
 
         # This design shouldn't load as the parent id ref is wrong
-        with pytest.raises(DesignError):
+        with pytest.raises(DesignOrphanError):
             project.get_design("t1_invalid_parent_id")

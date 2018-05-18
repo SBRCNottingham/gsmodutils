@@ -8,7 +8,7 @@ import fasteners
 from cobra.exceptions import Infeasible
 from six import string_types
 
-from gsmodutils.exceptions import ProjectNotFound, DesignError, ValidationError
+from gsmodutils.exceptions import ProjectNotFound, DesignError, DesignNotFoundError, ValidationError
 from gsmodutils.model_diff import model_diff
 from gsmodutils.project.design import StrainDesign
 from gsmodutils.project.model import GSModutilsModel
@@ -230,7 +230,7 @@ class GSMProject(object):
         :return:
         """
         if design not in self.list_designs:
-            raise DesignError("Design of name {} not found in project".format(design))
+            raise DesignNotFoundError("Design of name {} not found in project".format(design))
 
         if design not in self._designs_store:
 

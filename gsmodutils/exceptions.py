@@ -24,3 +24,14 @@ class ValidationError(Exception):
 class MediumError(Exception):
     """ Model medium incorrect. Model likely misses reaction """
     pass
+
+
+class DesignNotFoundError(Exception):
+    """ Designs not found in project """
+    pass
+
+
+class DesignOrphanError(Exception):
+    """ Error for orphan designs """
+    pass
+

@@ -10,10 +10,9 @@ import os
 import cobra
 import pytest
 from tutils import FakeProjectContext
-from gsmodutils.utils.io import load_model
 from gsmodutils import GSMProject
 from gsmodutils.project.design import StrainDesign
-from gsmodutils.exceptions import DesignError, ProjectNotFound
+from gsmodutils.exceptions import DesignError, DesignNotFoundError, ProjectNotFound
 
 from cobra.exceptions import Infeasible
 
@@ -161,7 +160,7 @@ def test_project_update():
             project.update()
 
         # Test non existent designs
-        with pytest.raises(DesignError):
+        with pytest.raises(DesignNotFoundError):
             project.get_design("fooooo")
 
 
