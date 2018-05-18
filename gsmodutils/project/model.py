@@ -97,6 +97,9 @@ class GSModutilsModel(cobra.Model):
         :return:
         """
         if self.design is not None:
+            if self.design.is_pydesign:
+                raise NotImplementedError("It is not possible to save python based designs in this manner")
+
             self.save_as_design(self, self.design.id, self.design.name, self.design.description)
         else:
             with self.project.project_context_lock:

@@ -225,7 +225,7 @@ class StrainDesign(object):
                 # syntax error for user written code
                 # ex.lineno, ex.msg, ex.filename, ex.text, ex.offset
                 logger.error("Cannot load designs in pyfile {} due to synatx error\n{}".format(pyfile, ex))
-                return [], None
+                return dict(), None
 
         f_prefix = "gsmdesign_"
         df = lambda f: f[:len(f_prefix)] == f_prefix
