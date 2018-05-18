@@ -316,11 +316,17 @@ class GSMTester(object):
         return log
 
     def _df_design_test(self, log, design):
-        model = self.project.load_design(design)
+
+        try:
+            model = self.project.load_design(design)
+        except Exception as ex:
+            log.error.append(('Design failure loading design {}'.format(ex), '.default'))
+            return log
+
         if self._model_check(model):
-            log.success.append(('Design functions', '.default'))
+            log.success.append(('Design appears to function correctly', '.default'))
         else:
-            log.error.append(('Design failure', '.default'))
+            log.error.append(('Design fails to pass check', '.default'))
         return log
 
     def _load_default_tests(self):

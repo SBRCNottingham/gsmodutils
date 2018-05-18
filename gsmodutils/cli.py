@@ -9,7 +9,7 @@ import os
 import click
 import cobra
 
-from gsmodutils.exceptions import ProjectNotFound, ValidationError
+from gsmodutils.exceptions import ProjectNotFound, ValidationError, DesignError, DesignOrphanError
 from gsmodutils.model_diff import model_diff
 from gsmodutils import GSMProject, load_model
 from gsmodutils.project.project_config import ProjectConfig
@@ -422,13 +422,18 @@ Tests directory - {tests_dir}
         click.echo("\t\t {}".format(model.id))
 
     click.echo("Designs:")
-    for d in project.designs:
-        design = project.get_design(d)
-        click.echo("\t* {}".format(design.id))
-        click.echo("\t\t {}".format(design.name))
-        click.echo("\t\t {}".format(design.description))
-        if design.parent is not None:
-            click.echo("\t\t Parent: {}".format(design.parent.id))
+    for d in project.list_designs:
+        try:
+            design = project.get_design(d)
+            click.echo("\t* {}".format(design.id))
+            click.echo("\t\t {}".format(design.name))
+            click.echo("\t\t {}".format(design.description))
+            if design.parent is not None:
+                click.echo("\t\t Parent: {}".format(design.parent.id))
+        except DesignError:
+            click.echo(click.style("\t* Error loading design {}".format(d)), color="red")
+        except DesignOrphanError:
+            click.echo(click.style("\t* Appears to be problem with parent of design {}".format(d)), color="red")
 
     click.echo("Conditions:")
     for c in project.conditions['growth_conditions']:
