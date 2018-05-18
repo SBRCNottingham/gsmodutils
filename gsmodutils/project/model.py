@@ -70,12 +70,18 @@ class GSModutilsModel(cobra.Model):
 
         return load_model(self.model_path)
 
-    def diff(self):
+    def diff(self, model=None):
         """
         Return the difference between the in memory model and the model from disk
         See gsmodutils.model_diff.model_diff for details on the returned dict
         :return: dictionary of changed reactions, objectives, metabolites or genes
         """
+        if isinstance(model, cobra.Model):
+            return model_diff(model, self)
+
+        if model is not None:
+            raise TypeError("Expecting cobra.Model instance or None, got {}".format(type(model)))
+
         tmp_model = self._load_cobra_model()
         return model_diff(tmp_model, self)
 
