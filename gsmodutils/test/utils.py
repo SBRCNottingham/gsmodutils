@@ -45,16 +45,8 @@ class ModelTestSelector(object):
             designs = []
 
         self.models = models
-        if not len(self.models):
-            self.models = [None]
-        
         self.conditions = conditions
-        if not len(self.conditions):
-            self.conditions = [None]
-        
         self.designs = designs
-        if not len(designs):
-            self.designs = [None]
 
     def __call__(self, func):
         """
@@ -64,7 +56,25 @@ class ModelTestSelector(object):
         def wrapper(*args, **kwargs):
             project = args[1]
             log = args[2]
-            
+
+            if self.models == "*":
+                self.models = project.list_models
+
+            if self.designs == "*":
+                self.designs = project.list_designs + [None]
+
+            if self.conditions == "*":
+                self.conditions = project.list_conditions + [None]
+
+            if not len(self.models):
+                self.models = [None]
+
+            if not len(self.conditions):
+                self.conditions = [None]
+
+            if not len(self.designs):
+                self.designs = [None]
+
             for mn in self.models:
                 if mn is None:
                     mn = project.config.default_model
@@ -81,7 +91,7 @@ class ModelTestSelector(object):
                             tid = (mn, cid)
                         elif did is not None:
                             tid = (mn, did)
-                        
+
                         nlog = log.create_child(tid, param_child=True)
                         
                         try:

@@ -60,6 +60,16 @@ class GSMProject(object):
         """Creates a tester for this project instance"""
         return GSMTester(self)
 
+    def run_tests(self):
+        """
+        Returns the log output of all the tests
+        :return:
+        """
+        tester = GSMTester(self)
+        tester.collect_tests()
+        tester.progress_tests()
+        return tester.to_dict()
+
     @property
     def project_context_lock(self):
         """
@@ -113,6 +123,10 @@ class GSMProject(object):
         """
         for mdl_path in self.config.models:
             yield self.load_model(mpath=mdl_path)
+
+    @property
+    def list_models(self):
+        return self.config.models
 
     @property
     def models(self):
@@ -351,6 +365,11 @@ class GSMProject(object):
         diff['parent'] = None
         tmp_design = StrainDesign.from_dict('tmp_design', diff, self)
         return tmp_design.load()
+
+    @property
+    def list_conditions(self):
+        conditions_store = self.get_conditions(update=True)
+        return list(conditions_store["growth_conditions"].keys())
 
     def load_conditions(self, conditions_id, model=None, copy=False):
         """
