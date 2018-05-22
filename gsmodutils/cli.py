@@ -15,8 +15,6 @@ from gsmodutils import GSMProject, load_model
 from gsmodutils.project.project_config import ProjectConfig
 from sys import exit
 
-from tqdm import tqdm
-
 
 def _load_project(project_path):
     project = None
@@ -115,8 +113,7 @@ def test(project_path, test_id, skip_default, verbose, log_path):
         click.echo()
 
     click.echo('Running tests: ')
-    for _ in tqdm(tester.iter_tests(skip_default=skip_default)):
-        pass
+    tester.progress_tests(skip_default=skip_default)
     click.echo()
     ts = 0
     te = 0

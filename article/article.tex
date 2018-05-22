@@ -260,7 +260,7 @@ We note that, in principle, this test case should be written \textit{a priori} o
 % \textbf{Solvent formation Cell recycling in solventogenic phase}\\
 
 
-\section{Example usage Clostridium autoethanogenum}
+\section{Case study usage Clostridium autoethanogenum}
 \textit{Clostridium autoethanogenum} is an anaerobic, gram positive spore forming acetogenic bacteria that is of industrial relevance \cite{}.
 In this section we describe how gsmodutils has been utilised to ensure that future versions of a genome scale model CLAU--- will remain functionally relevant, from the perspective of industrial biotechnology.
 
@@ -271,9 +271,24 @@ In this section we describe how gsmodutils has been utilised to ensure that futu
 \subsection{Model integration}
 \textbf{Project construction:}
 
-\textbf{Model comparison: TODO Diffs between existing models - use (and further develop) gsmodutils diff for model stats}.
 
 \subsection{Evaluation of model validation criteria}
+
+\begin{itemize}
+ \item Energetic consistency: All transporters are set to 0 lower bound and the ATPase reaction is given a fixed flux of one.
+ Providing the model has no cycles allowing ATP production without a food source, the model should never grow.
+ 
+ \item Minimisation of flux based tests. One conventional approach is to set an optimisation criteria of minimising flux across enzymatic reactions with a fixed biomass constraint.
+ Often known as parsimonious FBA, this was created as a design for the model allowing the creation of reversible reactions (for all model reactions) in a programmatic manner.
+ 
+ \item Product scans. Of interest to this project was the product spectrum under conditions where the organism can and cannot produce molecular Hydrogen (when growing on Carbon monoxide as an energy source).
+ Where Hydrogen production is blocked the organism should produce lactate and butanediol as by products.
+ 
+ \item The NFN mutant strain. This knockout mutant is shown to block production of acetate and increase the production of ethanol.
+ 
+ \item Lethal knockout mutants. These mutants are of interest to GSM design and development because any changes to systemic behaviour should preserve this behaviour.
+\end{itemize}
+
 
 % Discuss these results
 \subsection{Remarks}

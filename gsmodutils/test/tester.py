@@ -12,6 +12,7 @@ from six import exec_
 
 import gsmodutils
 from gsmodutils.test.utils import TestRecord
+from tqdm import tqdm
 
 
 @contextlib.contextmanager
@@ -408,6 +409,19 @@ class GSMTester(object):
                 yield func(tid)
             elif func != self.iter_basetf:
                 yield func(*tid)  # generator for the test
+
+    def progress_tests(self, recollect=False, skip_default=False):
+        """
+        Run tests with a progressbar
+        :param recollect:
+        :param skip_default:
+        :return:
+        """
+        for tid, func in tqdm(self._task_execs.items()):
+            if func == self._exec_default and not skip_default:
+                func(tid)
+            elif func != self.iter_basetf:
+                func(*tid)  # generator for the test
 
     def run_all(self, recollect=False):
         """Find and run all tests for a project, executes rather than returning generator"""
