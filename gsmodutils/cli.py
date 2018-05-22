@@ -88,26 +88,6 @@ def test(project_path, test_id, skip_default, verbose, log_path):
     click.echo('Collecting tests...')
     tester.collect_tests()
 
-    # Display errors
-    for tf, e in tester.load_errors:
-        click.echo(
-            click.style('Error loading test {} \n {}'.format(tf, e), fg='red')
-        )
-    
-    for tf, e in tester.syntax_errors.items():
-        click.echo(
-            click.style('Error - {} has syntax errors {}'.format(tf, e), fg='red')
-        )
-    
-    for tf, entry_key, missing_fields in tester.invalid_tests:
-        click.echo(
-            click.style('---Error with formating of test {} in {} ---'.format(tf, entry_key), fg='yellow')
-        )
-        
-        click.echo('Missing fields:')
-        for field in missing_fields:
-            click.echo('\t{}'.format(field))
-    
     if test_id is not None:
         # Only run specific test id
         if test_id not in tester.test_ids:
@@ -172,6 +152,26 @@ def test(project_path, test_id, skip_default, verbose, log_path):
             )
     percent = round(((ts - te) / ts) * 100, 3)
     click.echo('Ran {} test assertions with a total of {} errors ({}% success)'.format(ts, te, percent))
+
+    # Display errors
+    for tf, e in tester.load_errors:
+        click.echo(
+            click.style('Error loading test {} \n {}'.format(tf, e), fg='red')
+        )
+
+    for tf, e in tester.syntax_errors.items():
+        click.echo(
+            click.style('Error - {} has syntax errors {}'.format(tf, e), fg='red')
+        )
+
+    for tf, entry_key, missing_fields in tester.invalid_tests:
+        click.echo(
+            click.style('---Error with formating of test {} in {} ---'.format(tf, entry_key), fg='yellow')
+        )
+
+        click.echo('Missing fields:')
+        for field in missing_fields:
+            click.echo('\t{}'.format(field))
 
     # Save report to json log file
     if log_path is not None:
