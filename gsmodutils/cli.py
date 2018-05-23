@@ -132,7 +132,7 @@ def test(project_path, test_id, skip_default, verbose, log_path):
         click.echo("Counted {} test assertions with {} failures".format(*lc))
         # Output base test file
         if not log.is_success:
-            click.echo(click.style('{} has errors'.format(indicator), fg='red'))
+            click.echo(click.style('{} has test errors'.format(indicator), fg='red'))
         else:
             click.echo(click.style('{} completed all tests without error'.format(indicator), fg='green'))
 
@@ -404,8 +404,9 @@ def export(file_format, filepath, project_path, model_id, design, conditions, ov
 def info(project_path):
     """ Display all the information about a gsmodutils project (list models, paths, designs etc. """
     project = _load_project(project_path)
-    click.echo('''--------------------------------------------------------------------------------------------------
-Project description - {description}
+
+    click.echo("-" * click.get_terminal_size()[0])
+    click.echo('''Project description - {description}
 Author(s): - {author}
 Author email - {author_email}
 Designs directory - {design_dir}
@@ -415,27 +416,32 @@ Tests directory - {tests_dir}
     click.echo("Models:")
     for mdl_path in project.config.models:
         model = project.load_model(mdl_path)
-        click.echo("\t* {}".format(mdl_path))
+        click.echo(click.style("\t* {}".format(mdl_path), fg="green"))
         click.echo("\t\t {}".format(model.id))
 
     click.echo("Designs:")
     for d in project.list_designs:
         try:
             design = project.get_design(d)
-            click.echo("\t* {}".format(design.id))
-            click.echo("\t\t {}".format(design.name))
-            click.echo("\t\t {}".format(design.description))
-            if design.parent is not None:
-                click.echo("\t\t Parent: {}".format(design.parent.id))
-        except DesignError:
-            click.echo(click.style("\t* Error loading design {}".format(d)), color="red")
-        except DesignOrphanError:
-            click.echo(click.style("\t* Appears to be problem with parent of design {}".format(d)), color="red")
+            click.echo("*" * click.get_terminal_size()[0])
+            click.echo(click.style("\t* {} {}".format(design.name, design.id), fg="green"))
 
+            if design.parent is not None:
+                click.echo("\tParent: {}".format(design.parent.id))
+
+            click.echo("\t\t{}".format(design.description))
+        except DesignError:
+            click.echo(click.style("\t* Error loading design {}".format(d)), fg="red")
+        except DesignOrphanError:
+            click.echo(click.style("\t* Appears to be problem with parent of design {}".format(d)), fg="red")
+    click.echo("*" * click.get_terminal_size()[0])
     click.echo("Conditions:")
     for c in project.conditions['growth_conditions']:
         click.echo("\t* {}".format(c))
-    click.echo('''--------------------------------------------------------------------------------------------------''')
+
+    if not len(project.conditions['growth_conditions']):
+        click.echo(click.style("\t\tNo growth conditions found"))
+    click.echo("-" * click.get_terminal_size()[0])
 
 
 @click.command()
