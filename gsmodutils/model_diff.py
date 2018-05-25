@@ -115,7 +115,7 @@ class ModelDiff(dict):
                 <th> name </th>
                 <th> compartment </th>
                 <th> charge </th>
-                <th> note </th>
+                <th> notes </th>
                 <th> annotation </th>   
             """
             for mb in self["metabolites"]:
@@ -154,7 +154,7 @@ class ModelDiff(dict):
                 <tr>
                     <td>{id}</td>
                     <td>{name}</td>
-                    <td>{note}</td>
+                    <td>{notes}</td>
                     <td>{functional}</td>
                     <td>{annotation}</td>
                 </tr>
