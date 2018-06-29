@@ -261,37 +261,36 @@ We note that, in principle, this test case should be written \textit{a priori} o
 
 
 \section{Case study usage Clostridium autoethanogenum}
-\textit{Clostridium autoethanogenum} is an anaerobic, gram positive spore forming acetogenic bacteria that is of industrial relevance \cite{}.
-In this section we describe how gsmodutils has been utilised to ensure that future versions of a genome scale model CLAU--- will remain functionally relevant, from the perspective of industrial biotechnology.
+\textit{Clostridium autoethanogenum} is a bacterial species used for the production of commodity chemicals at industrial scale \cite{abrini1994clostridium,norman2018progress,LT}. A new GSMM of \textit{C. autoethanogenum}, `MetaCLAU', has been analysed to improve this bioprocess (Norman et al., unpublished).
+
+In this section we describe how gsmodutils has been utilised to ensure that future versions of MetaCLAU will remain functionally relevant from the perspective of industrial biotechnology.
 
 \subsection{Scientific background}
 
-\subsection{}
+\textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of 2,3-butanediol (2,3BD) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and 2,3BD has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of 2,3BD from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
 
 \subsection{Model integration}
-\textbf{Project construction:}
 
+MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see (Norman et al. unpublished)
+
+The model has been integrated with the gsodutils modelling framework as a test-driven project. The following section details specific tests used to evaluate the model at each stage of its continued development.
 
 \subsection{Evaluation of model validation criteria}
 
-\begin{itemize}
- \item Energetic consistency: All transporters are set to 0 lower bound and the ATPase reaction is given a fixed flux of one.
- Providing the model has no cycles allowing ATP production without a food source, the model should never grow.
+Energetic consistency: An important limitation of FBA is that optimal solutions may be thermodynamically infeasible if appropriate constraints are not applied \cite{Fell1197rohtua}. In order to identify these unwanted flux distributions and constrain the model such that they are not in the feasible soluton space, a diagnostic FBA is applied with the following constraints: 1) All transport reactions are constrained to allow no uptake (lower bound = 0), and 2) the ATPase reaction is given a fixed flux of one. If a (non-zero) solution to this problem exists, it must contain a thermodynamic inconsistency, which can be dealt with by manual inspection of the solution and modification of one or more of the involved reactions \cite{Fell1197rohtua}.
  
- \item Minimisation of flux based tests. One conventional approach is to set an optimisation criteria of minimising flux across enzymatic reactions with a fixed biomass constraint.
- Often known as parsimonious FBA, this was created as a design for the model allowing the creation of reversible reactions (for all model reactions) in a programmatic manner.
- 
- \item Product scans. Of interest to this project was the product spectrum under conditions where the organism can and cannot produce molecular Hydrogen (when growing on Carbon monoxide as an energy source).
- Where Hydrogen production is blocked the organism should produce lactate and butanediol as by products.
- 
- \item The NFN mutant strain. This knockout mutant is shown to block production of acetate and increase the production of ethanol.
- 
- \item Lethal knockout mutants. These mutants are of interest to GSM design and development because any changes to systemic behaviour should preserve this behaviour.
-\end{itemize}
+Minimisation of flux based tests: One conventional approach in FBA is to set an optimisation criteria of minimising flux across enzymatic reactions with a fixed biomass constraint \cite{holzhutter2006thegeneralised}. The solution to this FBA problem represents minimal protein investment \cite{holzhutter2006thegeneralised}. Since execution of flux minimisation in COBRApy requires a model in which reversible reactions are split into two irreversible reactions, a gsmodutils design was created in which all reversible reactions are split in a programmatic manner. In the case of MetaCLAU, the flux minimal solution includes both ethanol and acetate production, which represents good qualitative agreement with experimental data (Norman et al., unpublished). Since any changes to this predicted phenotype must be investigated, the flux minimisation analysis has been formulated as a gsmuodutils test.
 
+Product scans: Of interest to this project were changes in the product spectrum of \textit{C. autoethanogenum} under conditions where the organism can and cannot produce molecular hydrogen (with carbon monoxide as sole carbon and energy source). The hypothesis tested in (Norman et al., unpublished), was that in the case where hydrogen production in infeasible, alternative electron sinks like lactate and 2,3BD would be produced. As in the previous case, the model-predicted behaviour showing both lactate and 2,3BD was deemed an important result, which model curators should be notified of if lost during model development. Thus the analysis was built into a gsmodutils test.
+
+Lethal knockout mutants: The prediction of lethal single-gene KO mutants through FBA of a GSMM is useful in two ways: 1) the identification of essential genes is an important first step for metabolic engineering strategies, and 2) with the advent of high-throughput TraDIS gene-essentiality data sets \cite{langridge2009simultaneous}, GSMMs can be validated by their abiity to predict essential genes. Furthermore, any change in the set of essential genes (particularly an increase in the number of essentials) rpresents important information for metabolic engineering. For these reasons, a test been built into the MetaCLAU project which enables the computation of the set of essential genes and their comparison with TraDIS data sets.
+
+$\Delta \textit{nfn}$ knockout mutant: NOT SURE ABOUT THIS. CHRIS NOW THINKS IT'S ESSENTIAL :(
 
 % Discuss these results
 \subsection{Remarks}
+
+James smells.
  
 \section{Related work}
 \textbf{Memote:} \cite{lieven2017memote} is tool set that has very similar ambitions to gsmodutils.
