@@ -20,14 +20,14 @@
  
 
 \title{Gsmodutils: A python based framework for test driven genome scale metabolic model development}
-\author[1]{James Gilbert}
+\author[1]{James P Gilbert}
 \author[1]{Nicole Pearcy}
 \author[1]{Rupert Norman}
 \author[2]{Jamie Twycross}
 \author[3]{John King}
 \author[1]{Nigel Minton}
 \affil[1]{Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
-\affil[2]{Intelligent Modelling and Analysis group, School of Computer Science, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
+\affil[2]{Intelligent Modelling and Analysis group, School of Computer Science, University of Nottingham, Nottingham, NG8 1BB, United Kingdom}
 \affil[3]{School of Mathematical Sciences, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
 
 \begin{document}
@@ -183,7 +183,9 @@ Consequently, such designs are hereditary in nature.
 By taking the delta between the constraints applied to an initial model and subsequent modifications, gsmodutils allows users to easily reuse and export models with this design.
 As designs inherit from a base model, future curation to a wild type model will automatically be included in the designs.
 Similarly, designs are self contained and will not interfere with one another allowing a form of project management.
-Figure \ref{fig:strain_hered}
+Figure \ref{fig:strain_hered} shows how this could work in a practical situation.
+Designs of this nature can also be programmatic, allowing the implementation of features such as non-standard constraints that can be dynamically loaded.
+Furtheremore, integrity of all strain designs is automatically tested as part of the default gsmodutils testing framework.
 
 \begin{figure}
   \includegraphics[width=\textwidth]{inheritence.png}
@@ -265,11 +267,9 @@ We note that, in principle, this test case should be written \textit{a priori} o
 
 In this section we describe how gsmodutils has been utilised to ensure that future versions of MetaCLAU will remain functionally relevant from the perspective of industrial biotechnology.
 
-\subsection{Scientific background}
+\subsection{Scientific background and Model integration}
 
 \textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of 2,3-butanediol (2,3BD) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and 2,3BD has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of 2,3BD from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
-
-\subsection{Model integration}
 
 MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see (Norman et al. unpublished)
 
@@ -287,10 +287,6 @@ Lethal knockout mutants: The prediction of lethal single-gene KO mutants through
 
 $\Delta \textit{nfn}$ knockout mutant: NOT SURE ABOUT THIS. CHRIS NOW THINKS IT'S ESSENTIAL :(
 
-% Discuss these results
-\subsection{Remarks}
-
-James smells.
  
 \section{Related work}
 \textbf{Memote:} \cite{lieven2017memote} is tool set that has very similar ambitions to gsmodutils.
@@ -298,8 +294,8 @@ It features a fully specified set of tests, including custom test cases and has 
 A core difference between these projects is that gsmodutils has a stronger focus on reducing the redundancy in model storage through the usage of \textit{design deltas}, as described above.
 Similarly, a core goal of gsmodutils is to allow easy import and export outside of the framework for compatibility with other modelling suites.
 It should be noted that, as memote is written in python and utilises cobrapy, it is fully compatible with gsmodutils.
-
-\textbf{cameo:} Cameo \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
+\\
+\textbf{Cameo:} \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
 strategies, as well as other flux balance analysis utilities. Written in python and part of the cobrapy suite of applications,
 gsmodutils integrates easily with cameo.
 Indeed, making a set of design changes can easily be integrated into gsmodutils through the python API.
@@ -325,7 +321,7 @@ In an ideal world, we would envision a methodology such as our becoming a pre-re
 As with most software development projects, gsmodutils will see expanded features.
 Initially this will include tighter integration with version control systems such as git and mercurial.
 Furthermore, the objective of the project is to cultivate collaboration by simplifying the process of distributing large models to different users.
-As a consequence, methods for sharing docker containers will be investigated.
+As a consequence, methods for sharing reusable docker containers will be investigated.
 
 \section*{Acknowledgements}
 We would like to thank the Oxford Brookes Cell Systems Modelling group for helpful discussions regarding this work and Thomas Millat for scientific advice.
