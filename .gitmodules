@@ -1,0 +1,3 @@
+[submodule "clau"]
+	path = examples/clau
+	url = git@github.com:SBRCNottingham/clau.git

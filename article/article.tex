@@ -6,7 +6,7 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage{subfigure}
-
+\usepackage{hyperref}
 %PREPRINT/MANUSCRIPT OPTIONS
 \usepackage{setspace}
 \usepackage{lineno}
@@ -42,9 +42,9 @@ This is quickly becoming an issue for industrial systems and synthetic biotechno
 \\
 \textbf{Results:} 
 As part of an ongoing effort to improve genome scale metabolic analysis, we have developed a test driven development methodology for the continuous integration of validation data from different sources.
-Contributing to the open source technology based around cobrapy, we have developed the \textit{gsmodutils} modelling framework placing an emphasis on test driven design of models through defined test cases.
+Contributing to the open source technology based around COBRApy, we have developed the \textit{gsmodutils} modelling framework placing an emphasis on test driven design of models through defined test cases.
 Crucially, different substrate conditions are configurable allowing users to examine how different designs or curation impact a wide range of system behaviours, minimising error between model versions.\\
-\textbf{Availability:} The software framework described within this paper is open source and freely available from http://github.com/nottingham\_sbrc/gsmodutils \\
+\textbf{Availability:} The software framework described within this paper is open source and freely available from \url{http://github.com/SBRCNottingham/gsmodutils} \\
 \textbf{Contact:}{james.gilbert@nottingham.ac.uk}
 \end{abstract}
 
@@ -66,7 +66,7 @@ Similarly, the MetaNetX \cite{moretti2016metanetx} system exists to provide a st
 However, such tools often make it difficult to understand the design decisions made by the initial model authors.
 
 Furthermore, as with many areas of bioinformatic study the proliferation of available computational tools has become somewhat vast.
-This covers huge variety of software platforms including the COBRA toolbox in Matlab \cite{schellenberger2011quantitative}, ScrumPy and CobraPy in Python \cite{poolman2006scrumpy, ebrahim2013cobrapy} with additional tools and libraries such as cameo \cite{cardoso2017cameo}, OptFlux in Java \cite{rocha2010optflux}, SurreyFBA \cite{gevorgyan2010surreyfba}.
+This covers huge variety of software platforms including the COBRA toolbox in Matlab \cite{schellenberger2011quantitative}, ScrumPy and COBRApy in Python \cite{poolman2006scrumpy, ebrahim2013cobrapy} with additional tools and libraries such as cameo \cite{cardoso2017cameo}, OptFlux in Java \cite{rocha2010optflux}, SurreyFBA \cite{gevorgyan2010surreyfba}.
 Whilst most of these tools are Open Source and follow standards, such as SBML \cite{finney2003systems}, there are often few options that make analysis easy to replicate.
 
 The archetype design, build and test cycle of synthetic biology heavily relies on the usage of bioinformatics software and modelling to improve the production of natural products \cite{carbonell2016bioinformatics}.
@@ -95,7 +95,7 @@ Given the availability of widespread open source virtualisation tools that allow
 
 In this paper we present a software framework geared toward \textit{test driven} genome scale model development, a concept that is taken directly from good software development practices.
 By this we mean the notion that, as a model is curated to represent biological phenomena, much of the validation can be turned into specific test cases that can be repeated between model versions.
-We provide an example test case for \textit{C. acetobutylicum} an organism that has had considerable focus in terms of genome scale models and how a working methodology using the software presented here can reduce repetition of work and improve the reproducibility of results.
+We provide an example test case for \textit{Clostridium autoethanogenum}, an organism that has had considerable focus in terms of genome scale models and how a working methodology using the software presented here can reduce repetition of work and improve the reproducibility of results.
 This article aims to summarise the main objectives of the gsmodutils software and we refer the reader to the software user guide for a more detailed exploration features.
 
 \section{Improving the design phase of industrial biotechnology}
@@ -148,7 +148,7 @@ All software is open source and is designed to be interoperable with platforms w
 Test driven development is driven by the idea of clearly defined test cases written before significant changes are made to any underlying architecture.
 In the case of genome scale models, errors occur as a product of human curation to better represent newly discovered aspects of metabolism.
 
-By automatically integrating the COBRAPy \cite{ebrahim2013cobrapy} users can easily write convenient test cases following examples given in the user guide.
+By automatically integrating the COBRApy \cite{ebrahim2013cobrapy} users can easily write convenient test cases following examples given in the user guide.
 A standard test case, ensuring that a given model grows on media is given in Box \ref{fig:test_case}.
 When a new model repository is created with the gsmodutils tool, a number of pre-written test cases are automatically added to a file.
 However, we stress that the vast majority of individual use cases for a model must be specific to a given biological problem.
@@ -277,26 +277,44 @@ The model has been integrated with the gsodutils modelling framework as a test-d
 
 \subsection{Evaluation of model validation criteria}
 
-Energetic consistency: An important limitation of FBA is that optimal solutions may be thermodynamically infeasible if appropriate constraints are not applied \cite{Fell1197rohtua}. In order to identify these unwanted flux distributions and constrain the model such that they are not in the feasible soluton space, a diagnostic FBA is applied with the following constraints: 1) All transport reactions are constrained to allow no uptake (lower bound = 0), and 2) the ATPase reaction is given a fixed flux of one. If a (non-zero) solution to this problem exists, it must contain a thermodynamic inconsistency, which can be dealt with by manual inspection of the solution and modification of one or more of the involved reactions \cite{Fell1197rohtua}.
+\textbf{Energetic consistency:} 
+An important limitation of FBA is that optimal solutions may be thermodynamically infeasible if appropriate constraints are not applied \cite{Fell1197rohtua}.
+In order to identify these unwanted flux distributions and constrain the model such that they are not in the feasible soluton space, a diagnostic FBA is applied with the following constraints:
+1) All transport reactions are constrained to allow no uptake (lower bound = 0), and 2) the ATPase reaction is given a fixed flux of one.
+If a (non-zero) solution to this problem exists, it must contain a thermodynamic inconsistency, which can be dealt with by manual inspection of the solution and modification of one or more of the involved reactions \cite{Fell1197rohtua}.
  
-Minimisation of flux based tests: One conventional approach in FBA is to set an optimisation criteria of minimising flux across enzymatic reactions with a fixed biomass constraint \cite{holzhutter2006thegeneralised}. The solution to this FBA problem represents minimal protein investment \cite{holzhutter2006thegeneralised}. Since execution of flux minimisation in COBRApy requires a model in which reversible reactions are split into two irreversible reactions, a gsmodutils design was created in which all reversible reactions are split in a programmatic manner. In the case of MetaCLAU, the flux minimal solution includes both ethanol and acetate production, which represents good qualitative agreement with experimental data (Norman et al., unpublished). Since any changes to this predicted phenotype must be investigated, the flux minimisation analysis has been formulated as a gsmuodutils test.
+\textbf{Minimisation of flux based tests:}
+One conventional approach in FBA is to set an optimisation criteria of minimising flux across enzymatic reactions with a fixed biomass constraint \cite{holzhutter2006thegeneralised}. 
+The solution to this FBA problem represents minimal protein investment \cite{holzhutter2006thegeneralised}.
+Since execution of flux minimisation in COBRApy requires a model in which reversible reactions are split into two irreversible reactions, a gsmodutils design was created in which all reversible reactions are split in a programmatic manner.
+In the case of MetaCLAU, the flux minimal solution includes both ethanol and acetate production, which represents good qualitative agreement with experimental data (Norman et al., unpublished).
+Since any changes to this predicted phenotype must be investigated, the flux minimisation analysis has been formulated as a gsmuodutils test.
 
-Product scans: Of interest to this project were changes in the product spectrum of \textit{C. autoethanogenum} under conditions where the organism can and cannot produce molecular hydrogen (with carbon monoxide as sole carbon and energy source). The hypothesis tested in (Norman et al., unpublished), was that in the case where hydrogen production in infeasible, alternative electron sinks like lactate and 2,3BD would be produced. As in the previous case, the model-predicted behaviour showing both lactate and 2,3BD was deemed an important result, which model curators should be notified of if lost during model development. Thus the analysis was built into a gsmodutils test.
+\textbf{Product scans:}
+Of interest to this project were changes in the product spectrum of \textit{C. autoethanogenum} under conditions where the organism can and cannot produce molecular hydrogen (with carbon monoxide as sole carbon and energy source).
+The hypothesis tested in (Norman et al., unpublished), was that in the case where hydrogen production in infeasible, alternative electron sinks like lactate and 2,3BD would be produced.
+As in the previous case, the model-predicted behaviour showing both lactate and 2,3BD was deemed an important result, which model curators should be notified of if lost during model development.
+Thus the analysis was built into a gsmodutils test.
 
-Lethal knockout mutants: The prediction of lethal single-gene KO mutants through FBA of a GSMM is useful in two ways: 1) the identification of essential genes is an important first step for metabolic engineering strategies, and 2) with the advent of high-throughput TraDIS gene-essentiality data sets \cite{langridge2009simultaneous}, GSMMs can be validated by their abiity to predict essential genes. Furthermore, any change in the set of essential genes (particularly an increase in the number of essentials) rpresents important information for metabolic engineering. For these reasons, a test been built into the MetaCLAU project which enables the computation of the set of essential genes and their comparison with TraDIS data sets.
+\textbf{Lethal knockout mutants:} 
+The prediction of lethal single-gene KO mutants through FBA of a GSMM is useful in two ways: 
+1) the identification of essential genes is an important first step for metabolic engineering strategies, 
+and 2) with the advent of high-throughput TraDIS gene-essentiality data sets \cite{langridge2009simultaneous}, GSMMs can be validated by their abiity to predict essential genes.
+Furthermore, any change in the set of essential genes (particularly an increase in the number of essentials) represents important information for metabolic engineering.
+For these reasons, a test been built into the MetaCLAU project which enables the computation of the set of essential genes and their comparison with TraDIS data sets.
 
-$\Delta \textit{nfn}$ knockout mutant: NOT SURE ABOUT THIS. CHRIS NOW THINKS IT'S ESSENTIAL :(
+% $\Delta \textit{nfn}$ knockout mutant: NOT SURE ABOUT THIS. CHRIS NOW THINKS IT'S ESSENTIAL :(
+These test cases are all fully reproducible and available as an example within the gsmodutils software repository and we encourage the reader to explore these examples to understand how to utilise gsmodutils within their own project.
 
- 
 \section{Related work}
 \textbf{Memote:} \cite{lieven2017memote} is tool set that has very similar ambitions to gsmodutils.
 It features a fully specified set of tests, including custom test cases and has strong version control integration with git.
 A core difference between these projects is that gsmodutils has a stronger focus on reducing the redundancy in model storage through the usage of \textit{design deltas}, as described above.
 Similarly, a core goal of gsmodutils is to allow easy import and export outside of the framework for compatibility with other modelling suites.
-It should be noted that, as memote is written in python and utilises cobrapy, it is fully compatible with gsmodutils.
+It should be noted that, as memote is written in python and utilises COBRApy, it is fully compatible with gsmodutils.
 \\
 \textbf{Cameo:} \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
-strategies, as well as other flux balance analysis utilities. Written in python and part of the cobrapy suite of applications,
+strategies, as well as other flux balance analysis utilities. Written in python and part of the COBRApy suite of applications,
 gsmodutils integrates easily with cameo.
 Indeed, making a set of design changes can easily be integrated into gsmodutils through the python API.
 \\
