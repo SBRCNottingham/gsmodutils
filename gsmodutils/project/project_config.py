@@ -22,11 +22,26 @@ _templates_path = os.path.join(
 
 
 class ProjectConfig(object):
-    
-    _cfg_params = [
-        'description', 'author', 'author_email', 'tests_dir', 'design_dir', 'conditions_file',
-        'repository_type', 'default_model', 'models', 'name',
-    ]
+
+    config_scehma = {
+        "type": "object",
+        "properties": {
+            "author_email": {"type": "string"},
+            "description": {"type": "string"},
+            "author": {"type": "string"},
+            "tests_dir": {"type": "string"},
+            "design_dir": {"type": "string"},
+            "conditions_file": {"type": "string"},
+            "default_model": {"type": "string"},
+            "models": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "name": {"type": "string"}
+        }
+    }
     
     def __init__(self, description, author, author_email, name='Untitled', **kwargs):
         """
@@ -57,7 +72,7 @@ class ProjectConfig(object):
         """
         Could possibly just use self.__dict__ but this is the set of configuration options
         """
-        return dict([(it, getattr(self, it)) for it in self._cfg_params])
+        return dict([(it, getattr(self, it)) for it in self.config_scehma["properties"].keys()])
 
     @staticmethod
     def create_docker_file(path, dockerfile_name='Dockerfile'):

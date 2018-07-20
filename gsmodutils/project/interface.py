@@ -17,6 +17,8 @@ from gsmodutils.test.tester import GSMTester
 from gsmodutils.utils import validator
 from gsmodutils.utils.io import load_medium
 import logging
+import jsonschema
+
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +51,7 @@ class GSMProject(object):
         """
         Sanatizes configuration input
         """
+        jsonschema.validate(configuration, ProjectConfig.config_scehma)
         self.config = ProjectConfig(**configuration)
 
     @property
