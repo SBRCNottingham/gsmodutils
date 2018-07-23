@@ -23,7 +23,7 @@ _templates_path = os.path.join(
 
 class ProjectConfig(object):
 
-    config_scehma = {
+    config_schema = {
         "type": "object",
         "properties": {
             "author_email": {"type": "string"},
@@ -72,7 +72,7 @@ class ProjectConfig(object):
         """
         Could possibly just use self.__dict__ but this is the set of configuration options
         """
-        return dict([(it, getattr(self, it)) for it in self.config_scehma["properties"].keys()])
+        return dict([(it, getattr(self, it)) for it in self.config_schema["properties"].keys()])
 
     @staticmethod
     def create_docker_file(path, dockerfile_name='Dockerfile'):

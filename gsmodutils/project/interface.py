@@ -51,7 +51,7 @@ class GSMProject(object):
         """
         Sanatizes configuration input
         """
-        jsonschema.validate(configuration, ProjectConfig.config_scehma)
+        jsonschema.validate(configuration, ProjectConfig.config_schema)
         self.config = ProjectConfig(**configuration)
 
     @property
