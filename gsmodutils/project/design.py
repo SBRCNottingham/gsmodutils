@@ -13,6 +13,111 @@ logger = logging.getLogger(__name__)
 
 
 class StrainDesign(object):
+
+    design_schema = {
+        "type": "object",
+        "description": "JSON representation of gsmodutils designs. Largely based on COBRApy JSON schema",
+        "properties": {
+            "id": {"type": "string"},
+            "name": {"type": "string"},
+            "description": {"type": "string"},
+            "reactions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": "string"},
+                        "metabolites": {
+                            "type": "object",
+                            "patternProperties": {
+                                ".*": {"type": "number"},
+                            }
+                        },
+                        "gene_reaction_rule": {"type": "string"},
+                        "lower_bound": {"type": "number"},
+                        "upper_bound": {"type": "number"},
+                        "objective_coefficient": {
+                            "type": "number",
+                            "default": 0,
+                        },
+                        "variable_kind": {
+                            "type": "string",
+                            "pattern": "integer|continuous",
+                            "default": "continuous"
+                        },
+                        "subsystem": {"type": "string"},
+                        "notes": {"type": "object"},
+                        "annotation": {"type": "object"},
+                    },
+                    "required": ["id", "name", "metabolites", "lower_bound",
+                                 "upper_bound", "gene_reaction_rule"],
+                    "additionalProperties": False,
+                }
+            },
+            "metabolites": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": "string"},
+                        "compartment": {
+                            "type": "string",
+                            "pattern": "[a-z]{1,2}"
+                        },
+                        "charge": {"type": "integer"},
+                        "formula": {"type": "string"},
+                        "_bound": {
+                            "type": "number",
+                            "default": 0
+                        },
+                        "_constraint_sense": {
+                            "type": "string",
+                            "default": "E",
+                            "pattern": "E|L|G",
+                        },
+                        "notes": {"type": "object"},
+                        "annotation": {"type": "object"},
+                    },
+                    "required": ["id", "name", "compartment"],
+                    "additionalProperties": False,
+                }
+
+            },
+            "genes": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": "string"},
+                        "notes": {"type": "object"},
+                        "annotation": {"type": "object"},
+                    },
+                    "required": ["id", "name"],
+                    "additionalProperties": False,
+                }
+
+            },
+
+            "notes": {"type": "object"},
+            "annotation": {"type": "object"},
+            "conditions": {"type": "string"},
+            "removed_metabolites": {
+                "type": "array"
+            },
+            "removed_reactions": {
+                "type": "array"
+            },
+            "removed_genes": {
+                "type": "array"
+            },
+
+            "parent": {"type": "string"},
+        }
+    }
+
     def __init__(self, did, name, description, project, parent=None, reactions=None, metabolites=None, genes=None,
                  removed_metabolites=None, removed_reactions=None, removed_genes=None, base_model=None,
                  conditions=None, is_pydesign=False, design_func=None):
