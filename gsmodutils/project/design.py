@@ -8,6 +8,8 @@ from gsmodutils.exceptions import DesignError, DesignOrphanError, DesignNotFound
 from gsmodutils.model_diff import model_diff
 import logging
 from six import exec_
+import jsonschema
+
 
 logger = logging.getLogger(__name__)
 
@@ -343,9 +345,8 @@ class StrainDesign(object):
     @staticmethod
     def _exec_pydesign(func_name, compiled_code):
         """
-        :param project:
-        :param func_name:
-        :param compiled_code:
+        :param func_name: function name
+        :param compiled_code: python code compiled with `compile`
         :return: function
         """
         global_namespace = dict(
@@ -638,19 +639,15 @@ class StrainDesign(object):
         """
         Check required fields are present
         :param design_dict:
-        :param throw_exceptions:
+        :param throw_exceptions: Throw json schema exceptions. If false, returns bool on any exception
         :return:
         """
-        required_fields = ["name", "description", "metabolites", "reactions", "genes"]
-        for field in required_fields:
-            if field not in design_dict:
-                if not throw_exceptions:
-                    return False
-                raise DesignError("Required field {} missing from design".format(field))
-
-        # TODO: test if reactions are valid
-        # TODO: test if metabolites are valid
-        # TODO: test genes are valid
+        try:
+            jsonschema.validate(design_dict, StrainDesign.design_schema)
+        except (jsonschema.ValidationError, jsonschema.SchemaError) as exp:
+            if throw_exceptions:
+                raise exp
+            return False
         return True
 
     @property
