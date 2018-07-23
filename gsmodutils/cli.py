@@ -314,24 +314,30 @@ def dimport(model_path, identifier, name, description, project_path, parent, bas
     """ Import a design into a model. This can be new or overwrite an existing design. """
 
     project = _load_project(project_path)
-    if from_diff:
-        with open(model_path) as diff_file:
-            df = json.load(diff_file)
-            # model_path is a json diff file
-            model = project.load_diff(df, base_model=base_model)
-    else:
-        model = load_model(model_path)
+    try:
+        if from_diff:
+            with open(model_path) as diff_file:
+                df = json.load(diff_file)
+                # model_path is a json diff file
+
+                model = project.load_diff(df, base_model=base_model)
+        else:
+            model = load_model(model_path)
+    except ValidationError as exp:
+        click.echo('Validation Error with design: {}'.format(exp))
+        exit(-1)
+
     # Check if the design already exists
     new = True
     if identifier in project.list_designs and not overwrite:
         click.echo('Error: Design {} already exists. Use --overwrite to replace'.format(identifier))
-        exit(-1)
+        exit(-2)
     elif identifier in project.list_designs:
         new = False
 
     if parent is not None and parent not in project.list_designs:
         click.echo('Error: Parent design {} does not exist'.format(parent))
-        exit(-1)
+        exit(-3)
 
     if name is None and new:
         name = click.prompt('Please enter a name for this design', type=str)
@@ -339,8 +345,12 @@ def dimport(model_path, identifier, name, description, project_path, parent, bas
     if description is None and new:
         description = click.prompt('Please enter a description for this design', type=str)
 
-    project.save_design(model, identifier, name=name, description=description, parent=parent, base_model=base_model,
-                        overwrite=overwrite)
+    try:
+        project.save_design(model, identifier, name=name, description=description, parent=parent, base_model=base_model,
+                            overwrite=overwrite)
+    except ValidationError as exp:
+        click.echo('Validation Error with design: {}'.format(exp))
+        exit(-4)
 
     click.echo('Design successfully added to project')
 

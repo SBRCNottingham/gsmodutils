@@ -224,22 +224,22 @@ def test_import_designs():
         opts = [
             save_path, cdid,
             '--project_path', ctx.path,
+            '--parent', did,
+            '--overwrite'
+        ]
+
+        result = runner.invoke(gsmodutils.cli.dimport, opts, input='{}\n{}\n'.format(name, description))
+        assert result.exit_code == 0
+
+        opts = [
+            save_path, cdid,
+            '--project_path', ctx.path,
             '--parent', did
         ]
 
         # Test overwrite existing fail and pass
         result = runner.invoke(gsmodutils.cli.dimport, opts)
-        assert result.exit_code == -1
-
-        opts = [
-            save_path, cdid,
-            '--project_path', ctx.path,
-            '--parent', did,
-            '--overwrite'
-        ]
-
-        result = runner.invoke(gsmodutils.cli.dimport, opts)
-        assert result.exit_code == 0
+        assert result.exit_code == -2
 
         # Test non-existent parent
         opts = [
