@@ -53,8 +53,7 @@ class StrainDesign(object):
                         "annotation": {"type": "object"},
                     },
                     "required": ["id", "name", "metabolites", "lower_bound",
-                                 "upper_bound", "gene_reaction_rule"],
-                    "additionalProperties": False,
+                                 "upper_bound", "gene_reaction_rule"]
                 }
             },
             "metabolites": {
@@ -65,7 +64,7 @@ class StrainDesign(object):
                         "id": {"type": "string"},
                         "name": {"type": "string"},
                         "compartment": {
-                            "type": "string",
+                            "type": ["string", "null"],
                             "pattern": "[a-z]{1,2}"
                         },
                         "charge": {"type": "integer"},
@@ -82,8 +81,7 @@ class StrainDesign(object):
                         "notes": {"type": "object"},
                         "annotation": {"type": "object"},
                     },
-                    "required": ["id", "name", "compartment"],
-                    "additionalProperties": False,
+                    "required": ["id", "name", "compartment"]
                 }
 
             },
@@ -98,14 +96,11 @@ class StrainDesign(object):
                         "annotation": {"type": "object"},
                     },
                     "required": ["id", "name"],
-                    "additionalProperties": False,
                 }
 
             },
 
-            "notes": {"type": "object"},
-            "annotation": {"type": "object"},
-            "conditions": {"type": "string"},
+            "conditions": {"type": ["string", "null"]},
             "removed_metabolites": {
                 "type": "array"
             },
@@ -116,8 +111,9 @@ class StrainDesign(object):
                 "type": "array"
             },
 
-            "parent": {"type": "string"},
-        }
+            "parent": {"type": ["string", "null"]},
+        },
+        "required": ["id", "name", "description", "reactions", "metabolites", "genes"]
     }
 
     def __init__(self, did, name, description, project, parent=None, reactions=None, metabolites=None, genes=None,

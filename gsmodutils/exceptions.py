@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import, division
+from jsonschema import ValidationError
 
 
 class ProjectNotFound(Exception):
@@ -13,11 +14,6 @@ class ProjectConfigurationError(Exception):
 
 class DesignError(Exception):
     """ Design error occurs when their is an issue with a given design file """
-    pass
-
-
-class ValidationError(Exception):
-    """ Errors in validation of model """
     pass
 
 

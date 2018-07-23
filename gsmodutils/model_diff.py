@@ -231,11 +231,17 @@ class ModelDiff(dict):
             except KeyError:
                 self['removed_metabolites'].append(ma.id)
 
+        def parse_compartment(compartment):
+            if compartment == "":
+                return None
+            return compartment
+
         for mb in model_b.metabolites:
             # find added metabolites
             # find if metabolite has changed at all
             try:
                 ma = model_a.metabolites.get_by_id(mb.id)
+                ma.compartment = parse_compartment(ma.compartment)
             except KeyError:
                 ma = None
 
@@ -244,7 +250,7 @@ class ModelDiff(dict):
                     dict(
                        id=mb.id,
                        notes=mb.notes,
-                       compartment=mb.compartment,
+                       compartment=parse_compartment(mb.compartment),
                        formula=mb.formula,
                        name=mb.name,
                        charge=mb.charge,
@@ -255,7 +261,7 @@ class ModelDiff(dict):
         reacfields = [
             'lower_bound', 'upper_bound',
             'gene_reaction_rule', 'subsystem', 'name',
-            'variable_kind'
+            'variable_kind',
         ]
         for ra in model_a.reactions:
             # reaction has been removed

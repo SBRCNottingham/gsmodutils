@@ -179,7 +179,7 @@ def test_import_designs():
         # Now test inheritence
         cdid = 'tdes_child'
 
-        rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2')
+        rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2', charge=0)
         mdl.add_metabolites(rb15bp)
 
         rubisco = cobra.Reaction(id="RBPC", lower_bound=0, upper_bound=1000.0, name="Ribulose-bisphosphate carboxylase")
@@ -301,7 +301,7 @@ def test_diff():
 
         mdl.add_reactions([rubisco])
 
-        rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2')
+        rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2', charge=0)
         mdl.add_metabolites(rb15bp)
 
         stoich = {

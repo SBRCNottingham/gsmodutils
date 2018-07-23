@@ -128,7 +128,7 @@ class FakeProjectContext(object):
             rb15bp_c=1.0,
         )
 
-        rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2')
+        rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2', charge=0)
         model.add_metabolites(rb15bp)
 
         pruk = cobra.Reaction(id="PRUK", name="Phosphoribulokinase reaction", lower_bound=-1000, upper_bound=1000)

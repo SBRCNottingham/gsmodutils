@@ -13,7 +13,7 @@ from tutils import FakeProjectContext
 from gsmodutils import GSMProject
 from gsmodutils.project.design import StrainDesign
 from gsmodutils.exceptions import DesignError, DesignNotFoundError, ProjectNotFound
-
+import jsonschema
 from cobra.exceptions import Infeasible
 
 
@@ -179,7 +179,7 @@ def test_design_parent():
             rb15bp_c=1.0,
         )
 
-        rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2')
+        rb15bp = cobra.Metabolite(id='rb15bp_c', name='D-Ribulose 1,5-bisphosphate', formula='C5H8O11P2', charge=0)
         model.add_metabolites(rb15bp)
 
         pruk = cobra.Reaction(id="PRUK", name="Phosphoribulokinase reaction", lower_bound=-1000, upper_bound=1000)
@@ -213,6 +213,9 @@ def test_design_parent():
         # Test string representation
         str(design)
         design._repr_html_()
+
+        # test jsonschema is valid
+        design.validate_dict(design.to_dict())
 
         # Create a child of this design
         model = project.load_design('cbb_cycle')
@@ -346,7 +349,7 @@ def test_design_class():
         sd.load()
 
     # bad design dict
-    with pytest.raises(DesignError):
+    with pytest.raises(jsonschema.ValidationError):
         assert not StrainDesign.validate_dict({}, throw_exceptions=False)
         StrainDesign.validate_dict({})
 
