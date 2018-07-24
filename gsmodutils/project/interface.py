@@ -25,6 +25,44 @@ logger = logging.getLogger(__name__)
 
 class GSMProject(object):
 
+    conditions_schema = {
+        "type": "object",
+        "properties": {
+            "growth_conditions": {
+                "type": "object",
+                "patternProperties": {
+                    "^.*$": {
+                        "type": "object",
+                        "properties": {
+                            "observe_growth": {"type": "bool"},
+                            "models": {
+                                "type": "array",
+                                "items": {"type": "string"}
+                            },
+
+                            "carbon_source": {"type": "string"},
+                            "media": {
+                                "type": "object",
+                                "patternProperties": {
+                                    "^.*$": {
+                                        "type": "number",
+                                    }
+                                },
+                            }
+                        }
+                    }
+                }
+            },
+            "carbon_sources": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+
+        }
+    }
+
     def __init__(self, path="."):
         """
         Project class finds a gsmodutlils.json file in a given path and creates a project which allows a user to load:

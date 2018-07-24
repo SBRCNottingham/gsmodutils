@@ -13,6 +13,7 @@ from six import exec_
 import gsmodutils
 from gsmodutils.test.utils import TestRecord
 from tqdm import tqdm
+import jsonschema
 
 
 @contextlib.contextmanager
@@ -30,11 +31,60 @@ def stdout_ctx(stdout=None):
     
 
 class GSMTester(object):
-    """
-    Loads models and executes user specified tests for the genome scale models
-    """
+
+    test_json_schema = {
+        "type": "object",
+        "properties": {
+            'conditions': {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            'models': {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+
+            'designs': {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            'reaction_fluxes': {
+                "type": "object",
+                "patternProperties": {
+                    "^.*$": {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {"type": "number"}
+                    }
+                }
+            },
+            'required_reactions': {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "description": {"type": "string"},
+            "id": {"type": "string"}
+        },
+        "required": ["description", "reaction_fluxes", "conditions", "models", "designs"],
+    }
+
     def __init__(self, project):
-        """Creates the storage locations for logs"""
+        """
+        Loads models and executes user specified tests for the genome scale models
+        Creates the storage locations for logs
+
+        Note that json test schema is validated for individual tests, not for the whole json document.
+        This allows groups of tests to run with individual errors being captured.
+        """
         
         if not isinstance(project, gsmodutils.GSMProject):
             raise TypeError('Requires valid gsmodutils project')
@@ -63,38 +113,30 @@ class GSMTester(object):
         """
         populate all json files from test directory, validate format and add tests to be run
         """
-        def req_fields(entryi):
-            _required_fields = [
-                'conditions', 'models', 'designs', 'reaction_fluxes', 'required_reactions', 'description'
-            ]
-            missing_fieldsi = []
-            for rf in _required_fields:
-                if rf not in entryi:
-                    
-                    missing_fieldsi.append(rf)
-
-            return missing_fieldsi
-
         for tf in glob.glob(os.path.join(self.project.tests_dir, "test_*.json")):
             id_key = os.path.basename(tf)
             with open(tf) as test_file:
                 try:
                     entries = json.load(test_file)
-                
+
                     self.log[id_key].id = id_key
                     for entry_key, entry in entries.items():
-                        missing_fields = req_fields(entry)
+                        # Test to see if individual test entries are valid or not
+                        try:
+                            jsonschema.validate(entry, GSMTester.test_json_schema)
+                        except jsonschema.ValidationError as exp:
+                            self.log[id_key].add_error(entry_key, exp)
+                            self.invalid_tests.append((id_key, entry_key, exp))
+                            continue
+
                         t_args = (id_key, entry_key)
                         self._child_tests[id_key].append(t_args)
-                        if not len(missing_fields):
-                            self.json_tests[id_key][entry_key] = entry
-                            self.log[id_key].create_child(entry_key)
-                            self._task_execs[t_args] = self._dict_test
-                            self._task_id_map[id_key] = t_args
-                        else:
-                            self.log[id_key].add_error(entry_key, missing_fields)
-                            self.invalid_tests.append((id_key, entry_key, missing_fields))
-                    
+
+                        self.json_tests[id_key][entry_key] = entry
+                        self.log[id_key].create_child(entry_key)
+                        self._task_execs[t_args] = self._dict_test
+                        self._task_id_map[id_key] = t_args
+
                 except (ValueError, AttributeError) as e:
                     # Test json is invalid format
                     self.load_errors.append((id_key, e))

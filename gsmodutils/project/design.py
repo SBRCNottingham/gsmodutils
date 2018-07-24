@@ -62,13 +62,13 @@ class StrainDesign(object):
                     "type": "object",
                     "properties": {
                         "id": {"type": "string"},
-                        "name": {"type": "string"},
+                        "name": {"type": ["string", "array"], "item": {"type": "string"} },
                         "compartment": {
                             "type": ["string", "null"],
                             "pattern": "[a-z]{1,2}"
                         },
-                        "charge": {"type": "integer"},
-                        "formula": {"type": "string"},
+                        "charge": {"type": ["integer", "null"]},
+                        "formula": {"type": ["string", "null"]},
                         "_bound": {
                             "type": "number",
                             "default": 0

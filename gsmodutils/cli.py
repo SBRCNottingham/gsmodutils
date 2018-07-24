@@ -425,25 +425,37 @@ Tests directory - {tests_dir}
 
     click.echo("Models:")
     for mdl_path in project.config.models:
-        model = project.load_model(mdl_path)
-        click.echo(click.style("\t* {}".format(mdl_path), fg="green"))
-        click.echo("\t\t {}".format(model.id))
+        try:
+            model = project.load_model(mdl_path)
+            click.echo(click.style("\t* {}".format(mdl_path), fg="green"))
+            click.echo("\t\t {}".format(model.id))
+        except Exception as exp:
+            click.echo(click.style("\t* {} Error loading".format(mdl_path), fg="red"))
+            click.echo("\t\t {}".format(exp))
 
     click.echo("Designs:")
     for d in project.list_designs:
+
+        click.echo("*" * click.get_terminal_size()[0])
         try:
             design = project.get_design(d)
-            click.echo("*" * click.get_terminal_size()[0])
-            click.echo(click.style("\t* {} {}".format(design.name, design.id), fg="green"))
-
-            if design.parent is not None:
-                click.echo("\tParent: {}".format(design.parent.id))
-
-            click.echo("\t\t{}".format(design.description))
-        except DesignError:
-            click.echo(click.style("\t* Error loading design {}".format(d)), fg="red")
+        except DesignError as exp:
+            click.echo(click.style("\t* Error loading design {} {} ".format(d, exp), fg="red"))
+            continue
         except DesignOrphanError:
-            click.echo(click.style("\t* Appears to be problem with parent of design {}".format(d)), fg="red")
+            click.echo(click.style("\t* Appears to be problem with parent of design {}".format(d), fg="red"))
+            continue
+        except ValidationError as exp:
+            click.echo(click.style("\t* Error validating design {} {}".format(d, exp), fg="red"))
+            continue
+
+        click.echo(click.style("\t* {} {}".format(design.name, design.id), fg="green"))
+
+        if design.parent is not None:
+            click.echo("\tParent: {}".format(design.parent.id))
+
+        click.echo("\t\t{}".format(design.description))
+
     click.echo("*" * click.get_terminal_size()[0])
     click.echo("Conditions:")
     for c in project.conditions['growth_conditions']:
