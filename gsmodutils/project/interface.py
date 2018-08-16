@@ -268,7 +268,10 @@ class GSMProject(object):
         Return list of all the designs stored for the project
         """
         for design in self.list_designs:
-            self.get_design(design)
+            try:
+                self.get_design(design)
+            except DesignError:
+                pass
 
         return self._designs_store
 
@@ -293,7 +296,10 @@ class GSMProject(object):
                 des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design))
                 self._designs_store[design] = StrainDesign.from_json(design, des_path, self)
             else:
-                self._designs_store[design] = self._load_py_design(design)
+                try:
+                    self._designs_store[design] = self._load_py_design(design)
+                except Exception as exp:
+                    raise DesignError(str(exp))
 
         return self._designs_store[design]
 
