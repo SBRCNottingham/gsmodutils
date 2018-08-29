@@ -5,9 +5,8 @@ import json
 import os
 
 import cobra
-#from gsmodutils.utils.io import load_medium
 import re
-from io import StringIO
+from six import StringIO
 
 
 class ParseError(Exception):
@@ -75,7 +74,8 @@ def load_scrumpy_model(filepath_or_string, name=None, model_id=None, media=None,
             added_reactions.append(r.id)
 
     if media is not None:
-        load_medium(model, media)
+        for ex_reaction in model.exchanges:
+            ex_reaction.lower_bound = media.get(ex_reaction.id, 0)
 
     if fixed_fluxes is not None:
         for rid, flux in fixed_fluxes.items():
