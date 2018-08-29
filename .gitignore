@@ -42,3 +42,7 @@ article/*.aux
 article/article.pdf
 *.backup
 *.whl
+docs/_static
+docs/_build
+docs/_templates
+
