@@ -45,4 +45,5 @@ article/article.pdf
 docs/_static
 docs/_build
 docs/_templates
+.tox/*
 
