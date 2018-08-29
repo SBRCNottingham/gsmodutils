@@ -14,14 +14,16 @@ As a consequence, these will have to be specified manually (or through supported
 Example usage
 -------------
 
-.. code-block::
+.. code-block:: bash
 
     $ scrumpy_to_cobra --model SCRUMPY_FILE.spy --output OUTPUT_FILE.json
+
 
 As scrumpy spy files do not include constraints for models, the following options are probably required to get
 a working model
 
-.. code-block::
+
+.. code-block:: text
 
     --media a json file for growth media
 

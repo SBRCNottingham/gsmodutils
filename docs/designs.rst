@@ -40,7 +40,7 @@ allows the fixation of CO2 as an inorganic carbon source.
 To do this, we need to add two enzymatic reactions to the model
 Phosphoribulokinase and Rubisco.
 
-.. code:: ipython3
+.. code:: python
 
     from gsmodutils import GSMProject
     import cobra
@@ -119,7 +119,7 @@ Phosphoribulokinase and Rubisco.
 
 
 
-.. code:: ipython3
+.. code:: python
 
     # now rubisco
     rubisco
@@ -156,7 +156,7 @@ Phosphoribulokinase and Rubisco.
 
 
 
-.. code:: ipython3
+.. code:: python
 
     # Removed pfkA, pfkB and zwf
     model.genes.get_by_id("b3916").knock_out()
@@ -166,7 +166,7 @@ Phosphoribulokinase and Rubisco.
 Now we have added the reactions, we would probably want to make sure
 they work. To do this we need to change the medium.
 
-.. code:: ipython3
+.. code:: python
 
     from cameo.core.utils import medium, load_medium
 
@@ -184,7 +184,7 @@ they work. To do this we need to change the medium.
 
 
 
-.. code:: ipython3
+.. code:: python
 
     design = project.save_design(model, 'cbb_cycle', 'calvin cycle',
                         description='Reactions necissary for the calvin cycle in ecoli', overwrite=True)
@@ -198,7 +198,7 @@ making it part of the wild type ecoli core model.
 
 First, we want to start from the parent calvin cycle design as a base.
 
-.. code:: ipython3
+.. code:: python
 
     project = GSMProject('example_project')
     # Start from the design as a base model
@@ -260,7 +260,7 @@ First, we want to start from the parent calvin cycle design as a base.
 
 
 
-.. code:: ipython3
+.. code:: python
 
     mev__R = cobra.Metabolite(id="mev__R_c", name="R Mevalonate", charge=-1, formula="C6H11O4")
     model.add_metabolites([mev__R])
@@ -315,14 +315,14 @@ First, we want to start from the parent calvin cycle design as a base.
 
 
 
-.. code:: ipython3
+.. code:: python
 
     model.add_boundary(mev__R, type='sink') # add somewhere for mevalonate to go
 
     design = project.save_design(model, 'mevalonate_cbb', 'mevalonate production', parent='cbb_cycle',
                         description='Reactions for the production of mevalonate', overwrite=True)
 
-.. code:: ipython3
+.. code:: python
 
     des = project.load_design('mevalonate_cbb')
     des
@@ -366,7 +366,7 @@ To do this create a file in the `designs/` subdirectory of the project called `d
 Only files with the name prefix `design_` will be collected.
 Then, any functions defined as `design_` will be collected, they must have the function prototype:
 
-.. code:: ipython3
+.. code:: python
 
     def gsmdesign_NAME(model, project):
         """ docstrings are used as design descriptions """
@@ -375,7 +375,7 @@ Then, any functions defined as `design_` will be collected, they must have the f
 The designs must return a cobra.Model instance (and preferably a gsmodutils.project.Model instance).
 To, optionally, set parent designs set the attributes of the design by modifying the function attributes, as follows.
 
-.. code:: ipython3
+.. code:: python
 
     design_NAME.name = "name your design"
     design_NAME.description = "Alternatively you can use this field as a description"
@@ -410,7 +410,7 @@ Using the get\_design method allows access to the strain design object.
 This can also be loaded as an isolated pathway cobra model (though FBA
 cannot be performed on this object).
 
-.. code:: ipython3
+.. code:: python
 
     from gsmodutils import GSMProject
     project = GSMProject('example_project')
@@ -447,7 +447,7 @@ cannot be performed on this object).
 
 
 
-.. code:: ipython3
+.. code:: python
 
     des = project.get_design('cbb_cycle')
     des.as_pathway_model()
