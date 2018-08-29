@@ -26,3 +26,41 @@ def test_copy():
         for gene in copied.genes:
             assert gene is not model.genes.get_by_id(gene.id)
             assert gene.model is not model
+
+
+def test_load_scrumpy():
+    with FakeProjectContext() as ctx:
+        project = GSMProject(ctx.path)
+        assert project.project_path == ctx.path
+        model = GSModutilsModel(project)
+
+        scrumpy_string = """    
+External(PROTON_i, "WATER")
+
+NADH_DH_ubi:
+    "NADH" + "UBIQUINONE-8" + 4 PROTON_i -> "UBIQUINOL-8" + 3 PROTON_p + "NAD"
+    ~
+
+NADH_DH_meno:
+    "NADH" + "Menaquinones" + 4 PROTON_i -> "Menaquinols" + 3 PROTON_p + "NAD"
+    ~
+    
+Cytochrome_c_oxidase:
+    1/2 "OXYGEN-MOLECULE" + "UBIQUINOL-8" + 2 PROTON_i -> "UBIQUINONE-8" + "WATER" + 2 PROTON_p
+    ~
+
+
+ATPSynth:
+    "ADP" + "Pi" + 4 PROTON_p -> "ATP" + "WATER" + 3 PROTON_i
+    ~
+
+ATPase:
+    "ATP" -> "ADP" + "Pi" + x_ATPWork
+    ~
+"""
+        model.add_scrumpy_reactions(scrumpy_string)
+        assert "NADH_DH_ubi" in model.reactions
+        assert "NADH_DH_meno" in model.reactions
+        assert "Cytochrome_c_oxidase" in model.reactions
+        assert "ATPSynth" in model.reactions
+        assert "ATPase" in model.reactions

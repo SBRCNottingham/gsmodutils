@@ -7,6 +7,7 @@ import cobra
 import gsmodutils
 from gsmodutils.utils.io import load_model
 from gsmodutils.model_diff import model_diff
+from gsmodutils.utils.scrumpy import load_scrumpy_model
 import os
 import logging
 
@@ -229,3 +230,13 @@ class GSModutilsModel(cobra.Model):
         :return cobra.Model
         """
         return cobra.Model(id_or_model=self)
+
+    def add_scrumpy_reactions(self, file_or_string, overwrite=False, inplace=True):
+        """
+        Add Scrumpy specified reactions to the model
+        :param file_or_string:
+        :param overwrite:
+        :return:
+        """
+        spy_mdl = load_scrumpy_model(file_or_string)
+        return self.merge(spy_mdl, inplace=inplace)

@@ -7,13 +7,14 @@ import os
 import cobra
 #from gsmodutils.utils.io import load_medium
 import re
+from io import StringIO
 
 
 class ParseError(Exception):
     pass
 
 
-def load_scrumpy_model(filepath, name=None, model_id=None, media=None, objective_reactions=None, obj_dir='min',
+def load_scrumpy_model(filepath_or_string, name=None, model_id=None, media=None, objective_reactions=None, obj_dir='min',
                        fixed_fluxes=None):
     """
     Specify a base scrumpy structural model file and returns a cobra model.
@@ -21,7 +22,7 @@ def load_scrumpy_model(filepath, name=None, model_id=None, media=None, objective
 
     To get a solution from the returned object you need to specify nice stuff like the atpase reaction and media
 
-    :param filepath:
+    :param filepath_or_string: filepath or scrumpy string
     :param name:
     :param model_id:
     :param media:
@@ -37,9 +38,14 @@ def load_scrumpy_model(filepath, name=None, model_id=None, media=None, objective
     if fixed_fluxes is not None:
         assert isinstance(fixed_fluxes, dict)
 
-    rel_path = '/'.join(os.path.abspath(filepath).split('/')[:-1])
+    if os.path.isfile(filepath_or_string):
+        rel_path = '/'.join(os.path.abspath(filepath_or_string).split('/')[:-1])
+        fp = os.path.abspath(filepath_or_string).split('/')[-1]
+        reactions, metabolites = parse_file(fp, rel_path=rel_path)
+    else:
+        rel_path = '.'
+        reactions, metabolites = parse_string(filepath_or_string, rel_path=rel_path)
 
-    reactions, metabolites = parse_file(os.path.abspath(filepath).split('/')[-1], rel_path=rel_path)
     model = cobra.Model()
     for mid in metabolites:
         m = cobra.Metabolite(id=mid)
@@ -140,7 +146,7 @@ def get_tokens(line_dt):
             
     return tokens
 
-    
+
 def parse_file(filepath, fp_stack=None, rel_path=''):
     """
      Recursive function - takes in a scrumpy spy file and parses it, returning a set of reactions
@@ -156,114 +162,128 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
     else:
         fp_stack.append(filepath)
 
+    with open(os.path.join(rel_path, filepath)) as infile:
+        reactions, metabolites = parse_fobj(infile, fp_stack, rel_path, filepath)
+    return reactions, metabolites
+
+
+def parse_string(spy_string, rel_path='.'):
+    with StringIO() as fstr:
+        fstr.write(spy_string)
+        fstr.seek(0)
+        reactions, metabolites = parse_fobj(fstr, [], rel_path, "scrumpy_string")
+    return reactions, metabolites
+
+
+def parse_fobj(infile, fp_stack, rel_path, source_name):
+
     num_match = re.compile("[0-9]*/[0-9]*")
     reactions = []
     metabolites = []
-    with open(rel_path+'/'+filepath) as infile:
-        
-        in_include = False
-        in_external = False
-        in_reaction = False
-        s_coef = -1
-        si = 1.0
-        
-        for linecount, line in enumerate(infile):
-            # Ignore anything after comments
-            line_dt = line.strip().split('#')[0]
-            
-            tokens = get_tokens(line_dt)
-            prev_token = ''
-            # print tokens
-            for token in tokens:
-                if in_reaction:
-                    
-                    if token == '~':
-                        in_reaction = False
-                        s_coef = -1
-                        reactions.append(reaction)
-                    elif token in ["<-", "<>", "->"]:
-                        s_coef = 1
-                        if token == "<-":
-                            reaction['bounds'] = [-1000.0, 0.0]
-                        elif token == "->":
-                            reaction['bounds'] = [0.0, 1000.0]
-                        else:
-                            reaction['bounds'] = [-1000.0, 1000.0]
-                            
-                    elif token == "+":
-                        pass
-                    else:
-                        try:
-                            si = float(token)
-                        except ValueError:
 
-                            if num_match.match(token):
-                                si = eval(token)
-                            elif len(token.strip()):
-                                metab = token.replace('"', '').replace("'", '')
+    in_include = False
+    in_external = False
+    in_reaction = False
+    s_coef = -1
+    si = 1.0
 
-                                metabolites.append(metab)
-                                # not a stoichiometric value
-                                reaction['metabolites'][metab] = s_coef * si
-                                si = 1.0
-                            
-                    prev_token = token
-                    continue
-                
-                if in_external:
-                    if token in [',', '(']:
-                        continue
-                        
-                    elif token == ')':
-                        in_external = False
-                    else:
-                        token = token.replace('"', '')
-                        metabolites.append(token)
-                        rs = dict(
-                            id='{}_tx'.format(token),
-                            metabolites={token: -1.0},
-                            source=filepath,
-                            bounds=[-1000.0, 1000.0]
-                        )
-                        
-                        reactions.append(rs)
-                    
-                    continue
-                
-                if in_include:
-                    
-                    if token in [',', '(']:
-                        continue
-                        
-                    elif token == ')':
-                        in_include = False
-                    elif token in fp_stack:
-                        raise ParseError('Cyclic dependency for file {}'.format(token))
-                    else:
-                        rset, mset = parse_file(token, fp_stack, rel_path)
-                        reactions += rset
-                        metabolites += mset
-                    continue
+    for linecount, line in enumerate(infile):
+        # Ignore anything after comments
+        line_dt = line.strip().split('#')[0]
 
-                if token == '':
-                    continue
-                
-                elif token == 'External':
-                    in_external = True
-                    
-                elif token == 'Include':
-                    in_include = True
-                elif token == ":":
-                    in_reaction = True
+        tokens = get_tokens(line_dt)
+        prev_token = ''
+        # print tokens
+        for token in tokens:
+            if in_reaction:
+
+                if token == '~':
+                    in_reaction = False
                     s_coef = -1
-                    reaction = dict(
-                        source=filepath,
-                        metabolites={},
-                        id=prev_token.replace('"', '').replace("'", ""),
-                        line=linecount,
-                    )
+                    reactions.append(reaction)
+                elif token in ["<-", "<>", "->"]:
+                    s_coef = 1
+                    if token == "<-":
+                        reaction['bounds'] = [-1000.0, 0.0]
+                    elif token == "->":
+                        reaction['bounds'] = [0.0, 1000.0]
+                    else:
+                        reaction['bounds'] = [-1000.0, 1000.0]
+
+                elif token == "+":
+                    pass
+                else:
+                    try:
+                        si = float(token)
+                    except ValueError:
+
+                        if num_match.match(token):
+                            si = eval(token)
+                        elif len(token.strip()):
+                            metab = token.replace('"', '').replace("'", '')
+
+                            metabolites.append(metab)
+                            # not a stoichiometric value
+                            reaction['metabolites'][metab] = s_coef * si
+                            si = 1.0
 
                 prev_token = token
+                continue
+
+            if in_external:
+                if token in [',', '(']:
+                    continue
+
+                elif token == ')':
+                    in_external = False
+                else:
+                    token = token.replace('"', '')
+                    metabolites.append(token)
+                    rs = dict(
+                        id='{}_tx'.format(token),
+                        metabolites={token: -1.0},
+                        source=source_name,
+                        bounds=[-1000.0, 1000.0]
+                    )
+
+                    reactions.append(rs)
+
+                continue
+
+            if in_include:
+
+                if token in [',', '(']:
+                    continue
+
+                elif token == ')':
+                    in_include = False
+                elif token in fp_stack:
+                    raise ParseError('Cyclic dependency for file {}'.format(token))
+                else:
+                    rset, mset = parse_file(token, fp_stack, rel_path)
+                    reactions += rset
+                    metabolites += mset
+                continue
+
+            if token == '':
+                continue
+
+            elif token == 'External':
+                in_external = True
+
+            elif token == 'Include':
+                in_include = True
+            elif token == ":":
+                in_reaction = True
+                s_coef = -1
+                reaction = dict(
+                    source=source_name,
+                    metabolites={},
+                    id=prev_token.replace('"', '').replace("'", ""),
+                    line=linecount,
+                )
+
+            prev_token = token
 
     return reactions, metabolites
 
