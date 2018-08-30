@@ -180,5 +180,5 @@ gsmdesign_invalid_parent_id.parent = "thanos"
         assert mdl3.reactions.get_by_id("RBPC").lower_bound == 0
 
         # This design shouldn't load as the parent id ref is wrong
-        with pytest.raises(DesignOrphanError):
+        with pytest.raises(DesignError):
             project.get_design("t1_invalid_parent_id")
