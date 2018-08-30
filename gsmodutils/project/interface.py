@@ -290,16 +290,14 @@ class GSMProject(object):
         if design not in self.list_designs:
             raise DesignNotFoundError("Design of name {} not found in project".format(design))
 
-        if design not in self._designs_store:
-
-            if design in self._json_designs:
-                des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design))
-                self._designs_store[design] = StrainDesign.from_json(design, des_path, self)
-            else:
-                try:
-                    self._designs_store[design] = self._load_py_design(design)
-                except Exception as exp:
-                    raise DesignError(str(exp))
+        if design in self._json_designs:
+            des_path = os.path.join(self._project_path, self.config.design_dir, '{}.json'.format(design))
+            self._designs_store[design] = StrainDesign.from_json(design, des_path, self)
+        else:
+            try:
+                self._designs_store[design] = self._load_py_design(design)
+            except Exception as exp:
+                raise DesignError(str(exp))
 
         return self._designs_store[design]
 

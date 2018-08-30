@@ -204,6 +204,9 @@ def test_import_designs():
             '--parent', did
         ]
 
+        name = 'test m'
+        description = 'test desc'
+
         result = runner.invoke(gsmodutils.cli.dimport, opts, input='{}\n{}\n'.format(name, description))
 
         assert result.exit_code == 0
@@ -221,25 +224,23 @@ def test_import_designs():
         assert cdes.name == name
         assert cdes.description == description
 
+        desc_n = "overwrite valid test"
+        name_n = "overwrite"
+        # Test overwrite - valid
         opts = [
             save_path, cdid,
             '--project_path', ctx.path,
             '--parent', did,
+            '--description', desc_n,
+            '--name', name_n,
             '--overwrite'
         ]
-
-        result = runner.invoke(gsmodutils.cli.dimport, opts, input='{}\n{}\n'.format(name, description))
+        result = runner.invoke(gsmodutils.cli.dimport, opts)
         assert result.exit_code == 0
 
-        opts = [
-            save_path, cdid,
-            '--project_path', ctx.path,
-            '--parent', did
-        ]
-
-        # Test overwrite existing fail and pass
-        result = runner.invoke(gsmodutils.cli.dimport, opts)
-        assert result.exit_code == -2
+        odes = project.get_design(cdid)
+        assert odes.name == name_n
+        assert odes.description == desc_n
 
         # Test non-existent parent
         opts = [
@@ -249,8 +250,19 @@ def test_import_designs():
         ]
 
         result = runner.invoke(gsmodutils.cli.dimport, opts)
-        assert result.exit_code == -1
+        assert result.exit_code == -3
         assert 'should_fail' not in project.list_designs
+
+        # Test overwrite existing fail and pass
+        opts = [
+            save_path, cdid,
+            '--project_path', ctx.path,
+            '--parent', did
+        ]
+
+        # Test overwrite existing fail and pass
+        result = runner.invoke(gsmodutils.cli.dimport, opts)
+        assert result.exit_code == -2
 
 
 def test_addmodel():
