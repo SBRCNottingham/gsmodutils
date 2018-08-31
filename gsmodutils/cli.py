@@ -166,7 +166,8 @@ def test(project_path, test_id, skip_default, verbose, log_path):
             click.style('---Error with formating of test {} in {} ---'.format(tf, entry_key), fg='yellow')
         )
 
-        click.echo('\t{}'.format(exception))
+        click.echo('\tError found in file:')
+        click.echo('\t{}'.format(exception.message))
 
     # Save report to json log file
     if log_path is not None:
