@@ -14,6 +14,7 @@ from gsmodutils.utils.io import load_medium
 from click.testing import CliRunner
 import gsmodutils.cli
 from gsmodutils.test.tester import stdout_ctx
+from six import exec_
 
 
 def test_json_tests():
@@ -249,6 +250,6 @@ def test_std_out_capture_in_exec():
 
     with stdout_ctx() as context:
         compiled_code = compile(exec_code, '', 'exec')
-        exec(compiled_code, {})
+        exec_(compiled_code, {})
 
     assert context.getvalue() == output_message+"\n"

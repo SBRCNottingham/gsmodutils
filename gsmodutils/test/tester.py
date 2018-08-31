@@ -4,11 +4,11 @@ import json
 import os
 import sys
 from collections import defaultdict
-from io import StringIO
 
 from cobra.core import get_solution
 from cobra.exceptions import Infeasible
 from six import exec_
+from gsmodutils.utils import StringIO
 
 import gsmodutils
 from gsmodutils.test.utils import TestRecord

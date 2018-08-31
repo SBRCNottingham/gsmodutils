@@ -1,7 +1,6 @@
 import cobra
 import os
 from gsmodutils.utils.scrumpy import load_scrumpy_model
-from gsmodutils.exceptions import MediumError
 
 
 def load_model(path, file_format=None):

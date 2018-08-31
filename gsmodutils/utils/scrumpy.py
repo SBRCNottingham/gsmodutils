@@ -6,15 +6,16 @@ import os
 
 import cobra
 import re
-from six import StringIO
+
+from gsmodutils.utils import StringIO
 
 
 class ParseError(Exception):
     pass
 
 
-def load_scrumpy_model(filepath_or_string, name=None, model_id=None, media=None, objective_reactions=None, obj_dir='min',
-                       fixed_fluxes=None):
+def load_scrumpy_model(filepath_or_string, name=None, model_id=None, media=None, objective_reactions=None,
+                       obj_dir='min', fixed_fluxes=None):
     """
     Specify a base scrumpy structural model file and returns a cobra model.
     This hasn't be thoroughly tested so expect there to be bugs

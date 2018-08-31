@@ -1,6 +1,17 @@
 import cobra
 from cobra.exceptions import Infeasible
-from six import string_types
+from six import string_types, StringIO
+import sys
+
+# Hack for python version 2 to allow context management of StringIO
+if sys.version_info[0] == 2:
+
+    class StringIO(StringIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            self.close()
 
 
 class FrozenDict(dict):
