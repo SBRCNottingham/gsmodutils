@@ -161,14 +161,12 @@ def test(project_path, test_id, skip_default, verbose, log_path):
             click.style('Error - {} has syntax errors {}'.format(tf, e), fg='red')
         )
 
-    for tf, entry_key, missing_fields in tester.invalid_tests:
+    for tf, entry_key, exception in tester.invalid_tests:
         click.echo(
             click.style('---Error with formating of test {} in {} ---'.format(tf, entry_key), fg='yellow')
         )
 
-        click.echo('Missing fields:')
-        for field in missing_fields:
-            click.echo('\t{}'.format(field))
+        click.echo('\t{}'.format(exception))
 
     # Save report to json log file
     if log_path is not None:
