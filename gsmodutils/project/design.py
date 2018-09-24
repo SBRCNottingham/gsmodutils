@@ -538,10 +538,6 @@ class StrainDesign(object):
             except Exception as ex:
                 raise DesignError("Function execution error {}".format(ex))
 
-            if not isinstance(model, cobra.Model):
-                raise DesignError(
-                    "Function does not return cobra.Model instance. Got {} type instead".format(type(model)))
-
             return mdl
 
         # Add new or changed metabolites to model

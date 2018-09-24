@@ -1,14 +1,37 @@
 from tutils import FakeProjectContext
 from gsmodutils import GSMProject, GSModutilsModel
 import cobra
+import pytest
 
 
 def test_load_model():
+    """
+    Most of this is for code coverage
+    :return:
+    """
     with FakeProjectContext() as ctx:
+        ctx.add_fake_conditions()
+        ctx.add_fake_designs()
+
         project = GSMProject(ctx.path)
         assert project.project_path == ctx.path
         model = GSModutilsModel(project)
         assert isinstance(model, cobra.Model)
+
+        model.load_conditions("xyl_src")
+
+        model.diff()
+        model.diff(GSModutilsModel(project, design="cbb_cycle"))
+
+        with pytest.raises(TypeError):
+            model.diff("should break")
+
+        # Test loading non design fails
+        with pytest.raises(TypeError):
+            model = project.model
+            model.set_design({})
+
+        model.save_model()
 
 
 def test_copy():

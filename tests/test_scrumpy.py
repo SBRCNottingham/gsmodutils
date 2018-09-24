@@ -1,4 +1,5 @@
 from gsmodutils.utils.io import load_model
+from gsmodutils.utils.scrumpy import load_scrumpy_model
 from tutils import scrumpy_model_path, scrumpy_biomass_path
 import tempfile
 import cobra
@@ -7,6 +8,7 @@ import gsmodutils
 import os
 import string
 import random
+import pytest
 
 
 def test_cli_tool():
@@ -41,3 +43,12 @@ def test_cli_tool():
     assert len(model.metabolites) == 1130 # 1129
     # Number of transporters + metabolites should equal scrumpy's number of metabolites
     assert len(model.exchanges) == 71  # 67
+
+
+def test_load_model():
+    # Test loading of scrumpy models
+    model = load_scrumpy_model(scrumpy_model_path, media={"NH3_tx": -1000})
+    assert isinstance(model, cobra.Model)
+
+    with pytest.raises(KeyError):
+        load_scrumpy_model(scrumpy_model_path, fixed_fluxes={"NOTREAL": 1000})
