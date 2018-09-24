@@ -103,7 +103,7 @@ def load_scrumpy_model(filepath_or_string, name=None, model_id=None, media=None,
     return model
 
 
-def get_tokens(line_dt):
+def get_tokens(line):
     """
     Goes through each charachter in scrumpy file attempting to find tokens
 
@@ -112,6 +112,8 @@ def get_tokens(line_dt):
     :param line_dt:
     :return:
     """
+
+    line_dt = line.strip().split('#')[0]
 
     tokens = []
     quoted = False
@@ -193,9 +195,7 @@ def parse_fobj(infile, fp_stack, rel_path, source_name):
 
     for linecount, line in enumerate(infile):
         # Ignore anything after comments
-        line_dt = line.strip().split('#')[0]
-
-        tokens = get_tokens(line_dt)
+        tokens = get_tokens(line)
         prev_token = ''
         # print tokens
         for token in tokens:

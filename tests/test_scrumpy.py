@@ -1,6 +1,6 @@
 from gsmodutils.utils.io import load_model
-from gsmodutils.utils.scrumpy import load_scrumpy_model, ParseError
-from tutils import scrumpy_model_path, scrumpy_biomass_path, CleanUpDir
+from gsmodutils.utils.scrumpy import load_scrumpy_model, ParseError, get_tokens
+from tutils import scrumpy_model_path, scrumpy_biomass_path, scrumpy_media_path, CleanUpDir
 import tempfile
 import cobra
 from click.testing import CliRunner
@@ -44,6 +44,15 @@ def test_cli_tool():
     # Number of transporters + metabolites should equal scrumpy's number of metabolites
     assert len(model.exchanges) == 71  # 67
 
+    result = runner.invoke(gsmodutils.utils.scrumpy.scrumpy_to_cobra, [
+        scrumpy_model_path,
+        'MetaSal',
+        '--output', output_file_path,
+        '--media', scrumpy_media_path,
+        '--name', 'samonella scrumpy model',
+        '--objective', 'Glc_tx',
+    ])
+
 
 def test_load_model():
     # Test loading of scrumpy models
@@ -73,3 +82,23 @@ Include(File1.spy)
 
         with pytest.raises(ParseError):
             load_scrumpy_model(filepath_1)
+
+
+def test_get_tokens():
+    tokens = get_tokens("")
+    assert len(tokens) == 0
+
+    line = "A ->B"
+    tokens = get_tokens(line)
+    assert len(tokens) == 3
+    assert tuple(tokens) == ("A", "->", "B")
+
+    line = "\"FOO\"<>\"BOO\""
+    tokens = get_tokens(line)
+    assert len(tokens) == 3
+    assert tuple(tokens) == ("\"FOO\"", "<>", "\"BOO\"")
+
+    line = "\"FOO\"<- \"POO"
+    tokens = get_tokens(line)
+    assert len(tokens) == 3
+    assert tuple(tokens) == ("\"FOO\"", "<-", "\"POO")
