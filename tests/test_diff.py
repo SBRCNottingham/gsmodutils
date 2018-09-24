@@ -16,6 +16,7 @@ def test_model_ident():
     assert len(diff['removed_metabolites']) == 0
     assert len(diff['reactions']) == 0
     assert len(diff['metabolites']) == 0
+    diff._repr_html_()
 
 
 def test_reaction_lb_change():
@@ -34,6 +35,7 @@ def test_reaction_lb_change():
     assert len(diff['reactions']) == 1
     assert diff['reactions'][0]['id'] == model_b.reactions.ATPM.id
     assert diff['reactions'][0]['lower_bound'] == model_b.reactions.ATPM.lower_bound
+    diff._repr_html_()
 
 
 def test_metabolite_formula_change():
@@ -55,6 +57,7 @@ def test_metabolite_formula_change():
     assert len(diff['metabolites']) == 1
     assert diff['metabolites'][0]['id'] == model_a.metabolites.h2o_c.id
     assert diff['metabolites'][0]['formula'] == model_b.metabolites.h2o_c.formula
+    diff._repr_html_()
 
 
 def test_gene_removal():
@@ -65,6 +68,7 @@ def test_gene_removal():
     diff = gsmodutils.model_diff.model_diff(model_a, model_b)
 
     assert len(diff['removed_genes']) == 1
+    diff._repr_html_()
 
     model_a = load_model(_CORE_MODEL_PATH)
     model_b = load_model(_CORE_MODEL_PATH)
@@ -72,6 +76,7 @@ def test_gene_removal():
     cobra.manipulation.remove_genes(model_a, ['b0008'], remove_reactions=False)
     diff = gsmodutils.model_diff.model_diff(model_a, model_b)
     assert len(diff['genes']) == 1
+    diff._repr_html_()
 
 
 def test_model_error():
