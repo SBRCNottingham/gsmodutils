@@ -41,16 +41,19 @@ def load_scrumpy_model(filepath_or_string, name=None, model_id=None, media=None,
     if os.path.isfile(filepath_or_string):
         rel_path = '/'.join(os.path.abspath(filepath_or_string).split('/')[:-1])
         fp = os.path.abspath(filepath_or_string).split('/')[-1]
-        reactions, metabolites = parse_file(fp, rel_path=rel_path)
+        reactions, metabolites, externals = parse_file(fp, rel_path=rel_path)
     else:
         rel_path = '.'
-        reactions, metabolites = parse_string(filepath_or_string, rel_path=rel_path)
+        reactions, metabolites, externals = parse_string(filepath_or_string, rel_path=rel_path)
 
     model = cobra.Model()
     for mid in metabolites:
-        m = cobra.Metabolite(id=mid)
+        compartment = 'e'
+        if mid[:2] == "x_" or mid in externals:
+            compartment = 'e'
+        m = cobra.Metabolite(id=mid, compartment=compartment)  # ScrumPy does not use compartments
         model.add_metabolites([m])
-    
+
     added_reactions = []
     for reaction in reactions:
         if reaction['id'] not in added_reactions:
@@ -64,7 +67,6 @@ def load_scrumpy_model(filepath_or_string, name=None, model_id=None, media=None,
     # We need to add transporters for external metabolites not defined with the "External" directive
     for metabolite in model.metabolites:
         if metabolite.id[:2] == "x_":
-
             r = cobra.Reaction("EX_{}".format(metabolite.id[2:]))
             model.add_reactions([r])
             r.lower_bound = -1000.0
@@ -164,16 +166,16 @@ def parse_file(filepath, fp_stack=None, rel_path=''):
         fp_stack.append(filepath)
 
     with open(os.path.join(rel_path, filepath)) as infile:
-        reactions, metabolites = parse_fobj(infile, fp_stack, rel_path, filepath)
-    return reactions, metabolites
+        reactions, metabolites, externals = parse_fobj(infile, fp_stack, rel_path, filepath)
+    return reactions, metabolites, externals
 
 
 def parse_string(spy_string, rel_path='.'):
     with StringIO() as fstr:
         fstr.write(spy_string)
         fstr.seek(0)
-        reactions, metabolites = parse_fobj(fstr, [], rel_path, "scrumpy_string")
-    return reactions, metabolites
+        reactions, metabolites, externals = parse_fobj(fstr, [], rel_path, "scrumpy_string")
+    return reactions, metabolites, externals
 
 
 def parse_fobj(infile, fp_stack, rel_path, source_name):
@@ -181,6 +183,7 @@ def parse_fobj(infile, fp_stack, rel_path, source_name):
     num_match = re.compile("[0-9]*/[0-9]*")
     reactions = []
     metabolites = []
+    externals = []
 
     in_include = False
     in_external = False
@@ -234,12 +237,12 @@ def parse_fobj(infile, fp_stack, rel_path, source_name):
             if in_external:
                 if token in [',', '(']:
                     continue
-
                 elif token == ')':
                     in_external = False
                 else:
                     token = token.replace('"', '')
                     metabolites.append(token)
+                    externals.append(token)
                     rs = dict(
                         id='{}_tx'.format(token),
                         metabolites={token: -1.0},
@@ -261,9 +264,10 @@ def parse_fobj(infile, fp_stack, rel_path, source_name):
                 elif token in fp_stack:
                     raise ParseError('Cyclic dependency for file {}'.format(token))
                 else:
-                    rset, mset = parse_file(token, fp_stack, rel_path)
+                    rset, mset, exset = parse_file(token, fp_stack, rel_path)
                     reactions += rset
                     metabolites += mset
+                    externals += exset
                 continue
 
             if token == '':
@@ -286,7 +290,7 @@ def parse_fobj(infile, fp_stack, rel_path, source_name):
 
             prev_token = token
 
-    return reactions, metabolites
+    return reactions, metabolites, externals
 
 
 @click.command()

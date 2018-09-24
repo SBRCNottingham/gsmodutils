@@ -1,6 +1,6 @@
 from gsmodutils.utils.io import load_model
-from gsmodutils.utils.scrumpy import load_scrumpy_model
-from tutils import scrumpy_model_path, scrumpy_biomass_path
+from gsmodutils.utils.scrumpy import load_scrumpy_model, ParseError
+from tutils import scrumpy_model_path, scrumpy_biomass_path, CleanUpDir
 import tempfile
 import cobra
 from click.testing import CliRunner
@@ -47,8 +47,29 @@ def test_cli_tool():
 
 def test_load_model():
     # Test loading of scrumpy models
-    model = load_scrumpy_model(scrumpy_model_path, media={"NH3_tx": -1000})
+    model = load_scrumpy_model(scrumpy_model_path, media={"NH3_tx": -1000}, fixed_fluxes={"NOTREAL": 1000})
     assert isinstance(model, cobra.Model)
 
-    with pytest.raises(KeyError):
-        load_scrumpy_model(scrumpy_model_path, fixed_fluxes={"NOTREAL": 1000})
+
+def test_cyclic_files():
+    """ Shouldn't allow cyclic file definitions """
+
+    spy_file_1 = """
+Include(File2.spy)
+    """
+    spy_file_2 = """
+Include(File1.spy)
+    """
+    # Write to temp dirs
+
+    with CleanUpDir() as dir:
+        filepath_1 = os.path.join(dir.path, "File1.spy")
+        filepath_2 = os.path.join(dir.path, "File1.spy")
+        with open(filepath_1, "w+") as file1:
+            file1.write(spy_file_1)
+
+        with open(filepath_2, "w+") as file2:
+            file2.write(spy_file_2)
+
+        with pytest.raises(ParseError):
+            load_scrumpy_model(filepath_1)
