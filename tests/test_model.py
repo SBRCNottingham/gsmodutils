@@ -21,15 +21,15 @@ def test_load_model():
         model.load_conditions("xyl_src")
 
         model.diff()
-        model.diff(GSModutilsModel(project, design="cbb_cycle"))
+
+        model.diff(model)
 
         with pytest.raises(TypeError):
             model.diff("should break")
 
         # Test loading non design fails
         with pytest.raises(TypeError):
-            model = project.model
-            model.set_design({})
+            model = GSModutilsModel(project, design={})
 
         model.save_model()
 

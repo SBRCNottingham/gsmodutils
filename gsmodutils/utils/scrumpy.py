@@ -270,10 +270,7 @@ def parse_fobj(infile, fp_stack, rel_path, source_name):
                     externals += exset
                 continue
 
-            if token == '':
-                continue
-
-            elif token == 'External':
+            if token == 'External':
                 in_external = True
 
             elif token == 'Include':

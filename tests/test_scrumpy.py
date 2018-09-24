@@ -85,8 +85,26 @@ Include(File1.spy)
 
 
 def test_get_tokens():
+    # Should never return empty tokens
     tokens = get_tokens("")
     assert len(tokens) == 0
+
+    tokens = get_tokens(" ")
+    assert len(tokens) == 0
+
+    tokens = get_tokens("     ")
+    assert len(tokens) == 0
+
+    tokens = get_tokens("   A  ")
+    assert len(tokens) == 1
+
+    tokens = get_tokens("   A  BB")
+    assert tuple(tokens) == ("A", "BB")
+    assert len(tokens) == 2
+
+    tokens = get_tokens("\"\'A\'\"  BB")
+    assert tuple(tokens) == ("\"\'A\'\"", "BB")
+    assert len(tokens) == 2
 
     line = "A ->B"
     tokens = get_tokens(line)
@@ -102,3 +120,5 @@ def test_get_tokens():
     tokens = get_tokens(line)
     assert len(tokens) == 3
     assert tuple(tokens) == ("\"FOO\"", "<-", "\"POO")
+
+
