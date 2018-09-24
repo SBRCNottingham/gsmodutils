@@ -32,6 +32,8 @@ def test_load_model():
             model = GSModutilsModel(project, design={})
 
         model.save_model()
+        cpy = model.to_cobra_model()
+        assert not isinstance(cpy, GSModutilsModel)
 
 
 def test_copy():
