@@ -1,6 +1,6 @@
 from tutils import FakeProjectContext
 import pytest
-from gsmodutils.utils.io import load_model
+from gsmodutils.utils.io import load_model, load_medium
 import tempfile
 from gsmodutils.utils.validator import validate_model
 import cobra
@@ -14,8 +14,18 @@ def test_load_model():
 
     with pytest.raises(TypeError):
         # Create a fake file, format is not valid
-        with tempfile.TemporaryFile() as fp:
-            load_model(fp, file_format="foo")
+        with tempfile.NamedTemporaryFile() as fp:
+            load_model(fp.name, file_format="foo")
+
+    with FakeProjectContext() as ctx:
+        model = ctx.project.model
+
+        load_medium(model, {}, copy=True)
+        with pytest.raises(TypeError):
+            load_medium(model, set())
+
+        with pytest.raises(TypeError):
+            load_medium(set(), dict())
 
 
 def test_validator():

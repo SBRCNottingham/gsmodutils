@@ -30,7 +30,7 @@ def _load_project(project_path):
 @click.group()
 def cli():
     """Command line tools for management of gsmodutils genome scale model projects"""
-    pass
+    pass  # pragma: no cover
 
 
 def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
@@ -487,12 +487,12 @@ def docker(project_path, overwrite, build, save, tag, save_path):
     client = docker.from_env()
     try:
         client.info()
-    except ConnectionError:
-        click.echo(
+    except ConnectionError:  # pragma: no cover
+        click.echo(  # pragma: no cover
             click.style('Error: Docker is either not installed or not configured on your system'
                         'please consult the documentation at docs.docker.com', fg='red')
         )
-        exit(-1)
+        exit(-1)  # pragma: no cover
 
     ttag = project.config.name
     if tag is not None:
@@ -509,49 +509,49 @@ def docker(project_path, overwrite, build, save, tag, save_path):
             client.images.build(path=project.project_path, tag=ttag)
             click.echo('Image built')
 
-        except BuildError as e:
-            click.echo(
+        except BuildError as e:  # pragma: no cover
+            click.echo(  # pragma: no cover
                 click.style('Error building project:\n{}'.format(e), fg='red')
             )
 
-        except APIError as e:
-            click.echo(
+        except APIError as e:  # pragma: no cover
+            click.echo( # pragma: no cover
                 click.style('Docker returned an error:\n{}'.format(e), fg='red')
             )
-            exit(-1)
+            exit(-1)  # pragma: no cover
 
     if save:
         # ensure that build has been completed first
-        image = None
-        try:
-            image = client.images.get(ttag)
-        except ImageNotFound:
-            click.echo(
+        image = None  # pragma: no cover
+        try:  # pragma: no cover
+            image = client.images.get(ttag)  # pragma: no cover
+        except ImageNotFound:  # pragma: no cover
+            click.echo(  # pragma: no cover
                 click.style('Image not found try building image first', fg='red')
             )
-            exit(-1)
-        except APIError as e:
-            click.echo(
+            exit(-1)  # pragma: no cover
+        except APIError as e:  # pragma: no cover
+            click.echo(  # pragma: no cover
                 click.style('Docker returned an error:\n{}'.format(e), fg='red')
+            )  # pragma: no cover
+            exit(-1)  # pragma: no cover
+
+        if save_path is None:  # pragma: no cover
+            save_path = os.path.join(project.project_path, ttag + '.tar')  # pragma: no cover
+
+        click.echo('Writing docker image to path {}. This may take some time...'.format(save_path))  # pragma: no cover
+
+        try:  # pragma: no cover
+            resp = image.save()  # pragma: no cover
+            with open(save_path, 'w+') as image_tar:  # pragma: no cover
+                for chunk in resp.stream():  # pragma: no cover
+                    image_tar.write(chunk)  # pragma: no cover
+
+        except APIError as e:  # pragma: no cover
+            click.echo(  # pragma: no cover
+                click.style('Docker returned an error:\n{}'.format(e), fg='red')  # pragma: no cover
             )
-            exit(-1)
-
-        if save_path is None:
-            save_path = os.path.join(project.project_path, ttag + '.tar')
-
-        click.echo('Writing docker image to path {}. This may take some time...'.format(save_path))
-
-        try:
-            resp = image.save()
-            with open(save_path, 'w+') as image_tar:
-                for chunk in resp.stream():
-                    image_tar.write(chunk)
-
-        except APIError as e:
-            click.echo(
-                click.style('Docker returned an error:\n{}'.format(e), fg='red')
-            )
-            exit(-1)
+            exit(-1)  # pragma: no cover
 
 
 cli.add_command(test)
