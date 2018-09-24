@@ -6,12 +6,12 @@ import sys
 # Hack for python version 2 to allow context management of StringIO
 if sys.version_info[0] == 2:
 
-    class StringIO(StringIO):
-        def __enter__(self):
-            return self
+    class StringIO(StringIO):  # pragma: no cover
+        def __enter__(self):  # pragma: no cover
+            return self   # pragma: no cover
 
-        def __exit__(self, *args):
-            self.close()
+        def __exit__(self, *args):  # pragma: no cover
+            self.close()  # pragma: no cover
 
 
 class FrozenDict(dict):
