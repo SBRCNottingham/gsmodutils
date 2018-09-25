@@ -9,4 +9,6 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - pytest
+  - py.test --cov=gsmodutils
+after_success:
+  - codecov
