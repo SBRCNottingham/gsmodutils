@@ -26,7 +26,7 @@ model.
 E.g. having a directory structure such as this isn't good for anyone. You might add new curation to the base model,
 or a knockout might exist in one model but not another.
 
-.. code-block:: guess
+.. code-block:: 
 
     $ ls my_project
     ecoli_base_model.sbml
@@ -59,22 +59,22 @@ For this reason, gsmodutils uses simple utilities that let you load model ``cond
 Or you can export them through the convenient command line utility to export models for use in other tools outside the
 cobrapy world.
 
-.. code-block:: guess
+.. code-block:: 
 
     $ gsmodutils export matlab succ_production.m --design succinate_production --conditions xylose_growth
 
 
 Installation
 ------------
-To install, the simplest method is to use pip (FUTURE VERSION)
+To install, the simplest method is to use pip:
 
-.. code-block:: guess
+.. code-block:: 
 
     $ pip install gsmodutils
 
 Alternatively, install a development version using a virtual environment
 
-.. code-block:: guess
+.. code-block:: 
 
     $ pip install virtualenv
     $ virtualenv ~/gsmodenv
@@ -87,7 +87,7 @@ Alternatively, install a development version using a virtual environment
 
 If installed in this manner, you must activate the virtualenv whenever you wish to use the tools. For example:
 
-.. code-block:: guess
+.. code-block:: 
 
     $ gsmodutils info
     gsmodutils: command not found
@@ -100,7 +100,7 @@ Older versions of python are not supported.
 
 Check your python version with:
 
-.. code-block:: guess
+.. code-block:: 
 
     $ python --version
 
@@ -109,13 +109,13 @@ Mac
 If using MacOS and your version of python is outdated, it is recomended that you use hombrew
 ( https://brew.sh ) and then install pip:
 
-.. code-block:: guess
+.. code-block:: 
 
     $ brew install python
 
 If you have python, but not pip easy_install should work:
 
-.. code-block:: guess
+.. code-block:: 
 
     $ sudo easy_install pip
     $ sudo pip install virtualenv
@@ -132,7 +132,7 @@ User guides
 ------------
 Project creation is the first step. This can be done as simply
 
-.. code-block:: guess
+.. code-block:: 
 
     $ gsmodutils create_project PROJECT_PATH MODEL_PATH
 

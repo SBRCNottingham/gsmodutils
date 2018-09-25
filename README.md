@@ -31,7 +31,7 @@ complex analysis.
 
 ## Installation
 
-To install the latest release from pip (Not currently possible):
+To install the latest release from pip:
 
     pip install gsmodutils
 
