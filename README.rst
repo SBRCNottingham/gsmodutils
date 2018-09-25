@@ -68,12 +68,10 @@ Nicole Pearcy - Testing, ideas and knowledge of genome scale models.
 
 If you would like to collaborate, please get in touch!
 
-.. |Build Status| image:: https://travis-ci.org/azimov/cigram.svg?branch=master
-   :target: https://travis-ci.org/azimov/cigram
+.. |Build Status| image:: https://api.travis-ci.org/SBRCNottingham/gsmodutils.svg?branch=master
+   :target: https://travis-ci.org/SBRCNottingham/gsmodutils
 .. |Coverage Status| image:: https://codecov.io/github/SBRCNottingham/gsmodutils/coverage.svg?branch=master
-   :target: https://codecov.io/github/azimov/cigram
-.. |Build status2| image:: https://ci.appveyor.com/api/projects/status/
-   :target: https://ci.appveyor.com/project/azimov/cigram/branch/master
+   :target: https://codecov.io/github/SBRCNottingham/gsmodutils
 .. |PyPI| image:: https://badge.fury.io/py/gsmodutils.svg
    :target: https://pypi.python.org/pypi/gsmodutils
 .. |docs| image:: https://readthedocs.org/projects/gsmodutils/badge/?style=flat
