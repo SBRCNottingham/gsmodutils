@@ -169,6 +169,8 @@ def test_model(model, project, log):
 
         assert result.exit_code == -1
 
+        project.run_tests()
+
 
 def test_conditions():
     with FakeProjectContext() as fp:
