@@ -1,0 +1,144 @@
+UNIQUE-ID - TRANS-ENZRXN-114
+TYPES - Enzymatic-Reactions
+COMMON-NAME - phosphate:H<sup>+</sup> symporter PitA
+BASIS-FOR-ASSIGNMENT - :MANUAL
+CITATIONS - 6998957:EV-EXP-IDA:3276611712:ipaulsen
+CITATIONS - 6998957:EV-EXP-IMP-REACTION-BLOCKED:3277468542:ipaulsen
+CITATIONS - 328484:EV-EXP-IDA-UNPURIFIED-PROTEIN-NH:3530216595:amackie
+CREDITS - SRI
+CREDITS - |paley|
+ENZYME - PITA-MONOMER
+PHYSIOLOGICALLY-RELEVANT? - T
+REACTION - TRANS-RXN-114
+//
+UNIQUE-ID - ENZRXN-23621
+TYPES - Enzymatic-Reactions
+COMMON-NAME - D-glucosamine 6-phosphate kinase
+BASIS-FOR-ASSIGNMENT - :MANUAL
+CITATIONS - 10231382:EV-EXP-IDA-PURIFIED-PROTEIN-NH:3633468584:caspi
+CREDITS - |paley|
+CREDITS - SRI
+CREDITS - |caspi|
+PHYSIOLOGICALLY-RELEVANT? - T
+REACTION - RXN-16424
+//
+UNIQUE-ID - ALKAPHOSPHA-ENZRXN
+TYPES - Enzymatic-Reactions
+COMMON-NAME - alkaline phosphatase
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| L-THREONINE-O-3-PHOSPHATE)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| PHOSPHORYL-CHOLINE)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| PYRIDOXINE-5P)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| PYRIDOXAL_PHOSPHATE)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| NADP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| 3-P-SERINE)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| FMN)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| FRUCTOSE-16-DIPHOSPHATE)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| L-HISTIDINOL-P)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-194)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| GLC-1-P)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| |Glucose-6-phosphate|)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-536)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| IMP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| RIBOSE-5P)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| TTP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| UMP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-3724)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| DCTP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| UDP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| DCMP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CMP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| GMP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-3711)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| DGMP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-3708)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| DAMP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| DGTP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| ATP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| DATP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| AMP)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-3706)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-3721)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-3705)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-3710)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-3723)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| CPD-13025)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| PHOSPHORYL-ETHANOLAMINE)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| P3I)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| PPI)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| PHOSPHO-ENOL-PYRUVATE)
+ALTERNATIVE-SUBSTRATES - (|Orthophosphoric-Monoesters| 2-PG)
+BASIS-FOR-ASSIGNMENT - :MANUAL
+CITATIONS - 13826559:EV-EXP-IDA-PURIFIED-PROTEIN-NH:3533246316:amackie
+CITATIONS - 13838951:EV-EXP-IDA-UNPURIFIED-PROTEIN-NH:3533246316:amackie
+COFACTORS - MG+2
+COFACTORS - ZN+2
+CREDITS - SRI
+CREDITS - |paley|
+PH-OPT - 8.
+PHYSIOLOGICALLY-RELEVANT? - T
+REACTION - ALKAPHOSPHA-RXN
+REACTION-DIRECTION - REVERSIBLE
+SYNONYMS - APase
+SYNONYMS - AP
+SYNONYMS - alkaline phosphomonoesterase
+SYNONYMS - phosphomonoesterase
+SYNONYMS - glycerophosphatase
+SYNONYMS - orthophosphoric-monoester phosphohydrolase (alkaline optimum)
+TEMPLATE-FILE - /home/bolinas2/ecocyc/templates/new/centmet/phoA.template
+//
+UNIQUE-ID - ENZRXN0-1309
+TYPES - Enzymatic-Reactions
+COMMON-NAME - pyruvate:[dihydrolipoyllysine-residue acetyltransferase]-lipoyllysine 2-oxidoreductase
+BASIS-FOR-ASSIGNMENT - :MANUAL
+CITATIONS - 1445221:EV-EXP-IMP:3529586288:caspi
+CREDITS - SRI
+CREDITS - |paley|
+ENZYME - E1P-CPLX
+KCAT - 37.9
+KM - 260.9
+KM - 515.
+PH-OPT - 6.5
+PHYSIOLOGICALLY-RELEVANT? - T
+REACTION - RXN0-1134
+REACTION-DIRECTION - PHYSIOL-LEFT-TO-RIGHT
+//
+UNIQUE-ID - ENZRXN0-1307
+TYPES - Enzymatic-Reactions
+COMMON-NAME - lipoate acetyltransferase
+BASIS-FOR-ASSIGNMENT - :MANUAL
+CITATIONS - 1445221:EV-EXP-IMP:3529586316:caspi
+CREDITS - SRI
+CREDITS - |paley|
+ENZYME - E2P-MONOMER
+PHYSIOLOGICALLY-RELEVANT? - T
+REACTION - RXN0-1133
+//
+UNIQUE-ID - ENZRXN0-1318
+TYPES - Enzymatic-Reactions
+COMMON-NAME - 2-oxoglutarate decarboxylase
+BASIS-FOR-ASSIGNMENT - :MANUAL
+CITATIONS - 17367808:EV-EXP-IDA-PURIFIED-PROTEIN:3549134221:fulcher
+COFACTORS - THIAMINE-PYROPHOSPHATE
+COFACTORS - MG+2
+COMMENT - E1(o) activity was analyzed by mixing purified E1(o) enzyme with E2(o) and E3 enzymes <i>in vitro</i> and monitoring the formation of NADH spectrophotometrically |CITS: [17367808]|. The |CITS: [6380583]| data are for <i>E. coli</i> B.
+CREDITS - SRI
+CREDITS - |paley|
+ENZYME - E1O
+KM - 100.
+PH-OPT - 8
+PHYSIOLOGICALLY-RELEVANT? - T
+REACTION - 2OXOGLUTDECARB-RXN
+REACTION-DIRECTION - PHYSIOL-LEFT-TO-RIGHT
+SYNONYMS - oxoglutarate oxidoreductase
+SYNONYMS - decarboxylase
+SYNONYMS - 2-ketoglutarate decarboxylase
+//
+UNIQUE-ID - ENZRXN-11404
+TYPES - Enzymatic-Reactions
+COMMON-NAME - alcohol dehydrogenase
+BASIS-FOR-ASSIGNMENT - :MANUAL
+CITATIONS - 15821883:EV-EXP-IDA-PURIFIED-PROTEIN:3335814210:tissier
+ENZYME - MONOMER-11088
+PHYSIOLOGICALLY-RELEVANT? - T
+REACTION - ALCOHOL-DEHYDROG-RXN
+//

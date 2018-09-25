@@ -94,12 +94,13 @@ def parse_metacyc_file(fpath, unique_fields):
     return db
 
 
-def add_pathway(model, enzyme_ids=None, reaction_ids=None, db_path=None, copy=False):
+def add_pathway(model, enzyme_ids=None, reaction_ids=None, compartment="c", db_path=None, copy=False):
     """
     For a given model add enzymes from metacyc database
     :param model: cobra model object
     :param enzyme_ids: list of EC entires in format ["EC-x.x.x.x", ...]
     :param reaction_ids: set of reaction ids to add to model
+    :param compartment: compartment pathway is in
     :param db_path: path to the metacyc dat files on disk
     :param copy:
     :return:
@@ -124,7 +125,7 @@ def add_pathway(model, enzyme_ids=None, reaction_ids=None, db_path=None, copy=Fa
     added_metabolites = []
     for rid in set(reaction_ids):
         if rid not in model.reactions:
-            react, ametabolites = add_reaction(model, rid, db)
+            react, ametabolites = add_reaction(model, rid, db, compartment=compartment)
             added_reactions.append(react)
             added_metabolites += added_metabolites
 
@@ -165,12 +166,13 @@ def get_enzyme_reactions(eid, db):
     return erids
 
 
-def add_reaction(model, reaction_id, db):
+def add_reaction(model, reaction_id, db, compartment='c'):
     """
     Add a metacyc reaction id to a cobrapy model
     :param model: cobrapy model instance
     :param reaction_id: reaction identifier in metacyc
     :param db: dictionary db object
+    :param compartment: compartment reactions takeplace in (default is "c")
     :return: tuple(reaction, added_metabolites) cobrapy Reaction and Metabolite instances
     """
     metabolites = dict()
@@ -185,7 +187,7 @@ def add_reaction(model, reaction_id, db):
         mid = mid.replace('|', '')
         metabolites[mid] = -1 * coef
 
-    model.add_reaction(reaction)
+    model.add_reactions([reaction])
     added_metabolites = []
     for mid in metabolites:
         if mid not in model.metabolites:
@@ -198,6 +200,7 @@ def add_reaction(model, reaction_id, db):
             m = Metabolite(id=mid)
             m.name =cpd['COMMON-NAME']
             m.annotation = dict(metacyc_data=cpd)
+            m.compartment = compartment
             model.add_metabolites([m])
             added_metabolites.append(mid)
 
@@ -217,7 +220,7 @@ def add_reaction(model, reaction_id, db):
     return reaction, added_metabolites
 
 
-def build_universal_model(path, use_cache=True):
+def build_universal_model(path, use_cache=True, cache_location='.metacyc_universal.json'):
     """
     Constructs a universal model from all the reactions in the metacyc database
 
@@ -225,8 +228,6 @@ def build_universal_model(path, use_cache=True):
     :param use_cache: optionally store the resulting model in cached form
     :return:
     """
-    cache_location = '.metacyc_universal.json'
-
     try:
         if use_cache and os.path.exists(cache_location):
             model = load_model(cache_location)
