@@ -47,7 +47,7 @@ Follow the install instructions for docker found at docker.io clone the git repo
 
     docker build . -t gsmoduitls
 
-This will create a gsmodutils docker image that can be resused for prjects.
+This will create a gsmodutils docker image that can be reused for projects.
 
 Usage
 -----
