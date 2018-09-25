@@ -75,5 +75,5 @@ If you would like to collaborate, please get in touch!
 .. |PyPI| image:: https://badge.fury.io/py/gsmodutils.svg
    :target: https://pypi.python.org/pypi/gsmodutils
 .. |docs| image:: https://readthedocs.org/projects/gsmodutils/badge/?style=flat
-    :target: https://readthedocs.org/projects/gsmodutils
+    :target: https://gsmodutils.readthedocs.io
     :alt: Documentation Status
