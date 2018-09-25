@@ -295,8 +295,8 @@ def test_design_parent():
             project.save_design(model, 'mevalonate_cbbd', 'mevalonate production', parent=des,
                                 description='Reactions for the production of mevalonate')
 
-        project.list_models()
-        project.list_condtions()
+        _ = project.list_models
+        _ = project.list_conditions
 
 
 def test_save_infeasible_design():
