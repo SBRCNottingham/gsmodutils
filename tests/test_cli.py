@@ -37,6 +37,8 @@ def test_docker():
 
 def test_info():
     with FakeProjectContext() as ctx:
+        ctx.add_fake_designs()
+        ctx.add_fake_conditions()
         runner = CliRunner()
         result = runner.invoke(gsmodutils.cli.info, ['--project_path', ctx.path])
         assert result.exit_code == 0
