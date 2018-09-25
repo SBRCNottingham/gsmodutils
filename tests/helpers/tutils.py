@@ -12,6 +12,8 @@ scrumpy_model_path = os.path.join(os.path.dirname(__file__), 'scrumpy', 'MetaSal
 scrumpy_biomass_path = os.path.join(os.path.dirname(__file__), 'scrumpy', 'biomass_comp.json')
 scrumpy_media_path = os.path.join(os.path.dirname(__file__), 'scrumpy', 'media.json')
 
+METACYC_DB_PATH = os.path.join(os.path.dirname(__file__), 'metacyc_db')
+
 
 class CleanUpFile(object):
     """
