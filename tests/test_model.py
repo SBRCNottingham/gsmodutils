@@ -29,11 +29,27 @@ def test_load_model():
 
         # Test loading non design fails
         with pytest.raises(TypeError):
-            model = GSModutilsModel(project, design={})
+            GSModutilsModel(project, design={})
+
+        with pytest.raises(TypeError):
+            GSModutilsModel({})
+
+        with pytest.raises(IOError):
+            GSModutilsModel(project, mpath="/this/is/a/fake/path")
 
         model.save_model()
         cpy = model.to_cobra_model()
         assert not isinstance(cpy, GSModutilsModel)
+
+
+def test_save_design():
+    with FakeProjectContext() as ctx:
+        ctx.add_fake_conditions()
+        ctx.add_fake_designs()
+        project = GSMProject(ctx.path)
+        design = project.get_design("mevalonate_cbb")
+        mdl = GSModutilsModel(project, design=design)
+        mdl.save_model()
 
 
 def test_copy():

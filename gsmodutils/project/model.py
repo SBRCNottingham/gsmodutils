@@ -56,6 +56,9 @@ class GSModutilsModel(cobra.Model):
     @property
     def model_path(self):
         """ Models path on disk """
+        if self.mpath is None:
+            return None
+
         return os.path.join(self.project.project_path, self.mpath)
 
     def _load_cobra_model(self):
@@ -63,7 +66,7 @@ class GSModutilsModel(cobra.Model):
         Loads the cobra model
         :return: cobra.Model instance of self
         """
-        if not os.path.exists(self.model_path):
+        if self.model_path is not None and not os.path.exists(self.model_path):
             raise IOError("Model file not found")
 
         if self.design is not None:
@@ -107,7 +110,8 @@ class GSModutilsModel(cobra.Model):
             if self.design.is_pydesign:
                 raise NotImplementedError("It is not possible to save python based designs in this manner")
 
-            self.save_as_design(self, self.design.id, self.design.name, self.design.description)
+            self.project.save_design(self, self.design.id, self.design.name, description=self.design.description,
+                                     base_model=self.mpath, parent=self.design.parent, overwrite=True)
         else:
             with self.project.project_context_lock:
                 model_type = self.mpath.split(".")[-1]
