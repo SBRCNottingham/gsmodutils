@@ -51,6 +51,12 @@ def test_save_design():
         mdl = GSModutilsModel(project, design=design)
         mdl.save_model()
 
+        # Can't save py designs that have been modified
+        with pytest.raises(NotImplementedError):
+            design = project.get_design("fake_testpy")
+            mdl = GSModutilsModel(project, design=design)
+            mdl.save_model()
+
 
 def test_copy():
     with FakeProjectContext() as ctx:

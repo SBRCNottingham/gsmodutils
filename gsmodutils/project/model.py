@@ -108,6 +108,9 @@ class GSModutilsModel(cobra.Model):
         """
         if self.design is not None:
             if self.design.is_pydesign:
+                logger.error("{} is a python based design".format(self.design.id) +
+                             "Trying to save a python based design in this manner will not work." +
+                             "Consider saving differences as a child using GSModutilsModel.save_as_design")
                 raise NotImplementedError("It is not possible to save python based designs in this manner")
 
             self.project.save_design(self, self.design.id, self.design.name, description=self.design.description,

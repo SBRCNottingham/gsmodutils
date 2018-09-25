@@ -207,3 +207,15 @@ class FakeProjectContext(object):
 
         project.save_design(model, 'mevalonate_cbb', 'mevalonate production', parent='cbb_cycle',
                             description='Reactions for the production of mevalonate', overwrite=True)
+
+        py_design = """
+def gsmdesign_testpy(model, project):
+    reaction = model.reactions.get_by_id("ATPM")
+    reaction.bounds = (-999, 999)
+    return model
+
+gsmdesign_testpy.parent = "mevalonate_cbb"
+        """
+        ndpath = os.path.join(project.design_path, 'design_fake.py')
+        with open(ndpath, 'w+') as desf:
+            desf.write(py_design)
