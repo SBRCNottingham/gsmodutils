@@ -5,7 +5,7 @@ from sys import argv
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-with open("README.md") as rfile:
+with open("README.rst") as rfile:
     readme = rfile.read()
 
 setup_requirements = []
