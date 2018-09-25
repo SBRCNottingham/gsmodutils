@@ -24,7 +24,7 @@ setup(
     install_requires=requirements,
     author_email="james.gilbert@nottingham.ac.uk",
     url="",
-    license="MIT",
+    license="Apache 2.0",
     packages=find_packages(),
     entry_points={
         'console_scripts': [
