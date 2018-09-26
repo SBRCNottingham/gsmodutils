@@ -3,12 +3,12 @@ python:
   - "2.7"
   - "3.5"
   - "3.6"
-  - "3.7"
+  - "3.7-dev"
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip install -r requirements.txt scipy
 # command to run tests
 script:
-  - py.test --cov=gsmodutils
+  - py.test -n8 --cov=gsmodutils
 after_success:
   - codecov
