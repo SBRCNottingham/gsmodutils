@@ -8,7 +8,7 @@ gsmodutils - a genome scale model development and testing framework.
    :target: https://travis-ci.org/SBRCNottingham/gsmodutils
 .. |Dev Build Status| image:: https://api.travis-ci.org/SBRCNottingham/gsmodutils.svg?branch=develop
    :target: https://travis-ci.org/SBRCNottingham/gsmodutils
-.. |Coverage Status| image:: https://codecov.io/github/SBRCNottingham/gsmodutils/coverage.svg?branch=develop
+.. |Coverage Status| image:: https://codecov.io/gh/SBRCNottingham/gsmodutils/branch/master/graph/badge.svg?token=tZyixhlZtJ
    :target: https://codecov.io/github/SBRCNottingham/gsmodutils
 .. |PyPI| image:: https://badge.fury.io/py/gsmodutils.svg
    :target: https://pypi.python.org/pypi/gsmodutils
@@ -25,6 +25,7 @@ gsmodutils - a genome scale model development and testing framework.
 Initially developed by the Nottingham SBRC for use with their genome scale models.
 
 Design goals:
+
 
 - **Portability and interoperability.** models come in different formats - cobra JSON, matlab, SBML, ScrumPy etc. The tool needs to be able to export and import models in these formats. This allows users to leverage tools not just in the python development stack, such as CobraPy but also other strain design methods from the likes of Matlab and OptKnock. This is achieved through a command line api that allows the export of files in to a variety of formats. This ensures that good standards can be followed and maintained.
 
