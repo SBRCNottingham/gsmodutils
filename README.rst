@@ -2,13 +2,13 @@ gsmodutils - a genome scale model development and testing framework.
 ####################################################################
 
 
-|docs| |Build Status| |Dev Build Status| |PyPI| |wheel| |supported-versions|
+|docs| |Build Status| |Dev Build Status| |Coverage Status| |PyPI| |wheel| |supported-versions|
 
 .. |Build Status| image:: https://api.travis-ci.org/SBRCNottingham/gsmodutils.svg?branch=master
    :target: https://travis-ci.org/SBRCNottingham/gsmodutils
 .. |Dev Build Status| image:: https://api.travis-ci.org/SBRCNottingham/gsmodutils.svg?branch=develop
    :target: https://travis-ci.org/SBRCNottingham/gsmodutils
-.. |Coverage Status| image:: https://codecov.io/github/SBRCNottingham/gsmodutils/coverage.svg?branch=master
+.. |Coverage Status| image:: https://codecov.io/github/SBRCNottingham/gsmodutils/coverage.svg?branch=develop
    :target: https://codecov.io/github/SBRCNottingham/gsmodutils
 .. |PyPI| image:: https://badge.fury.io/py/gsmodutils.svg
    :target: https://pypi.python.org/pypi/gsmodutils
