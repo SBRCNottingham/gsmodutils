@@ -1,7 +1,26 @@
 gsmodutils - a genome scale model development and testing framework.
 ####################################################################
 
-|Build Status| |Coverage Status| |PyPI| |docs|
+
+|docs| |Build Status| |Dev Build Status| |PyPI| |wheel| |supported-versions|
+
+.. |Build Status| image:: https://api.travis-ci.org/SBRCNottingham/gsmodutils.svg?branch=master
+   :target: https://travis-ci.org/SBRCNottingham/gsmodutils
+.. |Dev Build Status| image:: https://api.travis-ci.org/SBRCNottingham/gsmodutils.svg?branch=develop
+   :target: https://travis-ci.org/SBRCNottingham/gsmodutils
+.. |Coverage Status| image:: https://codecov.io/github/SBRCNottingham/gsmodutils/coverage.svg?branch=master
+   :target: https://codecov.io/github/SBRCNottingham/gsmodutils
+.. |PyPI| image:: https://badge.fury.io/py/gsmodutils.svg
+   :target: https://pypi.python.org/pypi/gsmodutils
+.. |docs| image:: https://readthedocs.org/projects/gsmodutils/badge/?style=flat
+    :target: https://gsmodutils.readthedocs.io
+    :alt: Documentation Status
+.. |wheel| image:: https://img.shields.io/pypi/wheel/gsmodutils.svg
+    :alt: PyPI Wheel
+    :target: https://pypi.python.org/pypi/gsmodutils
+.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/gsmodutils.svg
+    :alt: Supported versions
+    :target: https://pypi.python.org/pypi/gsmodutils
 
 Initially developed by the Nottingham SBRC for use with their genome scale models.
 
@@ -67,13 +86,3 @@ James Gilbert  University of Nottingham - main software developer.
 Nicole Pearcy - Testing, ideas and knowledge of genome scale models.
 
 If you would like to collaborate, please get in touch!
-
-.. |Build Status| image:: https://api.travis-ci.org/SBRCNottingham/gsmodutils.svg?branch=master
-   :target: https://travis-ci.org/SBRCNottingham/gsmodutils
-.. |Coverage Status| image:: https://codecov.io/github/SBRCNottingham/gsmodutils/coverage.svg?branch=master
-   :target: https://codecov.io/github/SBRCNottingham/gsmodutils
-.. |PyPI| image:: https://badge.fury.io/py/gsmodutils.svg
-   :target: https://pypi.python.org/pypi/gsmodutils
-.. |docs| image:: https://readthedocs.org/projects/gsmodutils/badge/?style=flat
-    :target: https://gsmodutils.readthedocs.io
-    :alt: Documentation Status
