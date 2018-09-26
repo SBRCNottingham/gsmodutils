@@ -7,7 +7,7 @@ python:
 # command to install dependencies
 install:
   - sudo apt install -y docker
-  - pip install -r requirements.txt scipy
+  - pip install -r requirements.txt scipy codecov
 # command to run tests
 script:
   - py.test -n8 --cov=gsmodutils
