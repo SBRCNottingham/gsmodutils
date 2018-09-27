@@ -18,7 +18,6 @@
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
  
 \author{James P Gilbert}
-\email{james.gilbert@nottingham.ac.uk}
 \author{Nicole Pearcy}
 \author{Rupert Norman}
 \affiliation[sbrc]{Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
@@ -33,6 +32,7 @@
 \author{Nigel Minton}
 \affiliation[sbrc]{Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
 \author{Jamie Twycross}
+\email{jamie.twycross@nottingham.ac.uk}
 \affiliation[IMA]{Intelligent Modelling and Analysis group, School of Computer Science, University of Nottingham, Nottingham, NG8 1BB, United Kingdom}
 
 
@@ -55,7 +55,6 @@ Crucially, different substrates are configurable allowing users to examine how d
 \textbf{Availability:} The software framework described within this paper is open source and freely available from \url{http://github.com/SBRCNottingham/gsmodutils} \\
 \textbf{Contact:}{james.gilbert@nottingham.ac.uk}
 \end{abstract}
-
 
 \section{Introduction}
 Stoichiometric constraints based modelling for biological systems has been a mainstay of systems biology for several decades \cite{fell1986fat, varma1994stoichiometric}.
@@ -113,11 +112,11 @@ The waterfall approach for modelling is characterised in Figure \ref{fig:methodo
 In contrast, an \textit{agile} methodology for the development of models places the focus on adapting work to new requirements \cite{martin2002agile}.
 Such an approach best fits genome scale models because they are rarely created to investigate individual processes and, instead, capture the complexity of large systems.
 Genome scale models are intrinsically related to available genome annotations.
-Such annotations rely heavily on automated matches to related species, with the characterisations of individual genes often being left to a few of critical interest \cite{seemann2014prokka}.
+Such annotations rely heavily on automated matches to related species, with the characterisations of individual genes or changes in cofactors and substrates for specific reactions often being left to a few of critical interest \cite{seemann2014prokka}.
 This modelling formation costs an in depth understanding of dynamic behaviour. 
 However, capturing steady-state phenomena still provides a good understanding of system properties \cite{o2015using}.
 
-As such approaches often leave models with missing reactions, incorrect gene-reaction rules \cite{thiele2010protocol} or with pathways based on gap filling methods that add reactions that may not be present within the organism \cite{benedict2014likelihood}.
+As such, approaches often leave models with missing reactions, incorrect gene-reaction rules \cite{thiele2010protocol} or with pathways based on gap filling methods that add reactions that may not actually be catalysed by the organism in question \cite{benedict2014likelihood}.
 When attempting to understand specific natural phenomena, genome annotations are frequently updated and models are often corrected in an \textit{ad hoc} manner.
 
 \begin{figure}[ht]
@@ -128,8 +127,8 @@ Each process is considered to be an isolated aspect of model development.}
 \end{figure}
 
 Therefore, models undergo significant manual annotation and curation; a process which has a high chance of error.
-In this work we advocate a test-driven approach to model development highlighted in Figure \ref{fig:test_driven}.
-Here, the model is changed to achieve core research goals that are dynamic in response to the changes of a project.
+In this work, we advocate a test-driven approach to model development highlighted in Figure \ref{fig:test_driven}.
+Here, the model is changed to achieve research goals that are dynamic in response to the changes of a project.
 In order to meet this objective, validation criteria for a model such as growth conditions or the impact of gene knock outs, should be formally set.
 When a model is changed, all such validation criteria should be retested to ensure that models do not regress to previous states.
 
@@ -146,13 +145,13 @@ We feel that many of the current software tools for genome scale models do an ex
 However, there is a major gap in terms of the reliability and re-usability of models due to a lack of standardisation and software tools to aid such processes.
 The following sections provide an overview of the \textit{gsmodutils} software framework.
 \textit{gsmodutils} aims to provide a basis for test-driven, version controlled agile model development.
-All software is open source and is designed to be interoperable with platforms widely used in the domain of constraints based modelling.
+All software and packages are open source and is designed to be interoperable with platforms widely used in the domain of constraints based modelling.
 
 \section{Software}
 
 \subsection{Outline and features}
 Test-driven development is driven by the idea of clearly defined test cases written before significant changes are made to any underlying architecture.
-In the case of genome scale models, errors occur as a product of human curation to better represent newly discovered aspects of metabolism.
+In the case of genome scale models, errors can easily occur as a product of human curation designed to better represent newly discovered aspects of metabolism.
 
 By automatically integrating COBRApy \cite{ebrahim2013cobrapy} users can easily write convenient test cases following examples given in the user guide.
 A standard test case, ensuring that a given model grows on media is given in Figure \ref{fig:test_case}.
@@ -231,7 +230,7 @@ In this section we describe how \textit{gsmodutils} has been utilised to ensure 
 
 \subsection{Scientific background and Model integration}
 
-\textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of 2,3-butanediol (2,3BD) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and 2,3BD has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of 2,3BD from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
+\textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of \textit{2,3-butanediol} (\textit{2,3 BD}) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and \textit{2,3 BD} has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of \textit{2,3 BD} from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
 MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see (Norman et al. submitted for peer review).
 The model has been integrated with the gsodutils modelling framework as a test-driven project. The following section details specific tests used to evaluate the model at each stage of its continued development.
 
@@ -251,8 +250,8 @@ Since any changes to this predicted phenotype must be investigated, the flux min
 
 \textbf{Product scans:}
 Of interest to this project were changes in the product spectrum of \textit{C. autoethanogenum} under conditions where the organism can and cannot produce molecular hydrogen (with carbon monoxide as sole carbon and energy source).
-The hypothesis tested in (Norman et al., unpublished), was that in the case where hydrogen production in infeasible, alternative electron sinks like lactate and 2,3BD would be produced.
-As in the previous case, the model-predicted behaviour showing both lactate and 2,3BD was deemed an important result, which model curators should be notified of if lost during model development.
+The hypothesis tested in (Norman et al., unpublished), was that in the case where hydrogen production infeasible, alternative electron sinks like lactate and \textit{2,3 BD} would be produced.
+As in the previous case, the model-predicted behaviour showing both lactate and \textit{2,3 BD} was deemed an important result, which model curators should be notified of if lost during model development.
 Thus the analysis was built into a \textit{gsmodutils} test.
 
 \textbf{Lethal knockout mutants:} 
