@@ -45,13 +45,13 @@
 \textbf{Motivation:} Genome scale metabolic models (GSMMs) are increasingly important for systems biology and metabolic engineering research as they are capable of simulating complex steady-state behaviour.
 Constraints based models of this form can include thousands of reactions and metabolites, with many crucial pathways that only become activated in specific simulation settings.
 However, despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for the continued management of curated large scale models.
-For example, when genome annotations are updated or new understanding regarding behaviour of is discovered models may need to be updated.
-This is quickly becoming an issue for industrial systems and synthetic biotechnology applications, which require good quality reusable models integral to the design, build and test cycle.
+For example, when genome annotations are updated or new understanding regarding behaviour of is discovered, models often need to be altered to reflect this.
+This is quickly becoming an issue for industrial systems and synthetic biotechnology applications, which require good quality reusable models integral to the design, build and test cycle in biprodcessing and related fields.
 \\
 \textbf{Results:} 
 As part of an ongoing effort to improve genome scale metabolic analysis, we have developed a test-driven development methodology for the continuous integration of validation data from different sources.
 Contributing to the open source technology based around COBRApy, we have developed the \textit{gsmodutils} modelling framework placing an emphasis on test-driven design of models through defined test cases.
-Crucially, different substrates are configurable allowing users to examine how different designs or curation impact a wide range of system behaviours, minimising error between model versions.\\
+Crucially, different conditions are configurable allowing users to examine how different designs or curation impact a wide range of system behaviours, minimising error between model versions.\\
 \textbf{Availability:} The software framework described within this paper is open source and freely available from \url{http://github.com/SBRCNottingham/gsmodutils} \\
 \textbf{Contact:}{james.gilbert@nottingham.ac.uk}
 \end{abstract}
@@ -135,7 +135,7 @@ When a model is changed, all such validation criteria should be retested to ensu
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.8\textwidth]{testdriven.eps}
-\caption{Workflow for model development proposed for gsmodutils.
+\caption{Workflow for model development proposed for \textit{gsmodutils}.
 The objective of this approach is to simultaneously capture research questions, model validation criteria and minimise the impact of changes on previously completed models.
 }
 \label{fig:test_driven}
@@ -232,7 +232,7 @@ In this section we describe how \textit{gsmodutils} has been utilised to ensure 
 
 \textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of \textit{2,3-butanediol} (\textit{2,3 BD}) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and \textit{2,3 BD} has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of \textit{2,3 BD} from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
 MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see (Norman et al. submitted for peer review).
-The model has been integrated with the gsodutils modelling framework as a test-driven project. The following section details specific tests used to evaluate the model at each stage of its continued development.
+The model has been integrated with the \textit{gsmodutils} modelling framework as a test-driven project. The following section details specific tests used to evaluate the model at each stage of its continued development.
 
 \subsection{Evaluation of model validation criteria}
 \textbf{Energetic consistency:} 
@@ -265,11 +265,11 @@ For these reasons, a test has been built into the MetaCLAU project which enables
 These test cases are all fully reproducible and available as an example within the \textit{gsmodutils} software repository and we encourage the reader to explore these examples to understand how to utilise \textit{gsmodutils} within their own project.
 
 \section{Related work}
-\textbf{Memote:} \cite{lieven2017memote} is tool set that has very similar ambitions to gsmodutils.
+\textbf{Memote:} \cite{lieven2017memote} is tool set that has very similar ambitions to \textit{gsmodutils}.
 It features a fully specified set of tests, including custom test cases and has strong version control integration with git.
 A core difference between these projects is that \textit{gsmodutils} has a stronger focus on reducing the redundancy in model storage through the use of \textit{design deltas}, as described above.
 Similarly, a core goal of \textit{gsmodutils} is to allow easy import and export outside of the framework for compatibility with other modelling suites.
-It should be noted that, as memote is written in python and utilises COBRApy, it is fully compatible with gsmodutils.
+It should be noted that, as memote is written in python, utilises COBRApy and, at the time of writing, it is fully compatible with \textit{gsmodutils}.
 \\
 \textbf{Cameo:} \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
 strategies, as well as other flux balance analysis utilities. Written in python and part of the COBRApy suite of applications,
