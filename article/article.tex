@@ -228,13 +228,13 @@ We note that, in principle, this test case should be written before changes to a
 
 
 \section{Case study usage Clostridium autoethanogenum}
-\textit{Clostridium autoethanogenum} is a bacterial species used for the production of commodity chemicals at industrial scale \cite{abrini1994clostridium,norman2018progress,LT}. A new GSMM of \textit{C. autoethanogenum}, `MetaCLAU', has been analysed to improve this bioprocess (Norman et al., submitted for peer review).
+\textit{Clostridium autoethanogenum} is a bacterial species used for the production of commodity chemicals at industrial scale \cite{abrini1994clostridium,norman2018progress,LT}. A new GSMM of \textit{C. autoethanogenum}, `MetaCLAU', has been analysed to improve this bioprocess (\cite{norman2018progress}, submitted for peer review).
 In this section we describe how \textit{gsmodutils} has been utilised to ensure that future versions of MetaCLAU will remain functionally relevant from the perspective of industrial biotechnology.
 
 \subsection{Scientific background and Model integration}
 
 \textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of \textit{2,3-butanediol} (\textit{2,3 BD}) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and \textit{2,3 BD} has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of \textit{2,3 BD} from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
-MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see (Norman et al. submitted for peer review).
+MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see (\cite{norman2018progress}. submitted for peer review).
 The model has been integrated with the \textit{gsmodutils} modelling framework as a test-driven project. 
 The following section details specific tests used to evaluate the model at each stage of its continued development.
 
@@ -249,12 +249,12 @@ If a (non-zero) solution to this problem exists, it must contain a thermodynamic
 One conventional approach in FBA is to set an optimisation criterion of minimising flux across enzymatic reactions with a fixed biomass constraint \cite{holzhutter2006thegeneralised}. 
 The solution to this FBA problem represents minimal protein investment \cite{holzhutter2006thegeneralised}.
 Since execution of flux minimisation in COBRApy requires a model in which reversible reactions are split into two irreversible reactions, a \textit{gsmodutils} design was created in which all reversible reactions are split in a programmatic manner.
-In the case of MetaCLAU, the flux minimal solution includes both ethanol and acetate production, which represents good qualitative agreement with experimental data (Norman et al., unpublished).
+In the case of MetaCLAU, the flux minimal solution includes both ethanol and acetate production, which represents good qualitative agreement with experimental data (\cite{norman2018progress}, under review).
 Since any changes to this predicted phenotype must be investigated, the flux minimisation analysis has been formulated as a \textit{gsmodutils} test.
 
 \textbf{Product scans:}
 Of interest to this project were changes in the product spectrum of \textit{C. autoethanogenum} under conditions where the organism can and cannot produce molecular hydrogen (with carbon monoxide as sole carbon and energy source).
-The hypothesis tested in (Norman et al., unpublished), was that in the case where hydrogen production infeasible, alternative electron sinks like lactate and \textit{2,3 BD} would be produced.
+The hypothesis tested in (\cite{norman2018progress}, under review), was that in the case where hydrogen production infeasible, alternative electron sinks like lactate and \textit{2,3 BD} would be produced.
 As in the previous case, the model-predicted behaviour showing both lactate and \textit{2,3 BD} was deemed an important result, which model curators should be notified of if lost during model development.
 Thus the analysis was built into a \textit{gsmodutils} test.
 
@@ -264,8 +264,6 @@ The prediction of lethal single-gene KO mutants through FBA of a GSMM is useful 
 and 2) with the advent of high-throughput TraDIS gene-essentiality data sets \cite{langridge2009simultaneous}, GSMMs can be validated by their ability to predict essential genes.
 Furthermore, any change in the set of essential genes (particularly an increase in the number of essentials) represents important information for metabolic engineering.
 For these reasons, a test has been built into the MetaCLAU project which enables the computation of the set of essential genes and their comparison with TraDIS data sets.
-
-These test cases are all fully reproducible and available as an example within the \textit{gsmodutils} software repository and we encourage the reader to explore these examples to understand how to utilise \textit{gsmodutils} within their own project.
 
 \section{Related work}
 \textbf{Memote:} \cite{lieven2017memote} is tool set that has very similar ambitions to \textit{gsmodutils}.
