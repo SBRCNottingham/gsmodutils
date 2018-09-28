@@ -1,4 +1,5 @@
-\documentclass[journal=asbcd6,10pt]{achemso}
+\documentclass[journal=asbcd6]{achemso}
+\setkeys{acs}{articletitle=true}
 \usepackage[utf8]{inputenc}
 \usepackage{fullpage}
 \usepackage{color}
@@ -18,9 +19,12 @@
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
  
 \author{James P Gilbert}
+\affiliation[sbrc]{Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
 \author{Nicole Pearcy}
+\affiliation[sbrc]{Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
 \author{Rupert Norman}
 \affiliation[sbrc]{Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
+\alsoaffiliation[Biosciences]{School of Biosciences, University of Nottingham, Sutton Bonington, Loughborough, LE12 5RD, United Kingdom}
 \author{Thomas Millat}
 \affiliation[sbrc]{Synthetic Biology Research Centre, University of Nottingham, Nottingham, NG7 2RD, United Kingdom}
 \author{Klaus Winzer}
@@ -42,13 +46,14 @@
 \maketitle
 
 \begin{abstract}
-\textbf{Motivation:} Genome scale metabolic models (GSMMs) are increasingly important for systems biology and metabolic engineering research as they are capable of simulating complex steady-state behaviour.
+\textbf{Motivation:}
+Genome scale metabolic models (GSMMs) are increasingly important for systems biology and metabolic engineering research as they are capable of simulating complex steady-state behaviour.
 Constraints based models of this form can include thousands of reactions and metabolites, with many crucial pathways that only become activated in specific simulation settings.
 However, despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for the continued management of curated large scale models.
 For example, when genome annotations are updated or new understanding regarding behaviour of is discovered, models often need to be altered to reflect this.
 This is quickly becoming an issue for industrial systems and synthetic biotechnology applications, which require good quality reusable models integral to the design, build and test cycle in biprodcessing and related fields.
 \\
-\textbf{Results:} 
+\textbf{Results:}
 As part of an ongoing effort to improve genome scale metabolic analysis, we have developed a test-driven development methodology for the continuous integration of validation data from different sources.
 Contributing to the open source technology based around COBRApy, we have developed the \textit{gsmodutils} modelling framework placing an emphasis on test-driven design of models through defined test cases.
 Crucially, different conditions are configurable allowing users to examine how different designs or curation impact a wide range of system behaviours, minimising error between model versions.\\
@@ -232,7 +237,8 @@ In this section we describe how \textit{gsmodutils} has been utilised to ensure 
 
 \textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of \textit{2,3-butanediol} (\textit{2,3 BD}) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and \textit{2,3 BD} has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of \textit{2,3 BD} from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
 MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see (Norman et al. submitted for peer review).
-The model has been integrated with the \textit{gsmodutils} modelling framework as a test-driven project. The following section details specific tests used to evaluate the model at each stage of its continued development.
+The model has been integrated with the \textit{gsmodutils} modelling framework as a test-driven project. 
+The following section details specific tests used to evaluate the model at each stage of its continued development.
 
 \subsection{Evaluation of model validation criteria}
 \textbf{Energetic consistency:} 
@@ -305,7 +311,6 @@ We would like to thank the Oxford Brookes Cell Systems Modelling group for helpf
 This work was supported by the UK Biotechnology and Biological Sciences Research Council (BBSRC) and Engineering and Physical Sciences Research Council (EPSRC) grants BB/L013940/1,  BB/K00283X/1 and BB/L502030/1.
 \end{acknowledgement}
 
-\bibliographystyle{ieeetrans}
 \bibliography{references}
 \end{document}
 
