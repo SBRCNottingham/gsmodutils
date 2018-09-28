@@ -51,7 +51,7 @@ Genome scale metabolic models (GSMMs) are increasingly important for systems bio
 Constraints based models of this form can include thousands of reactions and metabolites, with many crucial pathways that only become activated in specific simulation settings.
 However, despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for the continued management of curated large scale models.
 For example, when genome annotations are updated or new understanding regarding behaviour of is discovered, models often need to be altered to reflect this.
-This is quickly becoming an issue for industrial systems and synthetic biotechnology applications, which require good quality reusable models integral to the design, build and test cycle in biprodcessing and related fields.
+This is quickly becoming an issue for industrial systems and synthetic biotechnology applications, which require good quality reusable models integral to the design, build and test cycle.
 \\
 \textbf{Results:}
 As part of an ongoing effort to improve genome scale metabolic analysis, we have developed a test-driven development methodology for the continuous integration of validation data from different sources.
@@ -92,14 +92,14 @@ In effect, mechanisms are required to relate to modified test and production str
 
 Similarly, many conventional applications of genome scale models in systems biology have often suffered from unnecessary replication of work due to a lack of adherence to standards \cite{monk2014}.
 For example, there are now many independently developed models of \textit{Clostridium acetobutylicum} \cite{lee2008genome, senger2008genome, mcanulty2012genome, dash2014capturing, yoo2015quantitative}, an organism used in the production of solvents for around a century \cite{moon2016one, 1919charles}.
-These models all exist to solve similar biological problems some being updates to the inital base models. 
+These models all exist to solve similar biological problems some being updates to the initial base models. 
 However, there has been disagreement over fundamental biochemical properties of this anaerobic organism, notably with the focus on redox balancing \cite{dash2014capturing}.
 Such models also include updates based on improved genome annotations and the inclusion of fluxomic, transcriptomic and metabolomic characterisations \cite{yoo2015quantitative}.
 
 %Many of the results presented in original sources are difficult to compare due to a lack of standardisation of reference identifiers for reaction names.
 
-Unfortunatley, many of the results reported in \cite{lee2008genome, senger2008genome, mcanulty2012genome, dash2014capturing, yoo2015quantitative} are difficult to compare or reproduce as the result of a number of issues.
-Often, the models lack a standardisation of identifiers for reaction names, which makes direct comparisson of model structure as well as differences between reactions a challenge.
+Unfortunately, many of the results reported in \cite{lee2008genome, senger2008genome, mcanulty2012genome, dash2014capturing, yoo2015quantitative} are difficult to compare or reproduce as the result of a number of issues.
+Often, the models lack a standardisation of identifiers for reaction names, which makes direct comparison of model structure as well as differences between reactions a challenge.
 Where models are shared, it is often in non-standard spreadsheet formats, rather than SBML models.
 Indeed, even in the case of valid SBML models being made available at the time of publication few details are given as to how to run such models for conditions discussed in original articles.
 
@@ -243,7 +243,7 @@ The following section details specific tests used to evaluate the model at each 
 \subsection{Evaluation of model validation criteria}
 \textbf{Energetic consistency:} 
 An important limitation of FBA is that optimal solutions may be thermodynamically infeasible if appropriate constraints are not applied \cite{Fell1197rohtua}.
-In order to identify these unwanted flux distributions and constrain the model such that they are not in the feasible soluton space, a diagnostic FBA is applied with the following constraints:
+In order to identify these unwanted flux distributions and constrain the model such that they are not in the feasible solution space, a diagnostic FBA is applied with the following constraints:
 1) All transport reactions are constrained to allow no uptake (lower bound = 0), and 2) the ATPase reaction is given a fixed flux of one.
 If a (non-zero) solution to this problem exists, it must contain a thermodynamic inconsistency, which can be dealt with by manual inspection of the solution and modification of one or more of the involved reactions \cite{Fell1197rohtua}.
  
@@ -252,7 +252,7 @@ One conventional approach in FBA is to set an optimisation criterion of minimisi
 The solution to this FBA problem represents minimal protein investment \cite{holzhutter2006thegeneralised}.
 Since execution of flux minimisation in COBRApy requires a model in which reversible reactions are split into two irreversible reactions, a \textit{gsmodutils} design was created in which all reversible reactions are split in a programmatic manner.
 In the case of MetaCLAU, the flux minimal solution includes both ethanol and acetate production, which represents good qualitative agreement with experimental data (Norman et al., unpublished).
-Since any changes to this predicted phenotype must be investigated, the flux minimisation analysis has been formulated as a gsmuodutils test.
+Since any changes to this predicted phenotype must be investigated, the flux minimisation analysis has been formulated as a \textit{gsmodutils} test.
 
 \textbf{Product scans:}
 Of interest to this project were changes in the product spectrum of \textit{C. autoethanogenum} under conditions where the organism can and cannot produce molecular hydrogen (with carbon monoxide as sole carbon and energy source).
@@ -267,7 +267,6 @@ and 2) with the advent of high-throughput TraDIS gene-essentiality data sets \ci
 Furthermore, any change in the set of essential genes (particularly an increase in the number of essentials) represents important information for metabolic engineering.
 For these reasons, a test has been built into the MetaCLAU project which enables the computation of the set of essential genes and their comparison with TraDIS data sets.
 
-% $\Delta \textit{nfn}$ knockout mutant: NOT SURE ABOUT THIS. CHRIS NOW THINKS IT'S ESSENTIAL :(
 These test cases are all fully reproducible and available as an example within the \textit{gsmodutils} software repository and we encourage the reader to explore these examples to understand how to utilise \textit{gsmodutils} within their own project.
 
 \section{Related work}
@@ -278,8 +277,7 @@ Similarly, a core goal of \textit{gsmodutils} is to allow easy import and export
 It should be noted that, as memote is written in python, utilises COBRApy and, at the time of writing, it is fully compatible with \textit{gsmodutils}.
 \\
 \textbf{Cameo:} \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
-strategies, as well as other flux balance analysis utilities. Written in python and part of the COBRApy suite of applications,
-gsmodutils integrates easily with cameo.
+strategies, as well as other flux balance analysis utilities. Written in python and part of the COBRApy suite of applications, \textit{gsmodutils} works well with cameo.
 Indeed, making a set of design changes can easily be integrated into \textit{gsmodutils} through the python API.
 \\
 \textbf{Model repositories:} models are frequently shared, at the time of publication through services such as BiGG \cite{king2015bigg} and Biomodels \cite{chelliah2013biomodels}. 
