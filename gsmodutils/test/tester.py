@@ -252,6 +252,7 @@ class GSMTester(object):
         """
 
         self._compiled_py = dict()
+        self._exec_space = dict()
         test_files = os.path.join(self.project.tests_dir, "test_*.py")
         for pyfile in glob.glob(test_files):
             tf_name = os.path.basename(pyfile)
@@ -266,7 +267,26 @@ class GSMTester(object):
 
                 self._compiled_py[tf_name] = compiled_code
                 self.log[tf_name].id = tf_name
-                
+
+                global_namespace = dict(
+                    __name__='__gsmodutils_test__',
+                )
+
+                log = self.log[tf_name]
+                with stdout_ctx() as stdout:
+                    try:
+                        exec_(compiled_code, global_namespace)
+                    except Exception as ex:
+                        # the whole module has an error somewhere, no functions will run
+                        log.add_error("Error with code file {} error - {}".format(tf_name, str(ex)), ".compile_error")
+                        continue
+
+                fout = stdout.getvalue()
+                if fout.strip() != '':
+                    log.std_out += fout
+
+                self._exec_space[tf_name] = global_namespace
+
                 for func in compiled_code.co_names:
                     # if the function is explicitly as test function
                     if func[:5] == "test_":
@@ -286,21 +306,11 @@ class GSMTester(object):
         """
         encapsulate a test function and run it storing the report
         """
-        compiled_code = self._compiled_py[tf_name] 
+        global_namespace = self._exec_space[tf_name]
         log = self.log[tf_name].children[test_func]
         # Load the module in to the namespace
         # Capture the standard out rather than dumping it to terminal
         with stdout_ctx() as stdout:
-            global_namespace = dict(
-                __name__='__gsmodutils_test__',
-            )
-            
-            try:
-                exec_(compiled_code, global_namespace)
-            except Exception as ex:
-                # the whole module has an error somewhere, no functions will run
-                log.add_error("Error with code file {} error - {}".format(tf_name, str(ex)), ".compile_error")
-
             try:
                 # Call the function
                 # Uses standardised prototypes
