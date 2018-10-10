@@ -1,3 +1,5 @@
+sudo: required
+
 language: python
 python:
   - "2.7"
@@ -5,8 +7,9 @@ python:
   - "3.6"
   - "3.7-dev"
 # command to install dependencies
+services:
+  - docker
 install:
-  - sudo apt install -y docker
   - pip install -r requirements.txt scipy codecov
 # command to run tests
 script:
