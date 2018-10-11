@@ -28,13 +28,13 @@ The output from the terminal should look something like this:
     Default project file tests (models, designs, conditions):
     Counted 4 test assertions with 0 failures
     Project file completed all tests without error
-        --model_e_coli_core.json
+        --model::e_coli_core.json
 
-        --design_mevalonate_calvin
+        --design::mevalonate_calvin
 
-        --design_mevalonate_cbb
+        --design::mevalonate_cbb
 
-        --design_cbb_cycle
+        --design::cbb_cycle
 
     Ran 4 test assertions with a total of 0 errors (100.0% success)
 

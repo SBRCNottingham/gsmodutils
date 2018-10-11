@@ -74,9 +74,9 @@ def _output_child_logs(log, verbose=False, indent=4, baseindent=4):
 @click.command()
 @click.option('--project_path', default='.', help='gsmodutils project path')
 @click.option('--test_id', default=None, help='specify a given test identifier to run - pyton filename, function or' +
-                                              'json_filename entry')
+                                              'json_filename entry. Individual tests separated by double colons - ::')
 @click.option('--skip_default/--no_skip_default', default=False, help='skip default tests')
-@click.option('--verbose/--no_verbose', default=False, help='Dispalty succesfully run test assertions')
+@click.option('--verbose/--no_verbose', default=False, help='Display succesfully run test assertions')
 @click.option('--log_path', default=None, type=click.Path(writable=True), help='path to output json test log')
 def test(project_path, test_id, skip_default, verbose, log_path):
     """Run tests for a project"""

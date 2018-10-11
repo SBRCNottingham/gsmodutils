@@ -146,7 +146,7 @@ def test_model(model, project, log):
         
         assert len(tester.syntax_errors) == 1
 
-        log = tester.run_by_id('test_code.py_test_model')
+        log = tester.run_by_id('test_code.py::test_model')
         assert log.std_out == "This is the end\n" # Test record should capture the standard output
 
         runner = CliRunner()
@@ -160,8 +160,9 @@ def test_model(model, project, log):
 
         assert result.exit_code == 0
         result = runner.invoke(gsmodutils.cli.test,
-                               ['--project_path', fp.path, '--verbose', '--test_id', '{}_test_func'.format(test_codep)])
+                               ['--project_path', fp.path, '--verbose', '--test_id', '{}::test_func'.format(test_codep)])
 
+        print(result.output)
         assert result.exit_code == 0
 
         result = runner.invoke(gsmodutils.cli.test,
