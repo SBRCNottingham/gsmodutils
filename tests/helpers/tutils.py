@@ -221,3 +221,37 @@ gsmdesign_testpy.parent = "mevalonate_cbb"
         ndpath = os.path.join(project.design_path, 'design_fake.py')
         with open(ndpath, 'w+') as desf:
             desf.write(py_design)
+
+    def add_fake_tests(self):
+        code_str = """
+# Look our tests are python 2 compatible!
+# p.s. if you're reading this you're such a nerd
+from __future__ import print_function 
+from gsmodutils.test.utils import ModelTestSelector
+
+@ModelTestSelector(models=["not_there"], conditions=["xyl_src", "bad", "not_there"], designs=["not_there"])
+def test_func(model, project, log):
+    log.assertion(True, "Works", "Does not work", "Test")
+
+
+# For code coverage
+@ModelTestSelector()
+def test_func_cove(model, project, log):
+    log.assertion(True, "Works", "Does not work", "Test")
+
+
+def test_model(model, project, log):
+    solution = model.solver.optimize()
+    print('This is the end')
+    log.warning(True, "this is a warning")
+    log.assertion(True, "Model grows", "Model does not grow")
+    log.assertion(False, "Model grows", "Model does not grow")
+
+
+def test_exception(model, project, log):
+    raise Exception('This is exceptional')
+            """
+
+        test_path = os.path.join(self.path, "tests", "test_code.py")
+        with open(test_path, "w+") as tf:
+            tf.write(code_str)

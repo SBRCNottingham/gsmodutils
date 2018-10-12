@@ -247,3 +247,50 @@ class GSModutilsModel(cobra.Model):
         """
         spy_mdl = load_scrumpy_model(file_or_string)
         return self.merge(spy_mdl, inplace=inplace)
+
+    def get_condition_tests(self, tester=None):
+        """
+        Get list of test ids that apply to this model
+        :return:
+        """
+        if tester is None:
+            tester = self.project.project_tester()
+            tester.collect_tests()
+
+        tf_names = []
+        for ckey, cdf in self.project.conditions['growth_conditions'].items():
+            if not len(cdf['models']) or (len(cdf['models']) and self.mpath in cdf['models']):
+                tf_name = 'conditions_{}:model_{}'.format(self.mpath, ckey)
+                tf_names.append(tf_name)
+        return tf_names
+
+    def test_conditions(self):
+        """
+        Test all conditions that apply to this model
+        :return:
+        """
+        tester = self.project.project_tester()
+        tester.collect_tests()
+
+        ids = self.get_condition_tests(tester)
+        logs = []
+        for tid in ids:
+            logs.append(tester.run_by_id(tid))
+
+        return logs
+
+    def get_tests(self):
+        tester = self.project.project_tester()
+        # Collect tests
+        tester.collect_tests()
+        # find all tests relating to this model
+        # return the set of test ids
+
+        for test in tester.default_tests:
+            # check test model is in it
+            # What conditions are loaded
+            # Does the model and apply this test
+            pass
+
+    def run_tests(self, test_ids=None):
+        pass

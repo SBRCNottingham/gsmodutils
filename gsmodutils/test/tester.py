@@ -125,7 +125,8 @@ class GSMTester(object):
         
         self._task_execs = dict()
         self._child_tests = defaultdict(list)  # store for top level tests
-        
+        self._queue_tasks = dict()
+
         self.python_tests = defaultdict(list)
         self.json_tests = defaultdict(dict)
         self.default_tests = dict()
@@ -321,6 +322,9 @@ class GSMTester(object):
                         # Add test items
                         mfunc = global_namespace[func]
                         log = self.log[tf_name].create_child(func)
+
+                        master_func_id = "{}::{}".format(tf_name, func)
+                        self._queue_tasks[master_func_id] = []
                         if hasattr(mfunc, '_is_test_selector'):
 
                             if mfunc.models == "*":
@@ -370,7 +374,7 @@ class GSMTester(object):
                                         self._task_execs[args] = self._exec_test
                                         self._task_id_map[task_id] = args
                                         self._child_tests[tf_name].append(args)
-
+                                        self._queue_tasks[master_func_id].append(task_id)
                         else:
                             # Just applies to the default project's model; no conditions or designs
                             self.python_tests[tf_name].append(func)
@@ -515,10 +519,18 @@ class GSMTester(object):
 
     @property
     def test_ids(self):
-        return list(self._task_id_map.keys())
+        return list(self._task_id_map.keys()) + list(self._queue_tasks.keys())
 
     def run_by_id(self, tid):
         """ Returns result of individual test function """
+
+        if tid in self._queue_tasks:
+            for child_id in self._queue_tasks[tid]:
+                targs = self._task_id_map[child_id]
+                func = self._task_execs[targs]
+                func(*targs)
+            return self.log[tid]
+
         targs = self._task_id_map[tid]
         func = self._task_execs[targs]
         
