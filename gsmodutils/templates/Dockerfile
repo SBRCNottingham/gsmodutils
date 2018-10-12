@@ -1,5 +1,5 @@
-# Requires the gsmodutils docker image to be installed on a users system
-FROM gsmodutils
+# Base file for a gsmodutils project. Edit as needed
+FROM sbrcnottingham/gsmodutils
 
 RUN mkdir /model
 ADD . /model
