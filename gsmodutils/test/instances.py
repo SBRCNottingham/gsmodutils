@@ -1,15 +1,17 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from six import exec_
 import sys
 import os
 import traceback
+from gsmodutils.test.utils import stdout_ctx, ModelLoader
 
 
-class TestInstance(metaclass=ABCMeta):
-    """
-    Abstract base class for test instances
-    """
+class TestInstance(ABC):
+
     def __init__(self, project, log, **kwargs):
+        """
+        Abstract base class for test instances
+        """
         self.children = []
         self.log = log
         self.project = project
@@ -47,9 +49,12 @@ class PyTestInstanceFile(TestInstance):
 
         super(PyTestInstanceFile).__init__(project, log, **kwargs)
         self.compiled_py = dict()
-        self._exec_space = dict()
+        self.syntax_errors = []
         self.file_path = pyfile_path
         self.name = os.path.basename(pyfile_path)
+        self.global_namespace = dict(
+            __name__='__gsmodutils_test__',
+        )
 
         with open(pyfile_path) as codestr:
             try:
@@ -59,10 +64,6 @@ class PyTestInstanceFile(TestInstance):
                 # ex.lineno, ex.msg, ex.filename, ex.text, ex.offset
                 self.syntax_errors.append(ex)
                 return
-
-            self.global_namespace = dict(
-                __name__='__gsmodutils_test__',
-            )
 
             with stdout_ctx() as stdout:
                 try:
@@ -109,11 +110,12 @@ class PyTestInstance(TestInstance):
         self.pyfile = pyfile
         self._function = self.pyfile.global_namespace[func_name]
         self.model_loader = model_loader
+        self._is_master = False
 
-        _func_id = "{}::{}".format(self.pyfile.name, self.func_name)
-
-        if hasattr(self._function, '_is_test_selector'):
-            # This is an individual test case
+        if model_loader is None and hasattr(self._function, '_is_test_selector'):
+            self._is_master = True
+            _func_id = "{}::{}".format(self.pyfile.name, self.func_name)
+            # This is not an individual test case
             if self._function.models == "*":
                 self._function.models = self.project.list_models
 
@@ -152,10 +154,15 @@ class PyTestInstance(TestInstance):
                         model_loader = ModelLoader(self.project, mn, cid, did)
                         task_id = "{}::{}".format(_func_id, tid)
                         nlog = log.create_child(task_id, param_child=True)
-                        self.children.append(PyTestInstance(self.project, nlog, self, self.pyfile, model_loader))
+                        self.children.append(PyTestInstance(self.project, nlog, func_name, self, self.pyfile,
+                                                            model_loader))
 
     def run(self):
-        yield self.exec()
+        if self._is_master:
+            for child in self.children:
+                yield child.run()
+        else:
+            yield self.exec()
 
     def exec(self, model=None):
         """
@@ -201,9 +208,6 @@ class DictTestInstance(TestInstance):
     def run(self):
         pass
 
-    def get_children(self):
-        pass
-
 
 class DefaultTestInstance(TestInstance):
 
@@ -215,7 +219,4 @@ class DefaultTestInstance(TestInstance):
         super(DictTestInstance).__init__(project, log, **kwargs)
 
     def run(self):
-        pass
-
-    def get_children(self):
         pass
