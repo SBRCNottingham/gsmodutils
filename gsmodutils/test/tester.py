@@ -1,60 +1,18 @@
-import contextlib
 import glob
 import json
 import os
-import sys
+
 from collections import defaultdict
 
 from cobra.core import get_solution
 from cobra.exceptions import Infeasible
-from six import exec_
-from gsmodutils.utils import StringIO
+from gsmodutils.test.instances import PyTestInstance, PyTestInstanceFile
+
 
 import gsmodutils
 from gsmodutils.test.utils import TestRecord
 from tqdm import tqdm
 import jsonschema
-
-
-@contextlib.contextmanager
-def stdout_ctx(stdout=None):
-    """
-    Context to capture standard output of python executed tests during run time
-    This is displayed to the user for them to see after the tests are run
-    """
-    old = sys.stdout
-    if stdout is None:
-        stdout = StringIO()
-    sys.stdout = stdout
-    yield stdout
-    sys.stdout = old
-
-
-class ModelLoader(object):
-
-    def __init__(self, project, model_id, conditions_id, design_id):
-        self.project = project
-        self.model_id = model_id
-        self.conditions_id = conditions_id,
-        self.design_id = design_id
-
-    def load(self, log):
-        mdl = self.project.load_model(self.model_id)
-        if self.conditions_id is not None:
-            try:
-                self.project.load_conditions( self.conditions_id, model=mdl)
-            except IOError as e:
-                log.add_error("conditions {} not found".format(self.conditions_id), str(e))
-                return None
-
-        if self.design_id is not None:
-            try:
-                self.project.load_design(self.design_id, model=mdl)
-            except IOError as e:
-                log.add_error("design {} not found".format(self.design_id), str(e))
-                return None
-
-        return mdl
 
 
 class GSMTester(object):
@@ -278,155 +236,16 @@ class GSMTester(object):
         """
         Loads and compiles each python test in the project's test path
         """
-
-        self._compiled_py = dict()
-        self._exec_space = dict()
-        self.py_test_params = dict()
         test_files = os.path.join(self.project.tests_dir, "test_*.py")
         for pyfile in glob.glob(test_files):
             tf_name = os.path.basename(pyfile)
-            with open(pyfile) as codestr:
-                try:
-                    compiled_code = compile(codestr.read(), '', 'exec')
-                except SyntaxError as ex:
-                    # syntax error for user written code
-                    # ex.lineno, ex.msg, ex.filename, ex.text, ex.offset
-                    self.syntax_errors[pyfile] = ex
-                    continue
-
-                self._compiled_py[tf_name] = compiled_code
-                self.log[tf_name].id = tf_name
-
-                global_namespace = dict(
-                    __name__='__gsmodutils_test__',
-                )
-
-                log = self.log[tf_name]
-                with stdout_ctx() as stdout:
-                    try:
-                        exec_(compiled_code, global_namespace)
-                    except Exception as ex:
-                        # the whole module has an error somewhere, no functions will run
-                        log.add_error("Error with code file {} error - {}".format(tf_name, str(ex)), ".compile_error")
-                        continue
-
-                fout = stdout.getvalue()
-                if fout.strip() != '':
-                    log.std_out += fout
-
-                self._exec_space[tf_name] = global_namespace
-
-                for func in compiled_code.co_names:
-                    # if the function is explicitly as test function
-                    if func[:5] == "test_":
-                        # Add test items
-                        mfunc = global_namespace[func]
-                        log = self.log[tf_name].create_child(func)
-
-                        master_func_id = "{}::{}".format(tf_name, func)
-                        self._queue_tasks[master_func_id] = []
-                        if hasattr(mfunc, '_is_test_selector'):
-
-                            if mfunc.models == "*":
-                                mfunc.models = self.project.list_models
-
-                            if mfunc.designs == "*":
-                                mfunc.designs = self.project.list_designs + [None]
-
-                            if mfunc.conditions == "*":
-                                mfunc.conditions = self.project.list_conditions + [None]
-
-                            if not len(mfunc.models):
-                                mfunc.models = [None]
-
-                            if not len(mfunc.conditions):
-                                mfunc.conditions = [None]
-
-                            if not len(mfunc.designs):
-                                mfunc.designs = [None]
-
-                            for mn in mfunc.models:
-                                if mn is None:
-                                    mn = self.project.config.default_model
-
-                                for cid in mfunc.conditions:
-
-                                    for did in mfunc.designs:
-                                        # correctly setting the log id so user can easily read
-                                        tid = [mn]
-                                        if cid is not None and did is not None:
-                                            tid = (mn, cid, did)
-                                        elif cid is not None:
-                                            tid = (mn, cid)
-                                        elif did is not None:
-                                            tid = (mn, did)
-
-                                        tid = "::".join(tid)
-
-                                        nlog = log.create_child(tid, param_child=True)
-
-                                        self.python_tests[tf_name].append(func)
-
-                                        mdl_loader = ModelLoader(self.project, mn, cid, did)
-
-                                        args = (tf_name, func, log, mdl_loader)
-                                        task_id = "{}::{}::{}".format(tf_name, func, tid)
-                                        self._task_execs[args] = self._exec_test
-                                        self._task_id_map[task_id] = args
-                                        self._child_tests[tf_name].append(args)
-                                        self._queue_tasks[master_func_id].append(task_id)
-                        else:
-                            # Just applies to the default project's model; no conditions or designs
-                            self.python_tests[tf_name].append(func)
-                            args = (tf_name, func, log)
-                            task_id = "{}::{}".format(tf_name, func)
-                            self._task_execs[args] = self._exec_test
-                            self._task_id_map[task_id] = args
-                            self._child_tests[tf_name].append(args)
-
-            self._task_execs[tf_name] = self.iter_basetf
-            self._task_id_map[tf_name] = tf_name
-
-    def _exec_test(self, tf_name, test_func, log, model_loader=None):
-        """
-        encapsulate a test function and run it storing the report
-        """
-        global_namespace = self._exec_space[tf_name]
-        # Load the module in to the namespace
-        # Capture the standard out rather than dumping it to terminal
-        with stdout_ctx() as stdout:
-            if model_loader is None:
-                model = self.project.load_model()
-            else:
-                try:
-                    model = model_loader.load(log)
-                except Exception as ex:
-                    log.add_error("Error loading model {}".format(ex))
-                    return log
-
-                if model is None:
-                    return log
-            try:
-                # Call the function
-                # Uses standardised prototypes
-                mfunc = global_namespace[test_func]
-                mfunc(model, self.project, log)
-            except Exception as ex:
-                # the specific test case has an erro
-                log.add_error("Error executing function {} in file {} error - {}".format(test_func, tf_name, str(ex)),
-                              ".execution_error")
-        
-        fout = stdout.getvalue()
-        if fout.strip() != '':
-            log.std_out = fout
-        
-        return log
+            testf = PyTestInstanceFile(self.project, self.log[tf_name], pyfile)
+            self.python_tests[tf_name].append(testf)
     
     def _run_py_tests(self):
         """ Runs compiled python tests """
-        for tf_name, compiled_code in self._compiled_py.items():
-            for func in self.python_tests[tf_name]:
-                yield self._exec_test(tf_name, func)
+        for test in self.python_tests:
+            yield test.run()
 
     @staticmethod
     def _model_check(model):
@@ -519,7 +338,7 @@ class GSMTester(object):
 
     @property
     def test_ids(self):
-        return list(self._task_id_map.keys()) + list(self._queue_tasks.keys())
+        return list(self._task_id_map.keys())
 
     def run_by_id(self, tid):
         """ Returns result of individual test function """
