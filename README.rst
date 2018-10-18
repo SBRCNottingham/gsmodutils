@@ -57,21 +57,34 @@ To run the tests for this project, install pytest and, from the project root dir
 
     pytest
     
-gsmodutils is fully compatible with python 2.7+ and python 3.5+.
-(TODO) Software has been tested on linux (Ubuntut, manjaro/arch), windows and MacOSX. 
+gsmodutils is fully compatible with python 2.7+ and python 3.6+.
+This software has been tested on linux (Ubuntut, manjaro/arch), windows and MacOSX.
 
-Install and using the docker image
---------------------------------------
-The simplest method of installation is probably with docker. 
-Follow the install instructions for docker found at docker.io clone the git repository found here and then run
 
-    docker build . -t gsmoduitls
+Change notes
+------------
 
-This will create a gsmodutils docker image that can be reused for projects.
+Version 0.0.2:
+
+
+* Changed method for test ids to separators being "::" for example "test_pytest.py::test_func" or "design::design_id"
+
+* Refactor of test loading
+    * Tests are now encapsulated around TestInstance classes
+    * Hierarchy of logs is stored
+    * Encapsulates individual tests better
+    * Can run children, trivially in isolation
+        * Allows access to python tests with runtime specified models (useful for python based interaction)
+
+TODO:
+    * GSModutilsModel class to allow the selection of specific tests related to the loaded model (e.g. add model to
+
 
 Usage
 -----
-Please read the user guide in the docs! |docs|
+Please read the user guide in the docs_!
+
+.. _docs: https://gsmodutils.readthedocs.io
 
 See also
 -----------
