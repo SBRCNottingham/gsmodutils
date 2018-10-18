@@ -13,7 +13,7 @@ from cobra.exceptions import Infeasible
 from gsmodutils.utils.io import load_medium
 from click.testing import CliRunner
 import gsmodutils.cli
-from gsmodutils.test.tester import stdout_ctx
+from gsmodutils.test.utils import stdout_ctx
 from six import exec_
 
 
@@ -78,6 +78,7 @@ def test_json_tests():
 
         result = runner.invoke(gsmodutils.cli.test,
                                ['--project_path', fp.path, '--verbose', '--test_id', 'test_x.json'])
+
         assert result.exit_code == 0
 
 
@@ -87,6 +88,36 @@ def test_py_tests():
     
     These tests are important because the exec code is nasty to debug...
     """
+    
+    code_str = """
+# Look our tests are python 2 compatible!
+# p.s. if you're reading this you're such a nerd
+from __future__ import print_function 
+from gsmodutils.test.utils import ModelTestSelector
+
+@ModelTestSelector(models=["not_there"], conditions=["xyl_src", "bad", "not_there"], designs=["not_there"])
+def test_func(model, project, log):
+    log.assertion(True, "Works", "Does not work", "Test")
+
+
+# For code coverage
+@ModelTestSelector()
+def test_func_cove(model, project, log):
+    log.assertion(True, "Works", "Does not work", "Test")
+
+
+def test_model(model, project, log):
+    solution = model.solver.optimize()
+    print('This is the end')
+    log.warning(True, "this is a warning")
+    log.assertion(True, "Model grows", "Model does not grow")
+    log.assertion(False, "Model grows", "Model does not grow")
+    
+    
+def test_exception(model, project, log):
+    raise Exception('This is exceptional')
+    """
+
     syntax_err = """
 def test_model(model, project, log):
     print('This is the end {}'.format(solution)
@@ -96,12 +127,15 @@ def test_model(model, project, log):
         project = GSMProject(fp.path)
 
         fp.add_fake_conditions()
-        fp.add_fake_tests()
         mdl = fp.project.model
         load_medium(mdl, dict())
         fp.project.save_conditions(mdl, "bad", apply_to=fp.project.config.default_model, observe_growth=False)
 
         test_codep = 'test_code.py'
+        tfp = os.path.join(project.tests_dir, test_codep)
+        
+        with open(tfp, 'w+') as testf:
+            testf.write(code_str)
 
         tfp = os.path.join(project.tests_dir, 'test_syn_err.py')
 
@@ -127,10 +161,9 @@ def test_model(model, project, log):
 
         assert result.exit_code == 0
         result = runner.invoke(gsmodutils.cli.test,
-                               ['--project_path', fp.path, '--verbose', '--test_id',
-                                '{}::test_func'.format(test_codep)])
+                               ['--project_path', fp.path, '--verbose',
+                                '--test_id', '{}::test_func'.format(test_codep)])
 
-        print(result.output)
         assert result.exit_code == 0
 
         result = runner.invoke(gsmodutils.cli.test,

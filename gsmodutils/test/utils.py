@@ -190,6 +190,13 @@ def stdout_ctx(stdout=None):
 class ModelLoader(object):
 
     def __init__(self, project, model_id, conditions_id, design_id):
+        """
+        Simple callback interface to load a model
+        :param project: gsmodutils project
+        :param model_id: model id within project
+        :param conditions_id: mcondtions id within project
+        :param design_id: design id within project
+        """
         self.project = project
         self.model_id = model_id
         self.conditions_id = conditions_id,
