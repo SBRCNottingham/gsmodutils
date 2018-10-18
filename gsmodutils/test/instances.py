@@ -72,7 +72,7 @@ class PyTestFileInstance(TestInstance):
         :param pyfile_path:
         """
 
-        super().__init__(project, log, **kwargs)
+        super(PyTestFileInstance, self).__init__(project, log, **kwargs)
         self.compiled_py = dict()
         self.syntax_errors = None
         self.file_path = pyfile_path
@@ -129,7 +129,7 @@ class PyTestInstance(TestInstance):
         :param model_loader:
         :param kwargs:
         """
-        super().__init__(project, log, **kwargs)
+        super(PyTestInstance, self).__init__(project, log, **kwargs)
         self.func_name = func_name
         self.tb_info = None
         self.parent = parent
@@ -455,7 +455,7 @@ class DefaultTestInstance(TestInstance):
         :param kwargs:
         """
         log = TestRecord(log_id)
-        super().__init__(project, log, **kwargs)
+        super(DefaultTestInstance, self).__init__(project, log, **kwargs)
 
         for model_path in self.project.config.models:
             # Checking model functions without design
@@ -488,6 +488,7 @@ class DefaultTestInstance(TestInstance):
             child.run()
         return self.log
 
+
 class ModelTestInstance(TestInstance):
 
         def __init__(self, project, log, model_id, conditions_id=None, **kwargs):
@@ -499,7 +500,7 @@ class ModelTestInstance(TestInstance):
             :param conditions_id:
             :param kwargs:
             """
-            super().__init__(project, log, **kwargs)
+            super(ModelTestInstance, self).__init__(project, log, **kwargs)
             self.model_path = model_id
             self.conditions = conditions_id
 
@@ -569,7 +570,7 @@ class DesignTestInstance(ModelTestInstance):
         :param conditions_id:
         :param kwargs:
         """
-        super().__init__(project, log, model_id, conditions_id, **kwargs)
+        super(DesignTestInstance, self).__init__(project, log, model_id, conditions_id, **kwargs)
         self.design = design_id
 
     def load_model(self):
