@@ -3,8 +3,9 @@ Test cases for the GSMTests class and associated files
 """
 from __future__ import print_function
 from gsmodutils import GSMProject
+from gsmodutils.project.design import StrainDesign
 from gsmodutils.test.tester import GSMTester
-
+from gsmodutils.test.utils import ModelLoader, TestRecord
 import json
 from tutils import FakeProjectContext
 import os
@@ -259,6 +260,32 @@ def test_std_out_capture_in_exec():
     assert context.getvalue() == output_message+"\n"
 
 
+def test_model_loader():
+    """ Model loader utility tests """
+    with FakeProjectContext(use_second_model=True) as ctx:
+        ml = ModelLoader(ctx.project, "e_coli_core.json", None, None)
+        ctx.add_fake_conditions()
+        log = TestRecord("TL")
+        model = ml.load(log)
+        assert os.path.basename(model.mpath) == "e_coli_core.json"
+        assert model.design is None
+
+        ctx.add_fake_designs()
+        ml = ModelLoader(ctx.project, None, "xyl_src", "mevalonate_cbb")
+        log = TestRecord("TL2")
+        model = ml.load(log)
+        treac = model.reactions.get_by_id("EX_xyl__D_e")
+        assert isinstance(model.design, StrainDesign)
+        assert model.design.id == "mevalonate_cbb"
+        assert treac.lower_bound == -8.0
+
+        ml = ModelLoader(ctx.project, None, "xyl_src", None)
+        log = TestRecord("TL2")
+        model = ml.load(log)
+        treac = model.reactions.get_by_id("EX_xyl__D_e")
+        assert treac.lower_bound == -8.0
+
+
 def test_model_tests():
     code_str = """
 # Look our tests are python 2 compatible!
@@ -267,8 +294,8 @@ from __future__ import print_function
 from gsmodutils.test.utils import ModelTestSelector
 
 @ModelTestSelector(designs=["mevalonate_cbb"])
-def test_func(model, project, log):
-    log.assertion(True, "Works", "Does not work", "Test1")
+def test_funcdes(model, project, log):
+    log.assertion(False, "Works", "Does not work", "Test1")
     
 @ModelTestSelector(conditions=["xyl_src"])
 def test_func(model, project, log):
@@ -285,23 +312,21 @@ def test_func(model, project, log):
         with open(tfp, "w+") as codef:
             codef.write(code_str)
 
+        # Test a design
+        design = ctx.project.load_design("mevalonate_cbb")
+        testsdes = design.run_tests()
+        assert len(testsdes) == 2
+        assert not testsdes["test_code.py::test_funcdes::iAF1260.json::mevalonate_cbb"].log.is_success
+
+        # Test a model
         model = ctx.project.load_model()
         tests = model.run_tests()
-
         assert len(tests) == 3
         assert tests["model::iAF1260.json"].log.is_success
         assert tests["model::iAF1260.json::conditions::xyl_src"].log.is_success
         assert tests["test_code.py::test_func::iAF1260.json::xyl_src"].log.is_success
-
+        # Test a second model
         model2 = ctx.project.load_model('e_coli_core.json')
-        tests2 = model2.run_tests(display=False)
+        tests2 = model2.run_tests(display_progress=False)
         assert len(tests2) == 1
         assert tests2["model::e_coli_core.json"].log.is_success
-        # Test a second model
-
-        # Test a design
-        design = ctx.project.load_design("mevalonate_cbb")
-
-        tests3 = design.run_tests()
-        print(tests3)
-        assert len(tests3) == 2

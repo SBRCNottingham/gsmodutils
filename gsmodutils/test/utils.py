@@ -199,7 +199,7 @@ class ModelLoader(object):
         """
         self.project = project
         self.model_id = model_id
-        self.conditions_id = conditions_id,
+        self.conditions_id = conditions_id
         self.design_id = design_id
 
     def load(self, log):

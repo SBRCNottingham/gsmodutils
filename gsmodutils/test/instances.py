@@ -248,9 +248,11 @@ class PyTestInstance(TestInstance):
 
     def applies_to_model(self, model_id, design_id=None):
 
-        if not len(self.children) and (
-                self.model_loader.design_id == design_id or (
-                    self.model_loader.design_id is not None and self.model_loader.model_id == model_id)):
+        if len(self.children) or design_id is None and self.model_loader.design_id is not None:
+            return False
+        elif self.model_loader.model_id == model_id and design_id is None:
+            return True
+        elif self.model_loader.model_id == model_id and design_id == self.model_loader.design_id:
             return True
 
         return False
