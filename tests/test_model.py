@@ -1,5 +1,6 @@
 from tutils import FakeProjectContext
 from gsmodutils import GSMProject, GSModutilsModel
+from gsmodutils.test.tester import GSMTester
 import cobra
 import pytest
 
@@ -40,6 +41,14 @@ def test_load_model():
         model.save_model()
         cpy = model.to_cobra_model()
         assert not isinstance(cpy, GSModutilsModel)
+
+
+def test_model_tests():
+    with FakeProjectContext() as ctx:
+        model = ctx.project.load_model()
+        tests = model.run_tests()
+        assert len(tests) == 1
+        assert tests["model::iAF1260.json"].log.is_success
 
 
 def test_save_design():

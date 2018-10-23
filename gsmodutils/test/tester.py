@@ -80,11 +80,6 @@ class GSMTester(object):
 
             self._id_tree[tf_name] = testf.get_id_tree()
 
-    def _run_py_tests(self):
-        """ Runs compiled python tests """
-        for test_id in self.python_tests:
-            yield self._test_map[test_id].run()
-
     def _load_default_tests(self):
         dti = DefaultTestInstance(self.project)
         self.log[dti.id] = dti.log
@@ -98,6 +93,9 @@ class GSMTester(object):
     @property
     def test_ids(self):
         return list(self._test_map.keys())
+
+    def get_test(self, tid):
+        return self._test_map[tid]
 
     def run_by_id(self, tid):
         """ Returns result of individual test function """
@@ -123,7 +121,6 @@ class GSMTester(object):
     def progress_tests(self, skip_default=False):
         """
         Run tests with a progressbar
-        :param recollect:
         :param skip_default:
         :return:
         """

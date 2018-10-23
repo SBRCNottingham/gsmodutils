@@ -17,6 +17,7 @@ class TestInstance(ABC):
         """
         Abstract base class for test instances
         """
+        self._override_model = None
         self.children = []
         self.log = log
         self.project = project
@@ -62,6 +63,18 @@ class TestInstance(ABC):
                     "children": child.get_children()
                 }
         return tree
+
+    def set_override_model(self, model):
+        """
+        Sets an in memory model to be loaded on execution instead of loaded from the project
+        :param model:
+        :return:
+        """
+        self._override_model = model
+
+    @abstractmethod
+    def applies_to_model(self, model_id, design_id=None):
+        pass
 
 
 class PyTestFileInstance(TestInstance):
@@ -114,6 +127,9 @@ class PyTestFileInstance(TestInstance):
         for child in self.children:
             child.run()
         return self.log
+
+    def applies_to_model(self, model_id, design_id=None):
+        return False
 
 
 class PyTestInstance(TestInstance):
@@ -230,6 +246,15 @@ class PyTestInstance(TestInstance):
 
         return self.log
 
+    def applies_to_model(self, model_id, design_id=None):
+
+        if not len(self.children) and (
+                self.model_loader.design_id == design_id or (
+                    self.model_loader.design_id is not None and self.model_loader.model_id == model_id)):
+            return True
+
+        return False
+
 
 class JsonTestInstance(TestInstance):
 
@@ -268,6 +293,9 @@ class JsonTestInstance(TestInstance):
         for child in self.children:
             child.run()
         return self.log
+
+    def applies_to_model(self, model_id, design_id=None):
+        return False
 
 
 class DictTestInstance(TestInstance):
@@ -376,8 +404,9 @@ class DictTestInstance(TestInstance):
         """
         broken up code for testing individual entries
         """
-
-        if model is None and self._model_loader is None:
+        if self._override_model is not None:
+            model = self._override_model
+        elif model is None and self._model_loader is None:
             model = self. project.load_model()
         elif self._model_loader is not None:
             try:
@@ -444,6 +473,10 @@ class DictTestInstance(TestInstance):
 
         return self.log
 
+    def applies_to_model(self, model_id, design_id=None):
+        if len(self.children):
+            return False
+
 
 class DefaultTestInstance(TestInstance):
 
@@ -488,6 +521,9 @@ class DefaultTestInstance(TestInstance):
             child.run()
         return self.log
 
+    def applies_to_model(self, model_id, design_id=None):
+        return False
+
 
 class ModelTestInstance(TestInstance):
 
@@ -507,6 +543,13 @@ class ModelTestInstance(TestInstance):
         def run(self):
             self.exec()
             return self.log
+
+        def applies_to_model(self, model_id, design_id=None):
+
+            if self.model_path == model_id and design_id is None:
+                return True
+
+            return False
 
         @staticmethod
         def _model_check(model):
@@ -536,7 +579,10 @@ class ModelTestInstance(TestInstance):
             return model
 
         def exec(self):
-            model = self.load_model()
+            if self._override_model is None:
+                model = self.load_model()
+            else:
+                model = self._override_model
 
             if model is None:
                 return self.log
@@ -586,7 +632,11 @@ class DesignTestInstance(ModelTestInstance):
         return model
 
     def exec(self):
-        model = self.load_model()
+
+        if self._override_model is None:
+            model = self.load_model()
+        else:
+            model = self._override_model
 
         if model is None:
             return self.log
@@ -596,3 +646,8 @@ class DesignTestInstance(ModelTestInstance):
         else:
             self.log.error.append(('Design fails to pass check', '.default'))
         return self.log
+
+    def applies_to_model(self, model_id, design_id=None):
+        if design_id != self.design:
+            return False
+        return True
