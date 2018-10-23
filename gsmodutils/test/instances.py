@@ -504,7 +504,7 @@ class DefaultTestInstance(TestInstance):
                 cmodels = cdf['models']
 
             for model_path in cmodels:
-                tf_name = 'conditions::{}::model::{}'.format(model_path, ckey)
+                tf_name = 'model::{}::conditions::{}'.format(model_path, ckey)
                 clog = self.log.create_child(tf_name)
                 ti = ModelTestInstance(self.project, clog, model_path, conditions_id=ckey)
                 self.children.append(ti)
