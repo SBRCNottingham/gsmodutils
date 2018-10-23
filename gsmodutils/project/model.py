@@ -306,7 +306,7 @@ class GSModutilsModel(cobra.Model):
                 print("\tSuccess: {}".format(tests[tid].log.is_success))
 
                 if not tests[tid].log.is_success:
-                    for error in tests[tid].log.errors:
+                    for error in tests[tid].log.error:
                         print(error[0])
         else:
             for tid in test_ids:
