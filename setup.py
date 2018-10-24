@@ -25,7 +25,7 @@ setup(
     install_requires=requirements,
     author_email="james.gilbert@nottingham.ac.uk",
     url="",
-    license="Apache 2.0",
+    license="Apache",
     packages=find_packages(),
     entry_points={
         'console_scripts': [
@@ -40,7 +40,7 @@ setup(
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: Apache License 2.0',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
