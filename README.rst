@@ -69,15 +69,16 @@ Version 0.0.2:
 
 * Changed method for test ids to separators being "::" for example "test_pytest.py::test_func" or "design::design_id"
 
-* Refactor of test loading
+* Major refactor of test loading classes
+    * CLI and gsmodutils.test.tester class API remains the same
     * Tests are now encapsulated around TestInstance classes
     * Hierarchy of logs is stored
     * Encapsulates individual tests better
-    * Can run children, trivially in isolation
+    * Can run child tests in isolation
         * Allows access to python tests with runtime specified models (useful for python based interaction)
 
-TODO:
-    * GSModutilsModel class to allow the selection of specific tests related to the loaded model (e.g. add model to
+* GSModutilsModel class to allow the selection of specific tests related to the loaded model.
+For
 
 
 Usage
