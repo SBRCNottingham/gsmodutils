@@ -9,9 +9,9 @@ Creating projects
 Project creation is best done with the command line utility.
 This provides a step by step guide for project creation.
 
-.. code-block:: guess
+.. code-block:: bash
 
-    $ gsmodutils create_project PROJECT_PATH MODEL_PATH
+    $ gsmodutils init PROJECT_PATH MODEL_PATH
 
 
 Alternatively, this can be done in python using the GSMProject class.
@@ -35,7 +35,7 @@ Alternatively, this can be done in python using the GSMProject class.
 
 Using the cli lets have a look inside the newly created project:
 
-.. code-block:: guess
+.. code-block:: bash
 
     $ gsmodutils create_project ./example_project e_coli_core.json
     ...

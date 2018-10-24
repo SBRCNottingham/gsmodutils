@@ -31,10 +31,10 @@ class ModelDiff(dict):
 
         title = ""
         if self.model_b is not None and self.model_a is not None:
-            title = "Model diff between {} {}".format(self.model_a.id, self.model_b.id)
+            title = "Model diff between {} and {}".format(self.model_a.id, self.model_b.id)
 
         info_str = """
-               {}
+               <b> {} </b>
                 <table>
                     <tr>
                         <td> Removed reactions: </td>
