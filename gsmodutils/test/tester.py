@@ -1,7 +1,7 @@
 import glob
 import os
 from gsmodutils.test.instances import JsonTestInstance, PyTestFileInstance, DefaultTestInstance
-from gsmodutils.test.utils import TestRecord
+from gsmodutils.test.utils import ResultRecord
 import gsmodutils
 from tqdm import tqdm
 
@@ -66,7 +66,7 @@ class GSMTester(object):
         test_files = os.path.join(self.project.tests_dir, "test_*.py")
         for pyfile in glob.glob(test_files):
             tf_name = os.path.basename(pyfile)
-            self.log[tf_name] = TestRecord(tf_name)
+            self.log[tf_name] = ResultRecord(tf_name)
             testf = PyTestFileInstance(self.project, self.log[tf_name], pyfile)
 
             if testf.syntax_errors is not None:

@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
-from six import exec_
+from abc import ABCMeta, abstractmethod
+from six import exec_, add_metaclass
 import sys
 import os
 import traceback
-from gsmodutils.test.utils import stdout_ctx, ModelLoader, TestRecord
+from gsmodutils.test.utils import stdout_ctx, ModelLoader, ResultRecord
 import jsonschema
 from cobra.exceptions import Infeasible
 import cobra
@@ -11,7 +11,8 @@ from cobra.core import get_solution
 import json
 
 
-class TestInstance(ABC):
+@add_metaclass(ABCMeta)
+class TestInstance:
 
     def __init__(self, project, log, **kwargs):
         """
@@ -206,10 +207,10 @@ class PyTestInstance(TestInstance):
             for child in self.children:
                 child.run()
         else:
-            self.exec()
+            self._fexec()
         return self.log
 
-    def exec(self, model=None):
+    def _fexec(self, model=None):
         """
         Execute the python test with encapsulation
         Passing a model allows this test to be run on any predefined cobra model, rather than one loaded from a project.
@@ -268,7 +269,7 @@ class JsonTestInstance(TestInstance):
         :param kwargs:
         """
         id_key = os.path.basename(file_path)
-        log = TestRecord(id_key)
+        log = ResultRecord(id_key)
         super(JsonTestInstance, self).__init__(project, log, **kwargs)
         self.load_errors = None
         self.invalid_tests = None
@@ -396,13 +397,13 @@ class DictTestInstance(TestInstance):
     def run(self):
         """ Run the test (iterable) """
         if not self._master:
-            self.exec()
+            self._fexec()
         else:
             for child in self.children:
                 child.run()
         return self.log
 
-    def exec(self, model=None):
+    def _fexec(self, model=None):
         """
         broken up code for testing individual entries
         """
@@ -489,7 +490,7 @@ class DefaultTestInstance(TestInstance):
         :param log_id:
         :param kwargs:
         """
-        log = TestRecord(log_id)
+        log = ResultRecord(log_id)
         super(DefaultTestInstance, self).__init__(project, log, **kwargs)
 
         for model_path in self.project.config.models:
@@ -543,7 +544,7 @@ class ModelTestInstance(TestInstance):
             self.conditions = conditions_id
 
         def run(self):
-            self.exec()
+            self._fexec()
             return self.log
 
         def applies_to_model(self, model_id, design_id=None):
@@ -580,7 +581,7 @@ class ModelTestInstance(TestInstance):
 
             return model
 
-        def exec(self):
+        def _fexec(self):
             if self._override_model is None:
                 model = self.load_model()
             else:
@@ -633,7 +634,7 @@ class DesignTestInstance(ModelTestInstance):
 
         return model
 
-    def exec(self):
+    def _fexec(self):
 
         if self._override_model is None:
             model = self.load_model()

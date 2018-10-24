@@ -5,7 +5,7 @@ from __future__ import print_function
 from gsmodutils import GSMProject
 from gsmodutils.project.design import StrainDesign
 from gsmodutils.test.tester import GSMTester
-from gsmodutils.test.utils import ModelLoader, TestRecord
+from gsmodutils.test.utils import ModelLoader, ResultRecord
 import json
 from tutils import FakeProjectContext
 import os
@@ -264,14 +264,14 @@ def test_model_loader():
     with FakeProjectContext(use_second_model=True) as ctx:
         ml = ModelLoader(ctx.project, "e_coli_core.json", None, None)
         ctx.add_fake_conditions()
-        log = TestRecord("TL")
+        log = ResultRecord("TL")
         model = ml.load(log)
         assert os.path.basename(model.mpath) == "e_coli_core.json"
         assert model.design is None
 
         ctx.add_fake_designs()
         ml = ModelLoader(ctx.project, None, "xyl_src", "mevalonate_cbb")
-        log = TestRecord("TL2")
+        log = ResultRecord("TL2")
         model = ml.load(log)
         treac = model.reactions.get_by_id("EX_xyl__D_e")
         assert isinstance(model.design, StrainDesign)
@@ -279,7 +279,7 @@ def test_model_loader():
         assert treac.lower_bound == -8.0
 
         ml = ModelLoader(ctx.project, None, "xyl_src", None)
-        log = TestRecord("TL2")
+        log = ResultRecord("TL2")
         model = ml.load(log)
         treac = model.reactions.get_by_id("EX_xyl__D_e")
         assert treac.lower_bound == -8.0

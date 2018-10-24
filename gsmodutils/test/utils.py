@@ -63,7 +63,7 @@ class ModelTestSelector(object):
         return func
 
 
-class TestRecord(object):
+class ResultRecord(object):
     """
     Class for handling logging of errors in tester
     follows a hierarchical pattern as log records allow child records
@@ -123,7 +123,7 @@ class TestRecord(object):
         if self.param_child:
             raise TypeError('Parameter variations should not have child logs')
         
-        newlog = TestRecord(new_id, parent=self, param_child=param_child)
+        newlog = ResultRecord(new_id, parent=self, param_child=param_child)
         self.children[new_id] = newlog
         return newlog
         
