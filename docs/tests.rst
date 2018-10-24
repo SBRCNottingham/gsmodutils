@@ -28,13 +28,13 @@ The output from the terminal should look something like this:
     Default project file tests (models, designs, conditions):
     Counted 4 test assertions with 0 failures
     Project file completed all tests without error
-        --model_e_coli_core.json
+        --model::e_coli_core.json
 
-        --design_mevalonate_calvin
+        --design::mevalonate_calvin
 
-        --design_mevalonate_cbb
+        --design::mevalonate_cbb
 
-        --design_cbb_cycle
+        --design::cbb_cycle
 
     Ran 4 test assertions with a total of 0 errors (100.0% success)
 
@@ -147,6 +147,30 @@ models, designs and conditions specified.
 As with json tests these will be picked up automatically by ``gsmodutils test``.
 Any logs to standard out (e.g. using python print) can also be captured with this approach.
 Note that this should not be used in all environments as this will allow any code to be executed, malicious or not.
+
+Performing tests on loaded models
+---------------------------------
+
+If you have an in memory Model object that has been modified, gsmodutils supports running
+existing tests on this model.
+For example,
+
+.. code-block:: python
+
+    from gsmodutils import project
+    project = GSMProject()
+    # Load a model or design
+    model = project.load_design("<some_design>")
+    # make some changes
+    model.reactions.get_by_id("SOME_REACTION").knock_out()
+    model.run_tests()
+
+The progress and results for tests that are only those that are applied to the given loaded model or design.
+
+Please note, that tests for designs that are downstream of a given model (i.e. designs based on this model or child designs)
+will not be run in the setting.
+Testing of this requires the changes to be saved to disk in order for them to be loaded in to
+other designs/models within the project.
 
 Further reading
 ~~~~~~~~~~~~~~~
