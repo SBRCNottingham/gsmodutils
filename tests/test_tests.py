@@ -156,7 +156,6 @@ def test_model(model, project, log):
         result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose', '--log_path', lpath])
         assert result.exit_code == 0
 
-        tester._run_py_tests()
         result = runner.invoke(gsmodutils.cli.test,
                                ['--project_path', fp.path, '--verbose', '--test_id', test_codep])
 
