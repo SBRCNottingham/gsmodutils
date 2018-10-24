@@ -10,6 +10,8 @@ from gsmodutils.model_diff import model_diff
 from gsmodutils.utils.scrumpy import load_scrumpy_model
 import os
 import logging
+import collections
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -247,3 +249,67 @@ class GSModutilsModel(cobra.Model):
         """
         spy_mdl = load_scrumpy_model(file_or_string)
         return self.merge(spy_mdl, inplace=inplace)
+
+    def collect_tests(self):
+        """
+        Returns test ids that apply to this model, (only bottom level tests)
+        :return:
+        """
+        tester = self.project.project_tester()
+        # Collect tests
+        tester.collect_tests()
+        # find all tests relating to this model
+        # return the set of test ids
+        apply_ids = []
+        for test_id in tester.test_ids:
+            test = tester.get_test(test_id)
+
+            did = None
+            if self.design is not None:
+                did = self.design.id
+
+            mid = os.path.basename(self.model_path)
+            if test.applies_to_model(mid, design_id=did) and not len(test.children):
+                # We only care about bottom level tests
+                apply_ids.append(test_id)
+
+        return apply_ids
+
+    def run_tests(self, test_ids=None, display_progress=True):
+        """
+        Run tests for a given model
+        :param test_ids:
+        :param display_progress: display the progress of running tests
+        :return:
+        """
+        tester = self.project.project_tester()
+        tester.collect_tests()
+
+        if test_ids is None:
+            test_ids = self.collect_tests()
+        elif not isinstance(test_ids, collections.Iterable):
+            raise TypeError("test_ids must be iterable or None")
+
+        def run_test_i(mdl, testid):
+            run_mdl = mdl.copy()
+            tests[testid] = tester.get_test(testid)
+            tests[testid].set_override_model(run_mdl)
+            tests[testid].run()
+
+        tests = dict()
+        if display_progress:
+            for tid in tqdm(test_ids):
+                run_test_i(self, tid)
+
+            for tid in tests:
+                print("Results for test:", tests[tid].id)
+                print("\tSuccess: {}".format(tests[tid].log.is_success))
+
+                if not tests[tid].log.is_success:
+                    for error in tests[tid].log.error:
+                        print(error[0])
+        else:
+            for tid in test_ids:
+                run_test_i(self, tid)
+
+        return tests

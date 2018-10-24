@@ -3,8 +3,9 @@ Test cases for the GSMTests class and associated files
 """
 from __future__ import print_function
 from gsmodutils import GSMProject
+from gsmodutils.project.design import StrainDesign
 from gsmodutils.test.tester import GSMTester
-
+from gsmodutils.test.utils import ModelLoader, ResultRecord
 import json
 from tutils import FakeProjectContext
 import os
@@ -13,7 +14,7 @@ from cobra.exceptions import Infeasible
 from gsmodutils.utils.io import load_medium
 from click.testing import CliRunner
 import gsmodutils.cli
-from gsmodutils.test.tester import stdout_ctx
+from gsmodutils.test.utils import stdout_ctx
 from six import exec_
 
 
@@ -78,6 +79,7 @@ def test_json_tests():
 
         result = runner.invoke(gsmodutils.cli.test,
                                ['--project_path', fp.path, '--verbose', '--test_id', 'test_x.json'])
+
         assert result.exit_code == 0
 
 
@@ -146,21 +148,21 @@ def test_model(model, project, log):
         
         assert len(tester.syntax_errors) == 1
 
-        log = tester.run_by_id('test_code.py_test_model')
-        assert log.std_out == "This is the end\n" # Test record should capture the standard output
+        log = tester.run_by_id('test_code.py::test_model')
+        assert log.std_out == "This is the end\n"  # Test record should capture the standard output
 
         runner = CliRunner()
         lpath = os.path.join(fp.path, 'lp.json')
         result = runner.invoke(gsmodutils.cli.test, ['--project_path', fp.path, '--verbose', '--log_path', lpath])
         assert result.exit_code == 0
 
-        tester._run_py_tests()
         result = runner.invoke(gsmodutils.cli.test,
                                ['--project_path', fp.path, '--verbose', '--test_id', test_codep])
 
         assert result.exit_code == 0
         result = runner.invoke(gsmodutils.cli.test,
-                               ['--project_path', fp.path, '--verbose', '--test_id', '{}_test_func'.format(test_codep)])
+                               ['--project_path', fp.path, '--verbose',
+                                '--test_id', '{}::test_func'.format(test_codep)])
 
         assert result.exit_code == 0
 
@@ -255,3 +257,75 @@ def test_std_out_capture_in_exec():
         exec_(compiled_code, {})
 
     assert context.getvalue() == output_message+"\n"
+
+
+def test_model_loader():
+    """ Model loader utility tests """
+    with FakeProjectContext(use_second_model=True) as ctx:
+        ml = ModelLoader(ctx.project, "e_coli_core.json", None, None)
+        ctx.add_fake_conditions()
+        log = ResultRecord("TL")
+        model = ml.load(log)
+        assert os.path.basename(model.mpath) == "e_coli_core.json"
+        assert model.design is None
+
+        ctx.add_fake_designs()
+        ml = ModelLoader(ctx.project, None, "xyl_src", "mevalonate_cbb")
+        log = ResultRecord("TL2")
+        model = ml.load(log)
+        treac = model.reactions.get_by_id("EX_xyl__D_e")
+        assert isinstance(model.design, StrainDesign)
+        assert model.design.id == "mevalonate_cbb"
+        assert treac.lower_bound == -8.0
+
+        ml = ModelLoader(ctx.project, None, "xyl_src", None)
+        log = ResultRecord("TL2")
+        model = ml.load(log)
+        treac = model.reactions.get_by_id("EX_xyl__D_e")
+        assert treac.lower_bound == -8.0
+
+
+def test_model_tests():
+    code_str = """
+# Look our tests are python 2 compatible!
+# p.s. if you're reading this you're such a nerd
+from __future__ import print_function 
+from gsmodutils.test.utils import ModelTestSelector
+
+@ModelTestSelector(designs=["mevalonate_cbb"])
+def test_funcdes(model, project, log):
+    log.assertion(False, "Works", "Does not work", "Test1")
+    
+@ModelTestSelector(conditions=["xyl_src"])
+def test_func(model, project, log):
+    log.assertion(True, "Works", "Does not work", "Test2")
+        """
+
+    with FakeProjectContext(use_second_model=True) as ctx:
+        ctx.add_fake_conditions()
+        ctx.add_fake_designs()
+
+        test_codep = 'test_code.py'
+        tfp = os.path.join(ctx.project.tests_dir, test_codep)
+
+        with open(tfp, "w+") as codef:
+            codef.write(code_str)
+
+        # Test a design
+        design = ctx.project.load_design("mevalonate_cbb")
+        testsdes = design.run_tests()
+        assert len(testsdes) == 2
+        assert not testsdes["test_code.py::test_funcdes::iAF1260.json::mevalonate_cbb"].log.is_success
+
+        # Test a model
+        model = ctx.project.load_model()
+        tests = model.run_tests()
+        assert len(tests) == 3
+        assert tests["model::iAF1260.json"].log.is_success
+        assert tests["model::iAF1260.json::conditions::xyl_src"].log.is_success
+        assert tests["test_code.py::test_func::iAF1260.json::xyl_src"].log.is_success
+        # Test a second model
+        model2 = ctx.project.load_model('e_coli_core.json')
+        tests2 = model2.run_tests(display_progress=False)
+        assert len(tests2) == 1
+        assert tests2["model::e_coli_core.json"].log.is_success

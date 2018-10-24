@@ -16,9 +16,10 @@ if {'pytest', 'test', 'ptr'}.intersection(argv):
 
 setup(
     name="gsmodutils",
-    version="0.0.1",
+    version="0.0.2",
     description="Utilities for the management and testing of genome scale models in  a cross platform, open manner.",
     long_description=readme,
+    long_description_content_type='text/x-rst',
     zip_safe=False,
     author="James Gilbert",
     install_requires=requirements,
@@ -39,8 +40,7 @@ setup(
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
-        'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
+        'License :: OSI Approved :: Apache License 2.0',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',

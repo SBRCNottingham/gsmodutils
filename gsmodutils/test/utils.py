@@ -7,6 +7,9 @@ variables won't be present and this will throw errors
 """
 from __future__ import print_function, absolute_import, division
 import time
+import contextlib
+import sys
+from gsmodutils.utils import StringIO
 
 
 class ModelTestSelector(object):
@@ -27,8 +30,7 @@ class ModelTestSelector(object):
         Without this decorator, the test function would run once
         
         usage as a decorator:
-        
-        
+
         from gsmodutils.testutitls import ModelTestSelector
         @ModelTestSelector(models=['model2'], conditions=['condtion_a'], designs=['a'])
         def test_func(model, project, log):
@@ -53,78 +55,15 @@ class ModelTestSelector(object):
         Repeatedly calls function with modfied parameters
         requires functions to have the standard form of arguments
         """
-        def wrapper(*args, **kwargs):
-            project = args[1]
-            log = args[2]
-
-            if self.models == "*":
-                self.models = project.list_models
-
-            if self.designs == "*":
-                self.designs = project.list_designs + [None]
-
-            if self.conditions == "*":
-                self.conditions = project.list_conditions + [None]
-
-            if not len(self.models):
-                self.models = [None]
-
-            if not len(self.conditions):
-                self.conditions = [None]
-
-            if not len(self.designs):
-                self.designs = [None]
-
-            for mn in self.models:
-                if mn is None:
-                    mn = project.config.default_model
-                ext_model = False
-                
-                for cid in self.conditions:
-                    
-                    for did in self.designs:
-                        # correctly setting the log id so user can easily read
-                        tid = mn
-                        if cid is not None and did is not None:
-                            tid = (mn, cid, did)
-                        elif cid is not None:
-                            tid = (mn, cid)
-                        elif did is not None:
-                            tid = (mn, did)
-
-                        nlog = log.create_child(tid, param_child=True)
-                        
-                        try:
-                            mdl = project.load_model(mn)
-                        except IOError as e:
-                            ext_model = True
-                            nlog.add_error("model {} not found".format(mn), str(e))
-                            break
-                        
-                        if cid is not None:
-                            try:
-                                project.load_conditions(cid, model=mdl)
-                            except IOError as e:
-                                nlog.add_error("conditions {} not found".format(mn), str(e))
-                                break
-                            
-                        if did is not None:
-                            try:
-                                project.load_design(did, model=mdl)
-                            except IOError as e:
-                                nlog.add_error("design {} not found".format(mn), str(e))
-                                break
-                        
-                        nargs = tuple([mdl, project, nlog] + list(args[3:]))
-                        func(*nargs, **kwargs)
-
-                    if ext_model:
-                        break
+        func._is_test_selector = True
+        func.models = self.models
+        func.conditions = self.conditions
+        func.designs = self.designs
                   
-        return wrapper
+        return func
 
 
-class TestRecord(object):
+class ResultRecord(object):
     """
     Class for handling logging of errors in tester
     follows a hierarchical pattern as log records allow child records
@@ -184,7 +123,7 @@ class TestRecord(object):
         if self.param_child:
             raise TypeError('Parameter variations should not have child logs')
         
-        newlog = TestRecord(new_id, parent=self, param_child=param_child)
+        newlog = ResultRecord(new_id, parent=self, param_child=param_child)
         self.children[new_id] = newlog
         return newlog
         
@@ -232,3 +171,51 @@ class TestRecord(object):
             run_time=self.run_time,
         )
         return result
+
+
+@contextlib.contextmanager
+def stdout_ctx(stdout=None):
+    """
+    Context to capture standard output of python executed tests during run time
+    This is displayed to the user for them to see after the tests are run
+    """
+    old = sys.stdout
+    if stdout is None:
+        stdout = StringIO()
+    sys.stdout = stdout
+    yield stdout
+    sys.stdout = old
+
+
+class ModelLoader(object):
+
+    def __init__(self, project, model_id, conditions_id, design_id):
+        """
+        Simple callback interface to load a model
+        :param project: gsmodutils project
+        :param model_id: model id within project
+        :param conditions_id: mcondtions id within project
+        :param design_id: design id within project
+        """
+        self.project = project
+        self.model_id = model_id
+        self.conditions_id = conditions_id
+        self.design_id = design_id
+
+    def load(self, log):
+        mdl = self.project.load_model(self.model_id)
+        if self.conditions_id is not None:
+            try:
+                self.project.load_conditions( self.conditions_id, model=mdl)
+            except IOError as e:
+                log.add_error("conditions {} not found".format(self.conditions_id), str(e))
+                return None
+
+        if self.design_id is not None:
+            try:
+                self.project.load_design(self.design_id, model=mdl)
+            except IOError as e:
+                log.add_error("design {} not found".format(self.design_id), str(e))
+                return None
+
+        return mdl
