@@ -580,7 +580,7 @@ class GSMProject(object):
 
         conditions_store['growth_conditions'][conditions_id] = dict(
             media=media,
-            designs=apply_to,
+            models=apply_to,
             observe_growth=observe_growth,
             carbon_source=carbon_source,
         )

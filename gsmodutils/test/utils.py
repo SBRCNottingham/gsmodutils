@@ -7,6 +7,9 @@ variables won't be present and this will throw errors
 """
 from __future__ import print_function, absolute_import, division
 import time
+import contextlib
+import sys
+from gsmodutils.utils import StringIO
 
 
 class ModelTestSelector(object):
@@ -60,7 +63,7 @@ class ModelTestSelector(object):
         return func
 
 
-class TestRecord(object):
+class ResultRecord(object):
     """
     Class for handling logging of errors in tester
     follows a hierarchical pattern as log records allow child records
@@ -120,7 +123,7 @@ class TestRecord(object):
         if self.param_child:
             raise TypeError('Parameter variations should not have child logs')
         
-        newlog = TestRecord(new_id, parent=self, param_child=param_child)
+        newlog = ResultRecord(new_id, parent=self, param_child=param_child)
         self.children[new_id] = newlog
         return newlog
         
@@ -168,3 +171,51 @@ class TestRecord(object):
             run_time=self.run_time,
         )
         return result
+
+
+@contextlib.contextmanager
+def stdout_ctx(stdout=None):
+    """
+    Context to capture standard output of python executed tests during run time
+    This is displayed to the user for them to see after the tests are run
+    """
+    old = sys.stdout
+    if stdout is None:
+        stdout = StringIO()
+    sys.stdout = stdout
+    yield stdout
+    sys.stdout = old
+
+
+class ModelLoader(object):
+
+    def __init__(self, project, model_id, conditions_id, design_id):
+        """
+        Simple callback interface to load a model
+        :param project: gsmodutils project
+        :param model_id: model id within project
+        :param conditions_id: mcondtions id within project
+        :param design_id: design id within project
+        """
+        self.project = project
+        self.model_id = model_id
+        self.conditions_id = conditions_id
+        self.design_id = design_id
+
+    def load(self, log):
+        mdl = self.project.load_model(self.model_id)
+        if self.conditions_id is not None:
+            try:
+                self.project.load_conditions( self.conditions_id, model=mdl)
+            except IOError as e:
+                log.add_error("conditions {} not found".format(self.conditions_id), str(e))
+                return None
+
+        if self.design_id is not None:
+            try:
+                self.project.load_design(self.design_id, model=mdl)
+            except IOError as e:
+                log.add_error("design {} not found".format(self.design_id), str(e))
+                return None
+
+        return mdl

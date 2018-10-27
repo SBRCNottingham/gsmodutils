@@ -10,6 +10,8 @@ from gsmodutils.model_diff import model_diff
 from gsmodutils.utils.scrumpy import load_scrumpy_model
 import os
 import logging
+import collections
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -248,49 +250,66 @@ class GSModutilsModel(cobra.Model):
         spy_mdl = load_scrumpy_model(file_or_string)
         return self.merge(spy_mdl, inplace=inplace)
 
-    def get_condition_tests(self, tester=None):
+    def collect_tests(self):
         """
-        Get list of test ids that apply to this model
+        Returns test ids that apply to this model, (only bottom level tests)
         :return:
         """
-        if tester is None:
-            tester = self.project.project_tester()
-            tester.collect_tests()
-
-        tf_names = []
-        for ckey, cdf in self.project.conditions['growth_conditions'].items():
-            if not len(cdf['models']) or (len(cdf['models']) and self.mpath in cdf['models']):
-                tf_name = 'conditions_{}:model_{}'.format(self.mpath, ckey)
-                tf_names.append(tf_name)
-        return tf_names
-
-    def test_conditions(self):
-        """
-        Test all conditions that apply to this model
-        :return:
-        """
-        tester = self.project.project_tester()
-        tester.collect_tests()
-
-        ids = self.get_condition_tests(tester)
-        logs = []
-        for tid in ids:
-            logs.append(tester.run_by_id(tid))
-
-        return logs
-
-    def get_tests(self):
         tester = self.project.project_tester()
         # Collect tests
         tester.collect_tests()
         # find all tests relating to this model
         # return the set of test ids
+        apply_ids = []
+        for test_id in tester.test_ids:
+            test = tester.get_test(test_id)
 
-        for test in tester.default_tests:
-            # check test model is in it
-            # What conditions are loaded
-            # Does the model and apply this test
-            pass
+            did = None
+            if self.design is not None:
+                did = self.design.id
 
-    def run_tests(self, test_ids=None):
-        pass
+            mid = os.path.basename(self.model_path)
+            if test.applies_to_model(mid, design_id=did) and not len(test.children):
+                # We only care about bottom level tests
+                apply_ids.append(test_id)
+
+        return apply_ids
+
+    def run_tests(self, test_ids=None, display_progress=True):
+        """
+        Run tests for a given model
+        :param test_ids:
+        :param display_progress: display the progress of running tests
+        :return:
+        """
+        tester = self.project.project_tester()
+        tester.collect_tests()
+
+        if test_ids is None:
+            test_ids = self.collect_tests()
+        elif not isinstance(test_ids, collections.Iterable):
+            raise TypeError("test_ids must be iterable or None")
+
+        def run_test_i(mdl, testid):
+            run_mdl = mdl.copy()
+            tests[testid] = tester.get_test(testid)
+            tests[testid].set_override_model(run_mdl)
+            tests[testid].run()
+
+        tests = dict()
+        if display_progress:
+            for tid in tqdm(test_ids):
+                run_test_i(self, tid)
+
+            for tid in tests:
+                print("Results for test:", tests[tid].id)
+                print("\tSuccess: {}".format(tests[tid].log.is_success))
+
+                if not tests[tid].log.is_success:
+                    for error in tests[tid].log.error:
+                        print(error[0])
+        else:
+            for tid in test_ids:
+                run_test_i(self, tid)
+
+        return tests
