@@ -64,7 +64,11 @@ This software has been tested on linux (Ubuntut, manjaro/arch), windows and MacO
 Change notes
 ------------
 
-Version 0.0.2:
+**Version 0.0.3**:
+
+* Added `gsmodutils.utils.design_annoation` decorator for annotating python based designs.
+
+**Version 0.0.2:**
 
 
 * Changed method for test ids to separators being "::" for example "test_pytest.py::test_func" or "design::design_id"
@@ -78,8 +82,6 @@ Version 0.0.2:
         * Allows access to python tests with runtime specified models (useful for python based interaction)
 
 * GSModutilsModel class to allow the selection of specific tests related to the loaded model.
-For
-
 
 Usage
 -----
