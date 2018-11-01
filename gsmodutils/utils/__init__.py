@@ -125,3 +125,37 @@ def biomass_debug(model, objective_reaction):
         nobjective.remove_from_model()
 
     return non_products
+
+
+def design_annotation(name="", description=None, base_model=None, parent=None, conditions=None):
+    """
+    Use to annotate programmable designs with data such as name, parent design and conditions to be loaded
+    prior to the function execution.
+
+    Usage:
+        from gsmodutils.utils import design_annotation
+
+
+        @design_annotation(name="Design short name", description="Override doc string", parent="some_parent")
+        def gsmdesign_name(model, project):
+            ...
+            return model
+
+    :param name: Name of the design
+    :param description: Long description of what the design is (overrides the function's doc string)
+    :param base_model: base model from project to apply design to. Must be valid in the project config
+    :param parent: Parent design to be loaded first - must exist in the project
+    :param conditions: conditions to be loaded - must exist within the project
+    :return:
+    """
+    def inner_func(func):
+        if description is not None:
+            func.description = description
+
+        func.name = name
+        func.parent = parent
+        func.conditions = conditions
+        func.base_model = base_model
+        return func
+
+    return inner_func

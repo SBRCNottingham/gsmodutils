@@ -9,40 +9,41 @@ def test_py_design():
     """ Tests a working py_design """
 
     py_design = """
+from gsmodutils.utils import design_annotation
+
+
+@design_annotation(name="tester")
 def gsmdesign_tester(model, project):
     '''This is the description'''
     reaction = model.reactions.get_by_id("ATPM")
     reaction.bounds = (-999, 999)
     return model
 
-gsmdesign_tester.name = "tester"
 
-
+@design_annotation()
 def gsmdesign_no_return(model, project):
     pass
     
-    
+
+@design_annotation()
 def gsmdesign_bad_prototype(model):
     return model
 
+
+@design_annotation(conditions="xylose_growth", description="overridden description")
 def gsmdesign_uses_conditions(model, project):
     '''orginal description'''
     return model
 
-gsmdesign_uses_conditions.conditions = "xylose_growth"
-gsmdesign_uses_conditions.description = "overridden description"
 
-
+@design_annotation(base_model="e_coli_core.json")
 def gsmdesign_uses_base_model(model, project):
     return model
 
-gsmdesign_uses_base_model.base_model = "e_coli_core.json"
 
-
+@design_annotation(base_model="e_coli_core")
 def gsmdesign_bad_base_model(model, project):
     return model
-
-gsmdesign_bad_base_model.base_model = "e_coli_core"
 
     """
 
@@ -110,27 +111,28 @@ def test_parantage():
     """ Tests for child and parent designs. Take a breath, this is some pretty confusing logic. """
 
     py_design = """
+from gsmodutils.utils import design_annotation    
+    
+
+@design_annotation(parent="mevalonate_cbb")
 def gsmdesign_thanos(model, project):
     reaction = model.reactions.get_by_id("ATPM")
     reaction.bounds = (-999, 999)
     return model
 
-gsmdesign_thanos.parent = "mevalonate_cbb"
 
+@design_annotation(parent="t1_thanos")
 def gsmdesign_child_of_thanos(model, project):
     reaction = model.reactions.get_by_id("ATPM")
     reaction.lower_bound  = 0
     return model     
 
-gsmdesign_child_of_thanos.parent = "t1_thanos"
 
-
+@design_annotation(parent="thanos")
 def gsmdesign_invalid_parent_id(model, project):
     reaction = model.reactions.get_by_id("ATPM")
     reaction.lower_bound  = 0
     return model
-
-gsmdesign_invalid_parent_id.parent = "thanos"
 
 """
     with FakeProjectContext() as ctx:
