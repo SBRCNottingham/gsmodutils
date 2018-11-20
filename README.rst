@@ -66,22 +66,24 @@ Change notes
 
 **Version 0.0.3**:
 
-* Added `gsmodutils.utils.design_annoation` decorator for annotating python based designs.
+
+Added `gsmodutils.utils.design_annoation` decorator for annotating python based designs.
+Fixed GsmodutilsModel.save_model for sbml models (it used to save it as a matlab).
 
 **Version 0.0.2:**
 
+Changed method for test ids to separators being "::" for example "test_pytest.py::test_func" or "design::design_id"
 
-* Changed method for test ids to separators being "::" for example "test_pytest.py::test_func" or "design::design_id"
+Major refactor of test loading classes:
 
-* Major refactor of test loading classes
-    * CLI and gsmodutils.test.tester class API remains the same
-    * Tests are now encapsulated around TestInstance classes
-    * Hierarchy of logs is stored
-    * Encapsulates individual tests better
-    * Can run child tests in isolation
-        * Allows access to python tests with runtime specified models (useful for python based interaction)
+* CLI and gsmodutils.test.tester class API remains the same
+* Tests are now encapsulated around TestInstance classes
+* Hierarchy of logs is stored
+* Encapsulates individual tests better
+* Can run child tests in isolation
+* Allows access to python tests with runtime specified models (useful for python based interaction)
 
-* GSModutilsModel class to allow the selection of specific tests related to the loaded model.
+GSModutilsModel class to allow the selection of specific tests related to the loaded model.
 
 Usage
 -----

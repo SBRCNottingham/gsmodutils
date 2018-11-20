@@ -124,7 +124,7 @@ class GSModutilsModel(cobra.Model):
                 if model_type == "json":
                     cobra.io.save_json_model(self, self.model_path, pretty=True)
                 elif model_type in ["xml", "sbml"]:
-                    cobra.io.save_matlab_model(self, self.model_path)
+                    cobra.io.write_sbml_model(self, self.model_path)
                 elif model_type in ["m", "mat"]:
                     cobra.io.save_matlab_model(self, self.model_path)
                 elif model_type in ["yaml", "yml"]:
