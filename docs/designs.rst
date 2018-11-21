@@ -367,20 +367,21 @@ Only files with the name prefix `design_` will be collected.
 Then, any functions defined as `design_` will be collected, they must have the function prototype:
 
 .. code:: python
+    from gsmodutils.utils import design_annotation
 
+
+    @design_annotation(name="name your design",
+                        description="Use this instead of the docstring",
+                        base_model="some valid base model id",
+                        parent="some_valid_parent_id",
+                        conditions="some_valid_conditions_id"
+    )
     def gsmdesign_NAME(model, project):
         """ docstrings are used as design descriptions """
         return model
 
 The designs must return a cobra.Model instance (and preferably a gsmodutils.project.Model instance).
-To, optionally, set parent designs set the attributes of the design by modifying the function attributes, as follows.
-
-.. code:: python
-
-    design_NAME.name = "name your design"
-    design_NAME.description = "Alternatively you can use this field as a description"
-    design_NAME.parent = "SOME_VALID_PARENT_ID"
-    design_NAME.conditions = "SOME_VALID_CONDITIONS_ID"
+To, optionally, set parent designs, name and base model
 
 When loading a design in python or exporting it, the id will be based on the filename and the function prototype,
 omitting `design` and `.py`. For the example above in the file `designs/design_some_name.py` the resulting design id

@@ -64,22 +64,26 @@ This software has been tested on linux (Ubuntut, manjaro/arch), windows and MacO
 Change notes
 ------------
 
-Version 0.0.2:
+**Version 0.0.3**:
 
 
-* Changed method for test ids to separators being "::" for example "test_pytest.py::test_func" or "design::design_id"
+Added `gsmodutils.utils.design_annoation` decorator for annotating python based designs.
+Fixed GsmodutilsModel.save_model for sbml models (it used to save it as a matlab).
 
-* Major refactor of test loading classes
-    * CLI and gsmodutils.test.tester class API remains the same
-    * Tests are now encapsulated around TestInstance classes
-    * Hierarchy of logs is stored
-    * Encapsulates individual tests better
-    * Can run child tests in isolation
-        * Allows access to python tests with runtime specified models (useful for python based interaction)
+**Version 0.0.2:**
 
-* GSModutilsModel class to allow the selection of specific tests related to the loaded model.
-For
+Changed method for test ids to separators being "::" for example "test_pytest.py::test_func" or "design::design_id"
 
+Major refactor of test loading classes:
+
+* CLI and gsmodutils.test.tester class API remains the same
+* Tests are now encapsulated around TestInstance classes
+* Hierarchy of logs is stored
+* Encapsulates individual tests better
+* Can run child tests in isolation
+* Allows access to python tests with runtime specified models (useful for python based interaction)
+
+GSModutilsModel class to allow the selection of specific tests related to the loaded model.
 
 Usage
 -----
