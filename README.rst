@@ -48,7 +48,7 @@ To install this software clone the git repository and type:
 
 .. code-block::
 
-    pip install -r requriements.txt
+    pip install -r requirements.txt
     python setup.py install
     
 To run the tests for this project, install pytest and, from the project root directory simply run
