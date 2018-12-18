@@ -39,7 +39,10 @@ class GSMProject(object):
                                 "type": "array",
                                 "items": {"type": "string"}
                             },
-
+                            "objective_reactions": {
+                                "type": "array",
+                                "items": {"type": "string"}
+                            },
                             "carbon_source": {"type": "string"},
                             "media": {
                                 "type": "object",
@@ -416,12 +419,13 @@ class GSMProject(object):
         conditions_store = self.get_conditions(update=True)
         return list(conditions_store["growth_conditions"].keys())
 
-    def load_conditions(self, conditions_id, model=None, copy=False):
+    def load_conditions(self, conditions_id, model=None, copy=False, set_objective=True):
         """
         Load a model with a given set of pre-saved media conditions
         :param conditions_id: identifier of conditions file
         :param model: string or cobrapy model
         :param copy: return copy of model or modify inplace
+        :param copy: If
         :return:
         """
 
@@ -441,7 +445,109 @@ class GSMProject(object):
             c_tx = mdl.reactions.get_by_id(cx["carbon_source"])
             c_tx.upper_bound = c_tx.lower_bound
 
+
+        if set_objective and "objective_reactions" in cx and cx["objective_reactions"] is not None \
+                and len(cx["objective_reactions"]):
+
+            set_objective = True
+            for objective in cx["objective_reactions"]:
+                if objective not in model.reactions:
+                    logger.warning("Objective reaction {}. Cannot set objective".format(objective))
+                    break
+
+            if set_objective:
+                for objective in cx["objective_reactions"]:
+                    objective_reaction = mdl.reaction.get_by_id(objective)
+                    objective_reaction.objective_coefficient = 1.0
+
+                for reaction in mdl.reactions:
+                    reaction.objective_coefficient = 0.0
+
         return mdl
+
+    def growth_condition(self, conditions_id):
+        conditions_store = self.get_conditions(update=True)
+        return conditions_store['growth_conditions'][conditions_id]['observe_growth']
+
+    def save_conditions(self, model, conditions_id, carbon_source=None, apply_to=None, observe_growth=True):
+        """
+        Add media conditions that a given model has to the project. Essentially the lower bounds on transport reactions.
+        All other trnasport reactions will be switched off.
+
+        In some cases, one may wish to set conditions under which a model should not grow.
+        observe_growth allows this to be configured. If using a single model or if the condition should not grow under
+        any circumstances, observe_growth can be set to false.
+
+        If certain models should grow, specify this with a a tuple where the entries refer to the model files tracked by
+        the project. All models specified must be contained within the project.
+
+        :param model: cobrapy model
+        :param conditions_id: identifier for the conditions should be unique
+        :param carbon_source: name of carbon source in the media that has a fixed uptake rate
+        :param apply_to: iterable of models that this set of designs applies to
+        :param observe_growth: bool or list.
+        :return:
+        """
+        # If it can't get a solution then this will raise errors.
+        status = model.solver.optimize()
+        if not observe_growth and status != 'infeasible':
+            raise AssertionError('Model should not grow')
+        elif observe_growth and status == 'infeasible':
+            raise Infeasible('Cannot find valid solution - should conditions result in growth?')
+
+        if apply_to is None:
+            apply_to = []
+        elif not isinstance(apply_to, list):
+            apply_to = [apply_to]
+
+        for mdl_path in apply_to:
+            if mdl_path not in self.config.models:
+                raise KeyError("Model {} not in current project".format(mdl_path))
+
+        # List all transport reactions in to the cell
+        def is_exchange(rr):
+            return (len(rr.reactants) == 0 or len(rr.products) == 0) and len(rr.metabolites) == 1
+
+        def is_media(rr):
+            if rr.lower_bound < 0 and is_exchange(rr):
+                return True
+            return False
+
+        media = {}
+        for r in model.reactions:
+            if is_media(r):
+                media[r.id] = r.lower_bound
+
+        # save to conditions file
+        conditions_store = self.get_conditions(update=True)
+
+        if carbon_source is not None and carbon_source not in media:
+            raise KeyError("carbon source not valid")
+
+        objective_reactions = []
+        for reaction in model.reactions:
+            if reaction.objective_coefficient:
+                objective_reactions.append(reaction.id)
+
+        conditions_store['growth_conditions'][conditions_id] = dict(
+            media=media,
+            models=apply_to,
+            observe_growth=observe_growth,
+            carbon_source=carbon_source,
+            objective_reactions=objective_reactions,
+        )
+        self._write_conditions(conditions_store)
+
+    def _write_conditions(self, conditions_store):
+        """
+        Writes updated conditions store
+        TODO: Validate passed dictionary
+        :param conditions_store:
+        :return:
+        """
+        with self.project_context_lock:
+            with open(self._conditions_file, 'w+') as cf:
+                json.dump(conditions_store, cf, indent=4)
 
     def add_essential_pathway(self, tid, reactions, description='', reaction_fluxes=None,
                               models=None, designs=None, conditions=None, overwrite=False):
@@ -518,85 +624,6 @@ class GSMProject(object):
         # Save the json test file to disk.
         with open(test_file, 'w+') as tf:
             json.dump(test, tf)
-
-    def growth_condition(self, conditions_id):
-        conditions_store = self.get_conditions(update=True)
-        return conditions_store['growth_conditions'][conditions_id]['observe_growth']
-
-    def save_conditions(self, model, conditions_id, carbon_source=None, apply_to=None, observe_growth=True):
-        """
-        Add media conditions that a given model has to the project. Essentially the lower bounds on transport reactions.
-        All other trnasport reactions will be switched off.
-
-        In some cases, one may wish to set conditions under which a model should not grow.
-        observe_growth allows this to be configured. If using a single model or if the condition should not grow under
-        any circumstances, observe_growth can be set to false.
-
-        If certain models should grow, specify this with a a tuple where the entries refer to the model files tracked by
-        the project. All models specified must be contained within the project.
-
-        :param model: cobrapy model
-        :param conditions_id: identifier for the conditions should be unique
-        :param carbon_source: name of carbon source in the media that has a fixed uptake rate
-        :param apply_to: iterable of models that this set of designs applies to
-        :param observe_growth: bool or list.
-        :return:
-        """
-        # If it can't get a solution then this will raise errors.
-        status = model.solver.optimize()
-        if not observe_growth and status != 'infeasible':
-            raise AssertionError('Model should not grow')
-        elif observe_growth and status == 'infeasible':
-            raise Infeasible('Cannot find valid solution - should conditions result in growth?')
-
-        if apply_to is None:
-            apply_to = []
-        elif not isinstance(apply_to, list):
-            apply_to = [apply_to]
-
-        for mdl_path in apply_to:
-            if mdl_path not in self.config.models:
-                raise KeyError("Model {} not in current project".format(mdl_path))
-
-        # List all transport reactions in to the cell
-        def is_exchange(rr):
-            return (len(rr.reactants) == 0 or len(rr.products) == 0) and len(rr.metabolites) == 1
-
-        def is_media(rr):
-            if rr.lower_bound < 0 and is_exchange(rr):
-                return True
-            return False
-        
-        media = {}
-        for r in model.reactions:
-            if is_media(r):
-                media[r.id] = r.lower_bound
-        
-        # save to conditions file
-        conditions_store = self.get_conditions(update=True)
-
-        if carbon_source is not None and carbon_source not in media:
-            raise KeyError("carbon source not valid")
-
-        conditions_store['growth_conditions'][conditions_id] = dict(
-            media=media,
-            models=apply_to,
-            observe_growth=observe_growth,
-            carbon_source=carbon_source,
-        )
-        self._write_conditions(conditions_store)
-
-    def _write_conditions(self, conditions_store):
-        """
-        Writes updated conditions store
-        TODO: Validate passed dictionary
-        TODO: make this a persistent dict stored in memory?
-        :param conditions_store:
-        :return:
-        """
-        with self.project_context_lock:
-            with open(self._conditions_file, 'w+') as cf:
-                json.dump(conditions_store, cf, indent=4)
 
     @classmethod
     def create_project(cls, models, description, author, author_email, project_path):

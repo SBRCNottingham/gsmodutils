@@ -16,7 +16,7 @@ if {'pytest', 'test', 'ptr'}.intersection(argv):
 
 setup(
     name="gsmodutils",
-    version="0.0.3",
+    version="0.0.4",
     description="Utilities for the management and testing of genome scale models in  a cross platform, open manner.",
     long_description=readme,
     long_description_content_type='text/x-rst',
