@@ -39,6 +39,9 @@ class GSMProject(object):
                                 "type": "array",
                                 "items": {"type": "string"}
                             },
+                            "objective_direction": {
+                                "type": "string",
+                            },
                             "objective_reactions": {
                                 "type": "array",
                                 "items": {"type": "string"}
@@ -462,6 +465,9 @@ class GSMProject(object):
                 for reaction in mdl.reactions:
                     reaction.objective_coefficient = 0.0
 
+            if "objective_direction" in cx:
+                model.objective_direction = cx["objective_direction"]
+
         return mdl
 
     def growth_condition(self, conditions_id):
@@ -528,12 +534,15 @@ class GSMProject(object):
             if reaction.objective_coefficient:
                 objective_reactions.append(reaction.id)
 
+        objective_direction = model.objective_direction
+
         conditions_store['growth_conditions'][conditions_id] = dict(
             media=media,
             models=apply_to,
             observe_growth=observe_growth,
             carbon_source=carbon_source,
             objective_reactions=objective_reactions,
+            objective_direction=objective_direction
         )
         self._write_conditions(conditions_store)
 
