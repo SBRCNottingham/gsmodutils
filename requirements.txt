@@ -14,3 +14,4 @@ lxml>=4.1.1
 fasteners>=0.14.1
 tqdm>=4.23.3
 jsonschema>=2.6.0
+scipy>=1.1.0

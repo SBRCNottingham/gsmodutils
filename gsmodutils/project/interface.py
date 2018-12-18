@@ -453,20 +453,20 @@ class GSMProject(object):
 
             set_objective = True
             for objective in cx["objective_reactions"]:
-                if objective not in model.reactions:
+                if objective not in mdl.reactions:
                     logger.warning("Objective reaction {}. Cannot set objective".format(objective))
                     break
 
             if set_objective:
                 for objective in cx["objective_reactions"]:
-                    objective_reaction = mdl.reaction.get_by_id(objective)
+                    objective_reaction = mdl.reactions.get_by_id(objective)
                     objective_reaction.objective_coefficient = 1.0
 
                 for reaction in mdl.reactions:
                     reaction.objective_coefficient = 0.0
 
             if "objective_direction" in cx:
-                model.objective_direction = cx["objective_direction"]
+                mdl.objective_direction = cx["objective_direction"]
 
         return mdl
 
