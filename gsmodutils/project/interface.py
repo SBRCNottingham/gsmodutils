@@ -425,7 +425,7 @@ class GSMProject(object):
         :param conditions_id: identifier of conditions file
         :param model: string or cobrapy model
         :param copy: return copy of model or modify inplace
-        :param copy: If
+        :param set_objective: set objective function (if stored)
         :return:
         """
 
@@ -444,7 +444,6 @@ class GSMProject(object):
             # Will throw error if invalid transporter
             c_tx = mdl.reactions.get_by_id(cx["carbon_source"])
             c_tx.upper_bound = c_tx.lower_bound
-
 
         if set_objective and "objective_reactions" in cx and cx["objective_reactions"] is not None \
                 and len(cx["objective_reactions"]):
