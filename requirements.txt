@@ -1,5 +1,5 @@
 cobra>=0.13.4
-pytest>=3.0.7
+pytest>=3.6.0
 click>=6.7
 lockfile>=0.12.2
 pytest-cov>=2.5.1

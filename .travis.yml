@@ -13,6 +13,6 @@ install:
   - pip install -r requirements.txt scipy codecov
 # command to run tests
 script:
-  - py.test -n8 --cov=gsmodutils
+  - py.test --cov=gsmodutils
 after_success:
   - codecov
