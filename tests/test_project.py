@@ -15,6 +15,7 @@ from gsmodutils.project.design import StrainDesign
 from gsmodutils.exceptions import DesignError, DesignNotFoundError, ProjectNotFound
 import jsonschema
 from cobra.exceptions import Infeasible
+import json
 
 
 def test_load_project():
@@ -110,14 +111,50 @@ def test_create_design():
         assert nmodel.reactions.EX_xyl__D_e.lower_bound == -8.00
         assert nmodel.reactions.EX_glc__D_e.lower_bound == 0.0 
         
-        
+
+def test_old_conditions():
+    """
+    Test to see if old conditions (without setting objective function) breaks
+    :return:
+    """
+    with FakeProjectContext() as ctx:
+        project = GSMProject(ctx.path)
+        model = project.model
+
+        model.reactions.EX_xyl__D_e.lower_bound = -8.00
+        model.reactions.EX_glc__D_e.lower_bound = 0.0
+
+        project.save_conditions(model, 'xylose_growth', carbon_source="EX_xyl__D_e")
+
+        with open(os.path.join(ctx.path, "model_conditions.json")) as cond_path:
+            ddict = json.load(cond_path)
+
+        del ddict["growth_conditions"]["xylose_growth"]["objective_reactions"]
+        with open(os.path.join(ctx.path, "model_conditions.json"), "w") as cond_path:
+            json.dump(ddict, cond_path)
+
+        too_model = project.load_conditions('xylose_growth', model=model, copy=True)
+        model.reactions.EX_xyl__D_e.lower_bound = 0.00
+        assert model.reactions.EX_xyl__D_e.lower_bound != too_model.reactions.EX_xyl__D_e.lower_bound
+
+        # Test bad objective handling
+        ddict["growth_conditions"]["xylose_growth"]["objective_reactions"] = ["NOT_REAL"]
+        with open(os.path.join(ctx.path, "model_conditions.json"), "w") as cond_path:
+            json.dump(ddict, cond_path)
+
+        too_model = project.load_conditions('xylose_growth', model=model, copy=True)
+        assert too_model.reactions.BIOMASS_Ec_iAF1260_core_59p81M.objective_coefficient
+
+
 def test_load_conditions():
     with FakeProjectContext() as ctx:
         project = GSMProject(ctx.path)
         model = project.model
         # Growth on xylose instead of glucose
         model.reactions.EX_xyl__D_e.lower_bound = -8.00
-        model.reactions.EX_glc__D_e.lower_bound = 0.0 
+        model.reactions.EX_glc__D_e.lower_bound = 0.0
+
+        model.reactions.EX_h_e.objective_coefficient = 1.0
 
         project.save_conditions(model, 'xylose_growth', carbon_source="EX_xyl__D_e")
         
@@ -128,6 +165,10 @@ def test_load_conditions():
         assert new_model.reactions.EX_xyl__D_e.lower_bound == -8.00
         assert new_model.reactions.EX_xyl__D_e.upper_bound == -8.00
         assert new_model.reactions.EX_glc__D_e.lower_bound == 0.0
+
+        # Test model objective
+        assert new_model.reactions.EX_h_e.objective_coefficient == 1.0
+        assert new_model.reactions.BIOMASS_Ec_iAF1260_core_59p81M.objective_coefficient == 1.0
 
         del new_model
         model = project.model
