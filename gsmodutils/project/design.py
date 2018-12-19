@@ -43,11 +43,6 @@ class StrainDesign(object):
                             "type": "number",
                             "default": 0,
                         },
-                        "variable_kind": {
-                            "type": "string",
-                            "pattern": "integer|continuous",
-                            "default": "continuous"
-                        },
                         "subsystem": {"type": "string"},
                         "notes": {"type": "object"},
                         "annotation": {"type": "object"},
@@ -576,7 +571,6 @@ class StrainDesign(object):
             reaction.gene_reaction_rule = rct['gene_reaction_rule']
             reaction.subsystem = rct['subsystem']
             reaction.name = rct['name']
-            reaction.variable_kind = rct['variable_kind']
 
             mdl.add_reactions([reaction])
             reaction = mdl.reactions.get_by_id(reaction.id)

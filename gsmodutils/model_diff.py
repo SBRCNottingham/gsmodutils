@@ -261,7 +261,6 @@ class ModelDiff(dict):
         reacfields = [
             'lower_bound', 'upper_bound',
             'gene_reaction_rule', 'subsystem', 'name',
-            'variable_kind',
         ]
         for ra in model_a.reactions:
             # reaction has been removed
@@ -288,7 +287,6 @@ class ModelDiff(dict):
                         subsystem=rb.subsystem,
                         objective_coefficient=rb.objective_coefficient,
                         name=rb.name,
-                        variable_kind=rb.variable_kind,
                         metabolites=dict(convert_stoich(rb.metabolites)),
                         rstr=rb.build_reaction_string(use_metabolite_names=False),
                         rstr_names=rb.build_reaction_string(use_metabolite_names=True)
