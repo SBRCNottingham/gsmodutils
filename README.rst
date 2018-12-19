@@ -64,6 +64,9 @@ This software has been tested on linux (Ubuntut, manjaro/arch), windows and MacO
 Change notes
 ------------
 
+**Version 0.0.4**:
+Model conditions now store objective functions and directions, this is more convenient than designs for many use cases.
+
 **Version 0.0.3**:
 
 
