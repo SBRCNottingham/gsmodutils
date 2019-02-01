@@ -367,6 +367,7 @@ Only files with the name prefix `design_` will be collected.
 Then, any functions defined as `design_` will be collected, they must have the function prototype:
 
 .. code:: python
+
     from gsmodutils.utils import design_annotation
 
 
