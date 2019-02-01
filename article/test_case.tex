@@ -1,0 +1,67 @@
+\documentclass[border={35pt 10pt 150pt 60pt}, % left bottom right top
+  svgnames]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{listings}
+\lstset{%
+  frame            = tb,    % draw frame at top and bottom of code block
+  tabsize          = 1,     % tab space width
+  numbers          = left,  % display line numbers on the left
+  framesep         = 3pt,   % expand outward
+  framerule        = 0.4pt, % expand outward 
+  commentstyle     = \color{Green},      % comment color
+  keywordstyle     = \color{blue},       % keyword color
+  stringstyle      = \color{DarkRed},    % string color
+  backgroundcolor  = \color{WhiteSmoke}, % backgroundcolor color
+  showstringspaces = false,              % do not mark spaces in strings
+}
+\begin{document}
+\begin{lstlisting}[language = python, numbers = none, escapechar = !,
+    basicstyle = \ttfamily\bfseries, linewidth = \linewidth] 
+        !
+ \tikz[remember picture] \node [] (a) {}; !
+@ModelTestSelector(designs=["calvin_cycle"]!\tikz[remember picture]\node[](b){};!)
+def test_fluxomic_data(model, log, project)!\tikz[remember picture] \node [] (c){};!
+    """ 
+    Example test comparing 13C fluxomic data to
+    model predicted values.
+    """
+    path = project.project_path + "data/13C_flux_dt.csv"
+    flux_data = pandas.read_csv(path) !\tikz[remember picture] \node [] (load_external_data){};!
+    
+    # Call to external cobrapy flux variability function
+    fva_result = fva(model) !\tikz[remember picture] \node [] (cobra_fva){};!
+
+    for row in flux_data.iterrows():
+        # Get reactions found in the data file
+        rxn = model.reactions.get_by_id(row["rxn_id"])
+        # Compare against fva
+        stmt = fva_result[rxn.id].minimum >= row["min"]\!\tikz[remember picture] \node [] (statment){};!
+                        and fva_result <= row["max"]
+        log.assertion( !\tikz[remember picture] \node [] (d){};!
+            stmt,
+            "Reaction {} inside range".format(rxn.id),
+            "Reaction {} outside range".format(rxn.id)
+        )
+                
+\end{lstlisting}
+\begin{tikzpicture}[remember picture, overlay,
+    every edge/.append style = { ->, thick, >=stealth,
+                                  DimGray, dashed, line width = 1pt },
+    every node/.append style = { align = center, minimum height = 10pt,
+                                 font = \bfseries, fill= green!20},
+                  text width = 2.5cm ]
+  \node [above left = 0.5cm and -1 cm of a,text width = 3cm] (A) {Model selection decorator};
+  \node [right = 4cm of A, text width = 2cm] (B) {Strain design selection};
+  
+  \node[right=3.5cm of load_external_data] (Ext) {Loading external data};
+  
+  \node [right = 2.6cm of c] (C) {Required parameters};
+  \node [right = 7.2cm of d]  (D) {Formal test definition with success and failure messages};
+  \draw (A.south) + (0, 0) coordinate(x1) edge (x1|-b.north);
+  \draw (B.south) + (0, 0) coordinate(x2) edge (x2|-b.north);
+  \draw (Ext.west) edge (load_external_data.east) ;
+  \draw (C.west) edge (c.east) ;
+  \draw (D.west) edge (d.east) ;
+\end{tikzpicture} 
+\end{document}
