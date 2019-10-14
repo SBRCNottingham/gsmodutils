@@ -134,7 +134,7 @@ def add_pathway(model, enzyme_ids=None, reaction_ids=None, compartment="c", db_p
         for metabolite in react.metabolites:
             # Check if orphan. if so, add transporter out
             if len(metabolite.reactions) == 1:
-                rb = model.add_boundary(metabolite, type='exchange')
+                rb = model.add_boundary(metabolite, type='sink')
                 added_boundaries.append(rb)
 
     rdict = dict(

@@ -48,39 +48,45 @@
 \begin{abstract}
 \textbf{Motivation:} Genome scale metabolic models (GSMMs) are increasingly important for systems biology and metabolic engineering research as they are capable of simulating complex steady-state behaviour.
 Constraints based models of this form can include thousands of reactions and metabolites, with many crucial pathways that only become activated in specific simulation settings.
-However, despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for the continued management of curated large scale models.
-For example, when genome annotations are updated or new understanding regarding behaviour of is discovered, models often need to be altered to reflect this.
-This is quickly becoming an issue for industrial systems and synthetic biotechnology applications, which require good quality reusable models integral to the design, build and test cycle.
+However, despite their widespread use, power and the availability of tools to aid with the construction and analysis of large scale models, little methodology is suggested for their continued management.
+For example, when genome annotations are updated or new understanding regarding behaviour is discovered, models often need to be altered to reflect this.
+This is quickly becoming an issue for industrial systems and synthetic biotechnology applications, which require good quality reusable models integral to the design, build, test and learn cycle.
 \\
 \textbf{Results:}
 As part of an ongoing effort to improve genome scale metabolic analysis, we have developed a test-driven development methodology for the continuous integration of validation data from different sources.
 Contributing to the open source technology based around COBRApy, we have developed the \textit{gsmodutils} modelling framework placing an emphasis on test-driven design of models through defined test cases.
 Crucially, different conditions are configurable allowing users to examine how different designs or curation impact a wide range of system behaviours, minimising error between model versions.\\
-\textbf{Availability:} The software framework described within this paper is open source and freely available from \url{http://github.com/SBRCNottingham/gsmodutils} \\
+\textbf{Availability:} The software framework described within this paper is open source and freely available from http://github.com/SBRCNottingham/gsmodutils \\
+\textbf{Supplementary information:} Supplementary data are available online.
 \end{abstract}
 
 \section{Introduction}
 Stoichiometric constraints based modelling for biological systems has been a mainstay of systems biology for several decades \cite{fell1986fat, varma1994stoichiometric}.
 Given its flexibility, low barrier to entry and requirement only on minimal knowledge regarding the stoichiometry of metabolic networks this structural approach has become an extremely popular method for modelling steady-state behaviour of large, biochemical networks \cite{kauffman2003advances}.
 Such large scale reconstructions are often referred to as genome scale metabolic models (GSMMs), as the processes is significantly aided through the advent of relatively inexpensive genome sequencing \cite{o2015using, land2015insights}.
-Indeed, owing to their ability to model complex aspects of metabolism, GSMMs have been widely adopted as a standard to elucidate and optimise of industrial biotechnology processes \cite{kim2017current}.
+Indeed, owing to their ability to model complex aspects of metabolism, GSMMs have been widely adopted as a standard to elucidate and optimise industrial biotechnology processes \cite{kim2017current}.
 
-The reconstruction of GSMMs is an arduous process that follows a complex protocol to ensure model validity \cite{thiele2010protocol}.
-Whilst many popular automated methods exists to construct GSMMs from reference genomes \cite{henry2010high, poolman2006scrumpy}, there is a still a significant amount of manual curation.
+The reconstruction of GSMMs is a time consuming process of manual curation that follows a complex protocol to ensure model validity \cite{thiele2010protocol}.
+Whilst many popular automated methods exist to construct GSMMs from reference genomes \cite{henry2010high, poolman2006scrumpy}, there is still a significant amount of manual curation.
 However, treating the creation of models as an isolated ``one-off'' event ignores the significant amount of curation that is required for applications such as biotechnology.
 
 As a consequence, a significant amount of work has gone into the management of genome scale models.
 The BiGG models database \cite{king2015bigg}, for example, exists to provide a standardised repository of validated models that can be shared and reused.
-However, little focus is placed upon the collaborative design aspect of such models with few mechanisms existing to capture the differences between two model versions, \textit{model deltas}.
+Perhaps one of the best examples of a well curated model developed in an iterative manner is yeast-GEM, a model for \textit{Saccharomyces cerevisiae} under continuous development \cite{benjamin_sanchez_2018_1994089}.
 Similarly, the MetaNetX \cite{moretti2016metanetx} system exists to provide a standardised namespace and toolchain for GSM analysis.
-However, such tools often make it difficult to understand the design decisions made by the initial model authors.
+However, in many cases too little focus is placed upon the collaborative design aspect of such models with few mechanisms existing to capture the differences between two model versions, \textit{model deltas}.
 
-Furthermore, as with many areas of bioinformatic study the number available computational tools has become vast.
-This covers huge variety of software platforms including the COBRA toolbox for Matlab \cite{schellenberger2011quantitative}, ScrumPy and COBRApy in python \cite{poolman2006scrumpy, ebrahim2013cobrapy} with additional tools and libraries such as cameo \cite{cardoso2017cameo}, OptFlux in Java \cite{rocha2010optflux} and SurreyFBA \cite{gevorgyan2010surreyfba}.
+Better tools for developing automated reconstructions of genome scale models are always under development.
+For example, a recent development in the domain of genome scale models is the EMBL-GEMS model repository for automated reconstructions of bacterial species created from NCBI annotations by the CarveMe tool \cite{machado2018fast}.
+However, these tools will often add incorrect reactions, such as aerobic reactions in organisms that only survive in anaerobic environments \cite{norman2018agenome}.
+Furthermore, we feel a specific advantage of genome scale models is that they encode domain specific knowledge that allows contradictions in understanding to be uncovered.
+For example, an entirely automated process is unlikely to find the correct cofactors involved in reactions under specific conditions.
+
+Furthermore, as with many areas of bioinformatic study the number of available computational tools has become vast.
+This covers a huge variety of software platforms including the COBRA toolbox for MATLAB \cite{schellenberger2011quantitative}, ScrumPy and COBRApy in python \cite{poolman2006scrumpy, ebrahim2013cobrapy} with additional tools and libraries such as cameo \cite{cardoso2018cameo}, OptFlux in Java \cite{rocha2010optflux} and SurreyFBA \cite{gevorgyan2010surreyfba}.
 Whilst most of these tools are Open Source and follow standards, such as SBML \cite{finney2003systems}, it is often challenging to replicate the initial modelling efforts conducted by authors of papers.
 Consequently, we feel that software tools are urgently needed to address this issue.
-
-Similarly, The archetype design, build and test cycle of synthetic biology heavily relies on the usage of bioinformatics software and modelling to improve the production of natural products \cite{carbonell2016bioinformatics}.
+Similarly, the archetype design, build, test and learn cycle of synthetic biology heavily relies on bioinformatics software and modelling to improve the production of natural products \cite{carbonell2016bioinformatics}.
 In order to speed up the use of bioinformatics tools to produce high value platform chemicals, genome scale models are often used to discover methods for process optimisation \textit{in silico}.
 
 For example, many tools such as RetroPath \cite{carbonell2013retropath}, XTMS \cite{carbonell2014xtms} and GEM-Path \cite{campodonico2014generation} suggest thousands of potential heterologous pathways.
@@ -94,55 +100,50 @@ These models all exist to solve similar biological problems some being updates t
 However, there has been disagreement over fundamental biochemical properties of this anaerobic organism, notably with the focus on redox balancing \cite{dash2014capturing}.
 Such models also include updates based on improved genome annotations and the inclusion of fluxomic, transcriptomic and metabolomic characterisations \cite{yoo2015quantitative}.
 
-%Many of the results presented in original sources are difficult to compare due to a lack of standardisation of reference identifiers for reaction names.
-
 Unfortunately, many of the results reported in \cite{lee2008genome, senger2008genome, mcanulty2012genome, dash2014capturing, yoo2015quantitative} are difficult to compare or reproduce as the result of a number of issues.
-Often, the models lack a standardisation of identifiers for reaction names, which makes direct comparison of model structure as well as differences between reactions a challenge.
+Often, model authors do not use a standardised set of identifiers for reaction names (such as the MetaNetX namespace \cite{moretti2016metanetx}), which makes direct comparison of model structure as well as differences between reactions a challenge.
 Where models are shared, it is often in non-standard spreadsheet formats, rather than SBML models.
 Indeed, even in the case of valid SBML models being made available at the time of publication few details are given as to how to run such models for conditions discussed in original articles.
 
-In this paper, we present a software framework geared toward \textit{test-driven} genome scale model development, a concept that is taken directly from good software development practices \cite{martin2002agile}.
+In this paper, we present a software framework geared towards \textit{test-driven} genome scale model development, a concept that is taken directly from good software development practices \cite{martin2002agile}.
 By this we mean the notion that, as a model is curated to represent biological phenomena, much of the validation can be turned into specific test cases that can be repeated between model versions.
 We provide an example test case for \textit{Clostridium autoethanogenum}, an organism that has had considerable focus in terms of genome scale models and how a working methodology using the software presented here can reduce repetition of work and improve the reproducibility of results.
-This article aims to summarise the main objectives of the \textit{gsmodutils} software and we refer the reader to the software user guide for a more detailed exploration features.
+This article aims to summarise the main objectives of the \textit{gsmodutils} software and we refer the reader to the software user guide for a more detailed exploration of features.
+
+\begin{figure}[ht]
+ \includegraphics[width=0.9\textwidth]{cycle.eps}
+ \caption{Iterative cycle for systems and synthetic biology development, prevalent in industrial biotechnology applications.
+This approach captures an iterative mode of development, where models are used to inform wet lab decision making and the information is fed back into future modelling decisions.
+By integrating test-driven model development (top section) the objective is to simultaneously capture research questions, model validation criteria and minimise the impact of changes on previously completed models.
+ }
+ \label{fig:cycle}
+ \end{figure}
 
 \section{Improving the design phase of industrial biotechnology}
 
-The design phase of industrial synthetic biotechnology, due to historical and regulatory convention, often follows a waterfall model for development of genome scale models.
-This is borne out of a number significant constraints in the development of genome scale models.
-The waterfall approach for modelling is characterised in Figure \ref{fig:methodology_approaches} where requirements for a model are captured at an early stage and are hard to refine during the production process.
+Recent efforts in systems and synthetic biology have been based around a form of iterative, design, build, test and learn cycle \cite{carbonell2016bioinformatics} (see Figure \ref{fig:cycle}).
+In terms of computational models, this iterative strategy requires adapting and updating models to integrate new biological knowledge \cite{reed2006towards}.
+However, the conventional processes of scientific literature often coalesces to a point at which models are published.
+In reality, an iterative process means that it is essential that digital experiments can be repeated in a reproducible manner \cite{cooper2015call}.
+Future changes to models, borne out of a need to meet new challenges and integrate new knowledge, should reflect this.
 
-In contrast, an \textit{agile} methodology for the development of models places the focus on adapting work to new requirements \cite{martin2002agile}.
+An \textit{agile} methodology for the development of models places the focus on adapting work to new requirements \cite{martin2002agile}.
 Such an approach best fits genome scale models because they are rarely created to investigate individual processes and, instead, capture the complexity of large systems.
 Genome scale models are intrinsically related to available genome annotations.
 Such annotations rely heavily on automated matches to related species, with the characterisations of individual genes or changes in cofactors and substrates for specific reactions often being left to a few of critical interest \cite{seemann2014prokka}.
-This modelling formation costs an in depth understanding of dynamic behaviour. 
+This modelling formation costs an in-depth understanding of dynamic behaviour. 
 However, capturing steady-state phenomena still provides a good understanding of system properties \cite{o2015using}.
 
 As such, approaches often leave models with missing reactions, incorrect gene-reaction rules \cite{thiele2010protocol} or with pathways based on gap filling methods that add reactions that may not actually be catalysed by the organism in question \cite{benedict2014likelihood}.
 When attempting to understand specific natural phenomena, genome annotations are frequently updated and models are often corrected in an \textit{ad hoc} manner.
 
-\begin{figure}[ht]
-\includegraphics[width=\textwidth]{waterfall.eps}
-\caption{Conventional waterfall methodology for model development.
-Each process is considered to be an isolated aspect of model development.}
-\label{fig:methodology_approaches}
-\end{figure}
 
 Therefore, models undergo significant manual annotation and curation; a process which has a high chance of error.
-In this work, we advocate a test-driven approach to model development highlighted in Figure \ref{fig:test_driven}.
+In this work, we advocate a test-driven approach to model development highlighted in Figure \ref{fig:cycle} (top).
 Here, the model is changed to achieve research goals that are dynamic in response to the changes of a project.
-In order to meet this objective, validation criteria for a model such as growth conditions or the impact of gene knock outs, should be formally set.
+In order to meet this objective, validation criteria for a model such as growth conditions or the impact of gene knock-outs, should be formally set.
 When a model is changed, all such validation criteria should be retested to ensure that models do not regress to previous states.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.8\textwidth]{testdriven.eps}
-\caption{Workflow for model development proposed for \textit{gsmodutils}.
-The objective of this approach is to simultaneously capture research questions, model validation criteria and minimise the impact of changes on previously completed models.
-}
-\label{fig:test_driven}
-\end{figure}
 
 We feel that many of the current software tools for genome scale models do an excellent job of facilitating answers to crucial research and design questions.
 However, there is a major gap in terms of the reliability and re-usability of models due to a lack of standardisation and software tools to aid such processes.
@@ -153,7 +154,7 @@ All software and packages are open source and is designed to be interoperable wi
 \section{Software}
 
 \subsection{Outline and features}
-Test-driven development is driven by the idea of clearly defined test cases written before significant changes are made to any underlying architecture.
+Test-driven development is motivated by the idea of clearly defined test cases written before significant changes are made to any underlying architecture.
 In the case of genome scale models, errors can easily occur as a product of human curation designed to better represent newly discovered aspects of metabolism.
 
 By automatically integrating COBRApy \cite{ebrahim2013cobrapy} users can easily write convenient test cases following examples given in the user guide.
@@ -163,130 +164,163 @@ However, we stress that the vast majority of individual use cases for a model mu
 
 The software provides a number of features such as import and export of models in different formats and the generation of test reports through use of the command line. 
 The use of flat files enables easy integration with version control software such as git and mercurial.
-In addition, projects are easy to export using portable standardised docker images \cite{merkel2014docker}, the idea being to allow users to share models as quickly and easily as possible without concern for custom system configurations.
+In addition, projects are easy to export using portable standardised docker images \cite{merkel2014docker}, the idea being to allow users to share models as quickly and easily as possible without concern for custom system configurations (see software documentation for more details).
 
 \begin{figure}[ht]
-
-\lstset{language=python}   
-\begin{lstlisting}
-def test_func(model, project, log):
-    status = model.solver.optimize()
-    log.assertion(status == 'optimal',
-                  ``Works'', # Success message
-		  ``Does not work'', # Failure message
-                  ``Test description'')
-\end{lstlisting}
-\caption{An example \textit{gsmodutils} test case written in python}
+\includegraphics[trim={1cm 0 2.5cm 0},clip,width=0.9\textwidth]{test_case.eps}
+\caption{An example \textit{gsmodutils} test case written in python. 
+In this test, flux variability analysis is used to compare a model against $^{13}$C carbon flux tracking data.
+The test also demonstrates how designs can be integrated into a test workflow by specifying the identifier in the `ModelTestSelector' function decorator.
+}
 \label{fig:test_case} 
 \end{figure}
 
 \subsection{Strain designs}
+
+\begin{figure*}[ht]
+  \includegraphics[width=\textwidth]{inheritence.eps}
+  \caption{Examples of \textit{gsmodutils} design inheritance.
+  Each design stores the delta between the wild-type base model, any parents and the changes to constraints the design contains.
+  In the example presented above, a heterologous production pathway is combined with a reusable set of knock-outs.
+  Rather than keeping redundant copies of models, designs make projects easier to maintain and understand by only storing annotated differences between models.
+  Designs can then be loaded in a hierarchical manner.
+  In practice, ideally, these designs should relate to experimentally evaluated constructs and strains.
+  }
+    \label{fig:strain_hered}
+\end{figure*}
+
 A core aspect behind the implementation of \textit{gsmodutils} is the concept of a \textit{design}, this encompasses a simple set of changes to a ``wild-type'' model that are required for analysis.
-For example a mutant strain that has undergone several gene deletions is not sufficiently different from the original wild-type to merit having its own genome scale model.
 However, it is often the case that such deletions are of scientific or industrial interest and, as such, the strain will be used in future work.
 Consequently, such designs are hereditary in nature.
-By taking the \textit{model delta} between the constraints applied to an initial model and subsequent modifications, \textit{gsmodutils} allows users to easily reuse and export models with this design.
-As designs inherit from a base model, future curation to a wild type model will automatically be included in the designs.
-Similarly, designs are self contained and will not interfere with one another allowing a form of project management.
+By taking the difference between the constraints applied to an initial model and subsequent modifications, \textit{gsmodutils} allows users to easily reuse and export models with this \textit{design delta}.
+
+Formally, we consider a \textit{design delta} to be the set of differences between any reactions, metabolites and genes stored within the COBRApy object.
+This should not be considered the same as a \textit{diff} in version control systems such as git. 
+Instead, designs of this nature are stored as JSON objects within the \textit{gsmodutils} project and can be tracked by version control systems.
+
+As designs inherit from a base model, future curation to a wild-type base model is automatically included in the resulting models.
+Similarly, designs are self contained and will not interfere with one another allowing project management and annotation as to the function of each design.
 Figure \ref{fig:strain_hered} shows how this could work in a practical situation.
+Here we consider how functional gene knock-outs can be combined with heterologous genes to create production strains.
+As designs can be inherited common knock-outs or changes to designs can be combined.
 
 Designs of this nature can also be programmatic, allowing the implementation of features such as non-standard constraints that can be dynamically loaded.
 An example of this is shown in Figure \ref{fig:programmatic_design}.
-This example converts an existing model to one based on a Mixed Integer Linear Program (MILP), as the reaction names do not need to be specified, should reactions be added or removed the process will still apply.
+This example converts an existing model to one based on a Mixed Integer Linear Program (MILP) and sets the objective to minimise the number of enzymatic reactions used with a fixed biomass constraint.
+This relates to minimising the number of active genes within a system.
+As the reaction names do not need to be specified, should reactions be altered within the base model the design will remain functionally the same.
 Alternative examples could include reductions of models through methods such as elementary flux modes or minimum cut sets, which can change dramatically with only small changes to stoichiometry.
-Furthermore, integrity of all strain designs is automatically tested as part of the default \textit{gsmodutils} testing framework.
-
-\begin{figure}[ht]
-\lstset{language=python}   
-\begin{lstlisting}
-def gsmdesign_example_milp(model, project):
-    for reaction in model.reactions:
-	reaction.variable_kind = "integer"
-    return model
-\end{lstlisting}
-\caption{An example \textit{gsmodutils} programmatic design written in python. 
-This design converts reactions to integer type, allowing an MILP formation.}
-\label{fig:programmatic_design} 
-\end{figure}
-
-
-\begin{figure}
-  \includegraphics[width=\textwidth]{inheritence2.eps}
-  \caption{Examples of \textit{gsmodutils} design inheritance.
-  Each design stores the delta between the wild-type base model, any parents and the changes to constraints the design contains.
-  In the example presented above a heterologous production pathway is combined with a reusable set of knock-outs.
-  In practice, ideally, these designs should relate to real constructs and strains evaluated by experiment.
-  }
-    \label{fig:strain_hered}
-\end{figure}
+Furthermore, functionality of all strain designs is automatically included in tests as part of the default \textit{gsmodutils} testing framework.
 
 \subsection{Development workflow}
-In this section we propose a method for the development of genome scale models that integrates \textit{gsmodutils} with version control systems.
-Figure \ref{fig:test_case} highlights the notion of test cases, taken from test-driven development.
-The outlined workflow is that the user writes a formal test case for some modelling goal, perhaps driven by captured experimental data, that fits a specific form of validation criteria.
-We note that, in principle, this test case should be written before changes to a model.
+In this section, we propose a method for the development of genome scale models that 
+integrates \textit{gsmodutils} with version control systems.
+The basic workflow is that the user writes a formal test case for some modelling goal, perhaps driven by captured experimental data, that fits a specific form of validation criteria.
+We note that, in principle, test cases should be written before changes to a model are made.
 
+Figure \ref{fig:test_case} highlights the notion of test cases, taken from test-driven development.
+In this example, a reusable test is written that incorperates data from $^{13}$C metabolic flux tracking.
+Flux variability analysis is then used to compare the expected flux ranges of a model against the experimental data.
+The test assertions will pass or fail based upon the models flux values when compared to the experimentally observed data.
 
 \section{Case study usage Clostridium autoethanogenum}
-\textit{Clostridium autoethanogenum} is a bacterial species used for the production of commodity chemicals at industrial scale \cite{abrini1994clostridium,norman2018progress,LT}. A new GSMM of \textit{C. autoethanogenum}, `MetaCLAU', has been analysed to improve this bioprocess (\cite{norman2018progress}, submitted for peer review).
+
+\textit{Clostridium autoethanogenum} is a bacterial species used for the production of commodity chemicals at industrial scale \cite{abrini1994clostridium,norman2018progress}. A new GSMM of \textit{C. autoethanogenum}, `MetaCLAU', has been analysed to improve this bioprocess \cite{norman2018agenome} (submitted for peer review).
 In this section we describe how \textit{gsmodutils} has been utilised to ensure that future versions of MetaCLAU will remain functionally relevant from the perspective of industrial biotechnology.
 
 \subsection{Scientific background and Model integration}
 
-\textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of \textit{2,3-butanediol} (\textit{2,3 BD}) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and \textit{2,3 BD} has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of \textit{2,3 BD} from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
-MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see (\cite{norman2018progress}. submitted for peer review).
+\textit{C. autoethanogenum} is a strictly anaerobic, acetogenic bacterium which naturally produces ethanol and trace amounts of 2,3-butanediol (2,3-BD) from carbon monoxide and water \cite{abrini1994clostridium,schuchmann2014autotrophy,norman2018progress}. Since carbon monoxide is readily available in the form of industrial waste gas, and 2,3-BD has a global market value of \$43 billion \cite{kopke201123butanediol}, the optimisation of yields of 2,3-BD from carbon monoxide is highly desirable in the context of industry \cite{norman2018progress}.   
+MetaCLAU was built using Pathway Tools \cite{karp2002pathway} and ScrumPy \cite{poolman2006scrumpy}, and is based on a manually annotated genome sequence of \textit{C. autoethanogenum} \cite{humphreys2015whole}. The resulting model consisted of 758 reactions, 773 metabolites and 518 genes. For full details of the model, see \cite{norman2018agenome} (submitted for peer review).
 The model has been integrated with the \textit{gsmodutils} modelling framework as a test-driven project. 
 The following section details specific tests used to evaluate the model at each stage of its continued development.
 
 \subsection{Evaluation of model validation criteria}
+In this section we outline specific test criteria that have been applied for the \textit{C. autoethanogenum} model discussed in this study.
+All of the examples discussed here are available in more detail in the supplementary repository \textbf{Supplementary Material File S1}.
+
 \textbf{Energetic consistency:} 
 An important limitation of FBA is that optimal solutions may be thermodynamically infeasible if appropriate constraints are not applied \cite{Fell1197rohtua}.
-In order to identify these unwanted flux distributions and constrain the model such that they are not in the feasible solution space, a diagnostic FBA is applied with the following constraints:
-1) All transport reactions are constrained to allow no uptake (lower bound = 0), and 2) the ATPase reaction is given a fixed flux of one.
+In order to identify these unwanted flux distributions and to constrain the model such that they are not in the feasible solution space, a diagnostic FBA is applied with the following constraints:
+1) All transport reactions are constrained to allow no uptake, and 2) the ATPase reaction is given a fixed flux of one.
 If a (non-zero) solution to this problem exists, it must contain a thermodynamic inconsistency, which can be dealt with by manual inspection of the solution and modification of one or more of the involved reactions \cite{Fell1197rohtua}.
  
-\textbf{Minimisation of flux based tests:}
+\textbf{Flux-minimisation tests:}
 One conventional approach in FBA is to set an optimisation criterion of minimising flux across enzymatic reactions with a fixed biomass constraint \cite{holzhutter2006thegeneralised}. 
 The solution to this FBA problem represents minimal protein investment \cite{holzhutter2006thegeneralised}.
-Since execution of flux minimisation in COBRApy requires a model in which reversible reactions are split into two irreversible reactions, a \textit{gsmodutils} design was created in which all reversible reactions are split in a programmatic manner.
-In the case of MetaCLAU, the flux minimal solution includes both ethanol and acetate production, which represents good qualitative agreement with experimental data (\cite{norman2018progress}, under review).
-Since any changes to this predicted phenotype must be investigated, the flux minimisation analysis has been formulated as a \textit{gsmodutils} test.
+Execution of flux minimisation in COBRApy requires a model in which reversible reactions are split into two irreversible reactions, representing forward and backward reactions.
+A \textit{gsmodutils} strain design was created in which all reversible reactions are split using a programmatic python based design.
+
+In the case of MetaCLAU, the minimal-flux solution includes both ethanol and acetate production, which represents good qualitative agreement with experimental data (\cite{norman2018progress}, under review).
+Since any changes to this predicted phenotype must be investigated, the flux minimisation analysis has been formulated as a \textit{gsmodutils} test which utilises the above mentioned design.
 
 \textbf{Product scans:}
 Of interest to this project were changes in the product spectrum of \textit{C. autoethanogenum} under conditions where the organism can and cannot produce molecular hydrogen (with carbon monoxide as sole carbon and energy source).
-The hypothesis tested in (\cite{norman2018progress}, under review), was that in the case where hydrogen production infeasible, alternative electron sinks like lactate and \textit{2,3 BD} would be produced.
-As in the previous case, the model-predicted behaviour showing both lactate and \textit{2,3 BD} was deemed an important result, which model curators should be notified of if lost during model development.
+The hypothesis tested in (\cite{norman2018progress}, under review), was that in the case where hydrogen production is infeasible, alternative electron sinks like lactate and 2,3-BD would be produced.
+As in the previous case, the model-predicted behaviour showing both lactate and 2,3-BD was deemed an important result, which model curators should be notified of if lost during model development.
 Thus the analysis was built into a \textit{gsmodutils} test.
 
-\textbf{Lethal knockout mutants:} 
+\textbf{Lethal knock-out mutants:} 
 The prediction of lethal single-gene KO mutants through FBA of a GSMM is useful in two ways: 
 1) the identification of essential genes is an important first step for metabolic engineering strategies, 
 and 2) with the advent of high-throughput TraDIS gene-essentiality data sets \cite{langridge2009simultaneous}, GSMMs can be validated by their ability to predict essential genes.
-Furthermore, any change in the set of essential genes (particularly an increase in the number of essentials) represents important information for metabolic engineering.
+Furthermore, any change in the set of essential genes (particularly an increase in their number) represents important information for metabolic engineering.
 For these reasons, a test has been built into the MetaCLAU project which enables the computation of the set of essential genes and their comparison with TraDIS data sets.
 
-\section{Related work}
-\textbf{Memote:} \cite{lieven2017memote} is tool set that has very similar ambitions to \textit{gsmodutils}.
+\begin{figure}[ht]
+\includegraphics[trim={1cm 0 4cm 0},clip,width=0.9\textwidth]{design.eps}
+\caption{An example \textit{gsmodutils} programmatic design written in python. 
+This design converts reactions to integer type, allowing an MILP formation.
+The above example seeks to utilise the MILP problem in order to minimise the number of reactions to produce the required biomass components.
+Loading a model of this form dynamically, as opposed to storing it as an SBML model, allows any underlying reactions to be changed.
+Designs of this form can also easily be exported to model files via the command line utility.
+}
+\label{fig:programmatic_design} 
+\end{figure}
+
+\vspace*{-12pt}
+\section{Related software}
+
+The reproducibility of computational based research has achieved more and more attention within the last decade \cite{peng2011reproducible, sandve2013ten, cooper2015call}.
+Consequently, there has been a proliferation of tools to support researchers in this endeavour.
+In this section we briefly review a number of tools that exist, both for genome scale models and from the wider mathematical and computational biology community.
+
+\textbf{PSAMM:} PSAMM \cite{steffensen2016psamm} is a tool that has similar goals to \textit{gsmodutils} in aiding the portability of genome scale models.
+PSAMM uses a custom YAML format which allows the annotation of models in a simpler manner than the conventional SBML standard.
+This, simultaneously allows model settings to be easily curated in a human friendly manner as well as allowing changes to be tracked in version control software such as git.
+This format relates, directly, to a \textit{gsmodutils} design object, which captures the difference between cobra objects.
+Both approaches allow export to standardised SBML, MATLAB and JSON models for usage in other tools.
+A core difference between the two frameworks, however, is that PSAMM includes much more functionality for working with genome scale models including gap filling and even its own interface to linear programming solvers.
+In contrast, \textit{gsmodutils} is designed to sit on top of the already existing COBRApy stack, with tools such as cameo \cite{cardoso2018cameo} providing additional functionality for more complex analysis.
+To this end, \textit{gsmodutils} also has a full python API allowing models and designs to be loaded from within external scripts or jupyter notebooks.
+
+\textbf{Memote:} \cite{lieven2018memote} is an excellent tool with similar ambitions to \textit{gsmodutils} for making reusable genome scale models.
 It features a fully specified set of tests, including custom test cases and has strong version control integration with git.
-A core difference between these projects is that \textit{gsmodutils} has a stronger focus on reducing the redundancy in model storage through the use of \textit{design deltas}, as described above.
+The core functionality of memote is to provide a standardised, community driven set of tests that check model consistency as well as annotations. 
+Along with user defined tests for experimental data, these tests allow continuous integration as models are updated within a git repository.
+One of memotes strongest aspects is providing human readable reports between model versions, this allows one to easily track the changes between annotations in reconstructions.
+
+A major difference between these projects is that \textit{gsmodutils} has a stronger focus on reducing the redundancy in model storage through the use of \textit{design deltas}, as described above.
 Similarly, a core goal of \textit{gsmodutils} is to allow easy import and export outside of the framework for compatibility with other modelling suites.
-It should be noted that, as memote is written in python, utilises COBRApy and, at the time of writing, it is fully compatible with \textit{gsmodutils}.
-\\
-\textbf{Cameo:} \cite{cardoso2017cameo} is a set of strain design utilities, such as genetic algorithms for finding optimal gene knock-out
-strategies, as well as other flux balance analysis utilities. Written in python and part of the COBRApy suite of applications, \textit{gsmodutils} works well with cameo.
-Indeed, making a set of design changes can easily be integrated into \textit{gsmodutils} through the python API.
-\\
-\textbf{Model repositories:} models are frequently shared, at the time of publication through services such as BiGG \cite{king2015bigg} and Biomodels \cite{chelliah2013biomodels}. 
-Whilst these repositories encourage the reuse of models and the reproducibility of \textit{in silico} predictions they are not designed to improve collaboration.
+It should be noted that, as memote is written in python, utilises COBRApy and, at the time of writing, is fully compatible with \textit{gsmodutils}.
+
+\textbf{Model repositories:} Models are frequently shared, at the time of publication through services such as BiGG \cite{king2015bigg} and BioModels \cite{chelliah2013biomodels}. 
+Whilst these repositories encourage the reuse of models and the reproducibility of \textit{in silico} predictions, they are not designed to improve collaboration.
 The software presented here is designed with the notion that genome scale models are never finished, \textit{per se}, but under continuous development.
 The cornerstone of this is the use of test cases, which formalise modelling validation criteria.
+Model repositories such as EMBL-GEMs, based on automated reconstructions generated by CarveMe \cite{machado2018fast}, could greatly benefit from an ever evolving set of tests that better capture biological understanding.
+Indeed, adding more features to control the future management of the BioModels repository has achieved recent attention with tools such as JUMMP \footnote{JUst a Model Management Platform (JUMMP) is available at {https://bitbucket.org/jummp/jummp/}, Accessed:2018-12-13} that aim to add version control to the management of repositories.
+
+Tools such as BiVes and BudHat \cite{scharm2018algorithm} also exist and apply more generally than \textit{gsmodutils} to capture the changes to models between versions.
+In a similar manner to \textit{gsmodutils}, this utility lends itself to version control between model versions by capturing changes to parameters that impact a models performance.
+As with \textit{gsmodutils}, this type of approach ignores irrelevant properties such as changes to the white space within XML files captured by a conventional unix diff.
 
 
 \section{Discussion}
 In order to facilitate the sharing and dissemination of high quality computational research, good standards and software are required \cite{jimenez2017four}.
-Naturally a great deal of effort has gone in to producing high quality systems and synthetic biology standards \cite{hucka2003systems, cox2018synthetic}.
-Furthermore, when research projects end it all to is common for important large models to be published and become relics lost within the literature, forgotten to all but the most dedicated of individuals.
-As GSMMs grow in terms of the metabolism the contain as well as the biological problems they are used to solve, problems with annotation and curation naturally accumulate as a product of human error.
+Naturally a great deal of effort has gone into producing high quality systems and synthetic biology standards \cite{hucka2003systems, cox2018synthetic}.
+Furthermore, when research projects end it is common for important, large models to be published and become relics lost within the literature, forgotten to all but the most dedicated of individuals.
+As GSMMs grow in terms of the information about metabolism they contain as well as the biological problems they are used to solve, problems with annotation and curation naturally accumulate as a product of human error.
 Software that facilitates actively improving how researchers develop and apply models to new phenomena is required.
 
 We have presented a framework with a number of features taken from the software development world specifically designed to improve collaboration and minimise such error.
@@ -297,7 +331,6 @@ In an ideal world, we would envision a methodology such as ours becoming a pre-r
 As with most software development projects, \textit{gsmodutils} will see expanded features.
 Initially this will include tighter integration with version control systems such as git and mercurial.
 Furthermore, the objective of the project is to cultivate collaboration by simplifying the process of distributing large models to different users.
-As a consequence, methods for sharing reusable docker containers will be investigated.
 
 
 \begin{acknowledgement}

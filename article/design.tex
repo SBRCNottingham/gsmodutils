@@ -1,0 +1,54 @@
+\documentclass[border={35pt 10pt 150pt 60pt}, % left bottom right top
+  svgnames]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{listings}
+\lstset{%
+  frame            = tb,    % draw frame at top and bottom of code block
+  tabsize          = 1,     % tab space width
+  numbers          = left,  % display line numbers on the left
+  framesep         = 3pt,   % expand outward
+  framerule        = 0.4pt, % expand outward 
+  commentstyle     = \color{Green},      % comment color
+  keywordstyle     = \color{blue},       % keyword color
+  stringstyle      = \color{DarkRed},    % string color
+  backgroundcolor  = \color{WhiteSmoke}, % backgroundcolor color
+  showstringspaces = false,              % do not mark spaces in strings
+}
+\begin{document}
+\begin{lstlisting}[language = python, numbers = none, escapechar = $,
+    basicstyle = \ttfamily\bfseries, linewidth = \linewidth] 
+        $
+ \tikz[remember picture] \node [] (a) {}; $
+ @annotate(parent="calvin_cycle"$\tikz[remember picture]\node[](b){};$)
+ def gsmdesign_minimum_reactions_milp(model, project):$\tikz[remember picture] \node [] (c){};$
+    """ Docstring is used for description """
+    for reaction in model.reactions:
+        if reaction.id != "Biomass" 
+                and len(reaction.genes):
+            reaction.variable_kind = "integer"
+    
+    model.reactions.Biomass.bounds = (0.2, 0.2)
+    model.objective_direction = "min"
+    model.solver = "cplex" $\tikz[remember picture] \node [] (d){};$
+    
+    return model
+ 
+\end{lstlisting}
+\begin{tikzpicture}[remember picture, overlay,
+    every edge/.append style = { ->, thick, >=stealth,
+                                  DimGray, dashed, line width = 1pt },
+    every node/.append style = { align = center, minimum height = 10pt,
+                                 font = \bfseries, fill= green!20},
+                  text width = 2.5cm ]
+  \node [above left = 0.5cm and -1 cm of a,text width = 3cm] (A) {Annotation decorator};
+  \node [right = 1.5cm of A, text width = 3cm] (B) {Parent design selection};
+  
+  \node [right = 2.0cm of B] (C) {Required parameters};
+  \node [right = 4.cm of d]  (D) {Setting custom solver interface};
+  \draw (A.south) + (0, 0) coordinate(x1) edge (x1|-b.north);
+  \draw (B.south) + (0, 0) coordinate(x2) edge (x2|-b.north);
+  \draw (C.south) + (0, 0) coordinate(x2) edge (x2|-b.north);
+  \draw (D.west) edge (d.east) ;
+\end{tikzpicture} 
+\end{document}
