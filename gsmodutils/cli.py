@@ -115,8 +115,8 @@ def test(project_path, test_id, skip_default, verbose, log_path):
     click.echo('Running tests: ')
     tester.progress_tests(skip_default=skip_default)
     click.echo()
-    ts = 0
-    te = 0
+    test_successes = 0
+    test_errors = 0
 
     for tf, log in tester.log.items():
 
@@ -127,8 +127,8 @@ def test(project_path, test_id, skip_default, verbose, log_path):
             click.echo("Test file {}:".format(tf))
             indicator = "Test file"
         lc = log.log_count
-        ts += lc[0]
-        te += lc[1]
+        test_successes += lc[0]
+        test_errors += lc[1]
         click.echo("Counted {} test assertions with {} failures".format(*lc))
         # Output base test file
         if not log.is_success:
@@ -147,8 +147,8 @@ def test(project_path, test_id, skip_default, verbose, log_path):
             click.echo(
                 click.style(barstr + ' End standard output ' + barstr, fg='black', bg='white')
             )
-    percent = round(((ts - te) / ts) * 100, 3)
-    click.echo('Ran {} test assertions with a total of {} errors ({}% success)'.format(ts, te, percent))
+    percent = round(((test_successes - test_errors) / test_successes) * 100, 3)
+    click.echo('Ran {} test assertions with a total of {} errors ({}% success)'.format(test_successes, test_errors, percent))
 
     # Display errors
     for tf, e in tester.load_errors:
@@ -174,6 +174,9 @@ def test(project_path, test_id, skip_default, verbose, log_path):
         with open(log_path, 'w+') as lf:
             json.dump(tester.to_dict(), lf, indent=4)
             click.echo('log file written to {}'.format(log_path))
+
+    if test_errors > 0:
+        exit(-1)
 
 
 @click.command()
