@@ -80,7 +80,7 @@ def test_json_tests():
         result = runner.invoke(gsmodutils.cli.test,
                                ['--project_path', fp.path, '--verbose', '--test_id', 'test_x.json'])
 
-        assert result.exit_code == -1
+        assert result.exit_code == 0
 
 
 def test_py_tests():
@@ -159,7 +159,7 @@ def test_model(model, project, log):
         result = runner.invoke(gsmodutils.cli.test,
                                ['--project_path', fp.path, '--verbose', '--test_id', test_codep])
 
-        assert result.exit_code == -1
+        assert result.exit_code == 0
         result = runner.invoke(gsmodutils.cli.test,
                                ['--project_path', fp.path, '--verbose',
                                 '--test_id', '{}::test_func'.format(test_codep)])
