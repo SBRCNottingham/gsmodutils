@@ -435,8 +435,8 @@ class DictTestInstance(TestInstance):
 
                     self.log.assertion(
                         reac.flux == 0,
-                        success_msg='required reaction {} not active'.format(rid),
-                        error_msg='required reaction {} present at steady state'.format(rid),
+                        success_msg='required reaction {} present at steady state'.format(rid),
+                        error_msg='required reaction {} not active'.format(rid),
                         desc='.required_reaction'
                     )
 
